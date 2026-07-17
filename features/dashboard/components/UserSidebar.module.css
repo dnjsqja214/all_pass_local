@@ -1,0 +1,33 @@
+@reference "../../../app/globals.css";
+
+.sidebar {
+  @apply w-64 bg-[#1C1A17] text-white min-h-screen hidden xl:flex flex-col justify-between p-6 border-r border-[#2C2A27] shrink-0;
+}
+
+.logoArea {
+  @apply flex items-center gap-3 px-2 py-3;
+}
+
+.logoBadge {
+  @apply w-8 h-8 rounded-lg bg-[#B83A38] flex items-center justify-center font-black text-white text-lg;
+}
+
+.logoBrand {
+  @apply text-lg font-black tracking-wider uppercase text-white;
+}
+
+.nav {
+  @apply flex flex-col gap-1.5;
+}
+
+.navLink {
+  @apply w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-[14px] font-bold tracking-tight transition-all duration-200 cursor-pointer;
+}
+
+.navActive {
+  @apply bg-[#B83A38] text-white shadow-md shadow-[#B83A38]/10;
+}
+
+.navInactive {
+  @apply text-[#A8A7A5] hover:text-white hover:bg-[#FFFFFF0A];
+}

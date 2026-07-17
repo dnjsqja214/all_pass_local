@@ -2,8 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
+
 import { usePathname } from "next/navigation";
 import { USER_MENU_ITEMS } from "../constants/navigation";
+import styles from "./UserSidebar.module.css";
 
 export function UserSidebar() {
   const pathname = usePathname();
@@ -99,31 +101,27 @@ export function UserSidebar() {
   };
 
   return (
-    <aside className="w-64 bg-[#1C1A17] text-white min-h-screen hidden xl:flex flex-col justify-between p-6 border-r border-[#2C2A27] shrink-0">
+    <aside className={styles.sidebar}>
       <div className="flex flex-col gap-8">
         {/* 로고 영역 */}
-        <div className="flex items-center gap-3 px-2 py-3">
-          <div className="w-8 h-8 rounded-lg bg-[#B83A38] flex items-center justify-center font-black text-white text-lg">
+        <div className={styles.logoArea}>
+          <div className={styles.logoBadge}>
             A
           </div>
-          <span className="text-lg font-black tracking-wider uppercase text-white">
+          <span className={styles.logoBrand}>
             All Pass
           </span>
         </div>
 
         {/* 네비게이션 메뉴 */}
-        <nav className="flex flex-col gap-1.5">
+        <nav className={styles.nav}>
           {USER_MENU_ITEMS.map((item) => {
             const isActive = activeTab === item.id;
             return (
               <Link
                 key={item.id}
                 href={item.path}
-                className={`w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-[14px] font-bold tracking-tight transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? "bg-[#B83A38] text-white shadow-md shadow-[#B83A38]/10"
-                    : "text-[#A8A7A5] hover:text-white hover:bg-[#FFFFFF0A]"
-                }`}
+                className={`${styles.navLink} ${isActive ? styles.navActive : styles.navInactive}`}
               >
                 {getIcon(item.id)}
                 <span>{item.label}</span>
@@ -132,7 +130,7 @@ export function UserSidebar() {
           })}
         </nav>
       </div>
-
     </aside>
   );
 }
+
