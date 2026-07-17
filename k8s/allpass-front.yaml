@@ -1,0 +1,77 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: allpass-front
+  namespace: allpass
+  labels:
+    app: allpass-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: allpass-front
+  template:
+    metadata:
+      labels:
+        app: allpass-front
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/hostname: asus-vm200
+      containers:
+        - name: allpass-front
+          # 태그는 GitHub Actions(build-ghcr.yml)가 커밋 SHA로 자동 갱신
+          image: ghcr.io/dnjsqja214/allpass-front:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: allpass-front
+  namespace: allpass
+spec:
+  selector:
+    app: allpass-front
+  ports:
+    - port: 80
+      targetPort: 3000
+---
+# 프론트 전용 Ingress. 백엔드(/api·/auth)는 viinac/allpass 저장소에서
+# allpass-api.coder-han.com 으로 분리 관리한다.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: allpass-front
+  namespace: allpass
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/target: viinac.iptime.org
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - allpass.coder-han.com
+      secretName: allpass-coder-han-com-tls
+  rules:
+    - host: allpass.coder-han.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: allpass-front
+                port:
+                  number: 80
