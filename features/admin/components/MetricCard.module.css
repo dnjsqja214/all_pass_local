@@ -1,0 +1,29 @@
+@reference "../../../app/globals.css";
+
+.card {
+  @apply bg-white rounded-2xl p-5 border shadow-xs flex flex-col gap-1.5 transition-all border-[#E4E0D9] hover:border-[#C93A35]/30;
+}
+
+.cardAlert {
+  @apply border-[#FCDDDB] hover:border-[#D93D35]/30 bg-[#FDF1F0]/10;
+}
+
+.title {
+  @apply text-[12px] text-[#817D76] font-bold tracking-tight uppercase;
+}
+
+.value {
+  @apply text-[26px] font-black tracking-tight leading-none text-[#111111];
+}
+
+.valueAlert {
+  @apply text-[#D93D35];
+}
+
+.subtitle {
+  @apply text-[12px] font-semibold text-[#817D76];
+}
+
+.subtitleAlert {
+  @apply text-[#B83A38];
+}

@@ -1,0 +1,96 @@
+@reference "../../../app/globals.css";
+
+.scrollWrapper {
+  @apply w-full overflow-x-auto;
+}
+
+.table {
+  @apply w-full border-collapse text-left min-w-[600px];
+}
+
+.theadRow {
+  @apply bg-[#F6F4F0] border-b border-[#E4E0D9] text-[12px] font-bold text-[#111111];
+}
+
+.th {
+  @apply px-5 py-3;
+}
+
+.thCenter {
+  @apply px-5 py-3 text-center;
+}
+
+.trBody {
+  @apply hover:bg-[#F6F4F0]/10 transition-colors;
+}
+
+.td {
+  @apply px-5 py-3;
+}
+
+.tdCenter {
+  @apply px-5 py-3 text-center;
+}
+
+.memberCell {
+  @apply flex items-center gap-2.5;
+}
+
+.avatar {
+  @apply w-8 h-8 rounded-full bg-[#E4E0D9] text-[#111111] flex items-center justify-center font-extrabold text-[11px] shrink-0;
+}
+
+.memberName {
+  @apply font-bold text-[#111111];
+}
+
+.roundText {
+  @apply text-[#817D76] font-medium;
+}
+
+/* Score cell render styles */
+.scoreUnsubmitted {
+  @apply text-[#817D76] font-semibold;
+}
+
+.scoreFail {
+  @apply text-[#D93D35] font-bold;
+}
+
+.scorePass {
+  @apply text-[#3F7D4E] font-bold;
+}
+
+.scoreNormal {
+  @apply text-[#111111] font-semibold;
+}
+
+/* Total score styles */
+.totalUnsubmitted {
+  @apply text-[#817D76] font-semibold;
+}
+
+.totalPass {
+  @apply text-[#3F7D4E] font-extrabold;
+}
+
+.totalFail {
+  @apply text-[#D93D35] font-bold;
+}
+
+.totalNormal {
+  @apply text-[#111111] font-bold;
+}
+
+/* Trend styles */
+.trendUp {
+  @apply text-[#3F7D4E] font-bold;
+}
+
+.trendDown {
+  @apply text-[#D93D35] font-bold;
+}
+
+.trendFlat {
+  @apply text-[#817D76] font-bold;
+}

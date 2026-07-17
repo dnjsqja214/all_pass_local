@@ -1,5 +1,7 @@
 import React from "react";
 import { RecentExam } from "../hooks/useDashboardData";
+import cardStyles from "./DashboardCard.module.css";
+import styles from "./RecentExamsCard.module.css";
 
 interface RecentExamsCardProps {
   exams: RecentExam[];
@@ -7,40 +9,38 @@ interface RecentExamsCardProps {
 
 export function RecentExamsCard({ exams }: RecentExamsCardProps) {
   return (
-    <div className="w-full bg-white rounded-[24px] p-5 shadow-[0_2px_8px_rgba(0,0,0,0.02)] border border-[#EDEDED] flex flex-col gap-4">
-      <div className="flex justify-between items-center pb-2 border-b border-[#F5F5F5]">
-        <h4 className="text-[15px] font-bold text-[#1A1A1A] tracking-tight">
+    <div className={cardStyles.card}>
+      <div className={cardStyles.header}>
+        <h4 className={cardStyles.title}>
           최근 시험 결과
         </h4>
-        <span className="text-[12px] text-[#8E8E8E] font-medium">
+        <span className={cardStyles.subtitle}>
           최근 3회 기준
         </span>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className={styles.listWrapper}>
         {exams.map((exam) => (
           <div
             key={exam.id}
-            className="flex items-center justify-between py-1.5"
+            className={styles.itemRow}
           >
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[14px] font-bold text-[#333] tracking-tight leading-tight">
+            <div className={styles.infoArea}>
+              <span className={styles.examTitle}>
                 {exam.title}
               </span>
-              <span className="text-[11px] text-[#8E8E8E]">
+              <span className={styles.date}>
                 풀이일: {exam.date}
               </span>
             </div>
             
-            <div className="flex items-center gap-2">
-              <span className="text-[16px] font-extrabold text-[#1A1A1A]">
+            <div className={styles.valueArea}>
+              <span className={styles.score}>
                 {exam.score}점
               </span>
               <span
-                className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                  exam.isPassed
-                    ? "bg-[#E6F4EA] text-[#137333]"
-                    : "bg-[#FDF1F0] text-[#B83A38]"
+                className={`${styles.badge} ${
+                  exam.isPassed ? styles.badgePass : styles.badgeFail
                 }`}
               >
                 {exam.isPassed ? "합격" : "불합격"}
@@ -52,3 +52,4 @@ export function RecentExamsCard({ exams }: RecentExamsCardProps) {
     </div>
   );
 }
+

@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { USER_MENU_ITEMS } from "../constants/navigation";
+import styles from "./MobileBottomNav.module.css";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
@@ -100,21 +101,17 @@ export function MobileBottomNav() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#EDEDED] py-2 px-4 flex justify-around items-center z-30 shadow-[0_-2px_10px_rgba(0,0,0,0.03)] xl:hidden rounded-t-[20px] pb-safe">
+    <div className={styles.container}>
       {USER_MENU_ITEMS.map((item) => {
         const isActive = activeTab === item.id;
         return (
           <Link
             key={item.id}
             href={item.path}
-            className="flex flex-col items-center gap-1 min-w-[70px] py-1 cursor-pointer transition-colors"
+            className={styles.navItem}
           >
             {getIcon(item.id, isActive)}
-            <span
-              className={`text-[10px] font-bold tracking-tight transition-colors ${
-                isActive ? "text-[#B83A38]" : "text-[#A8A7A5]"
-              }`}
-            >
+            <span className={`${styles.label} ${isActive ? styles.labelActive : styles.labelInactive}`}>
               {item.label}
             </span>
           </Link>
@@ -123,3 +120,4 @@ export function MobileBottomNav() {
     </div>
   );
 }
+

@@ -1,0 +1,17 @@
+@reference "../../../app/globals.css";
+
+.card {
+  @apply bg-white rounded-2xl p-5 border border-[#E4E0D9] shadow-xs flex flex-col gap-4 w-full;
+}
+
+.header {
+  @apply flex flex-col gap-0.5 border-b border-[#F6F4F0] pb-2;
+}
+
+.title {
+  @apply text-[15px] font-bold text-[#111111] tracking-tight;
+}
+
+.subtitle {
+  @apply text-[12px] text-[#817D76];
+}

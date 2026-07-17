@@ -1,0 +1,29 @@
+@reference "../../../app/globals.css";
+
+.badge {
+  @apply text-[11px] font-bold px-2 py-0.5 rounded-full border inline-flex items-center justify-center;
+}
+
+.normal {
+  @apply bg-[#E6F4EA] border-[#C2E7CD] text-[#137333];
+}
+
+.late {
+  @apply bg-[#FEF7E0] border-[#FADF91] text-[#B06000];
+}
+
+.absent {
+  @apply bg-[#FDF1F0] border-[#FCDDDB] text-[#B83A38];
+}
+
+.pass {
+  @apply bg-[#E6F4EA] border-[#C2E7CD] text-[#137333];
+}
+
+.fail {
+  @apply bg-[#FDF1F0] border-[#FCDDDB] text-[#B83A38];
+}
+
+.unsubmitted {
+  @apply bg-[#F1F0EC] border-[#E4E0D9] text-[#817D76];
+}

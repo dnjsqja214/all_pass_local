@@ -1,0 +1,49 @@
+@reference "../../../app/globals.css";
+
+.listWrapper {
+  @apply flex flex-col divide-y divide-[#F6F4F0];
+}
+
+.rowItem {
+  @apply flex justify-between items-center py-3.5 first:pt-1 last:pb-1;
+}
+
+.infoWrapper {
+  @apply flex flex-col sm:flex-row sm:items-center gap-2 min-w-0;
+}
+
+.badgeBase {
+  @apply text-[10px] font-extrabold px-2 py-0.5 rounded-md border shrink-0 w-fit;
+}
+
+.badgeFailRisk {
+  @apply bg-[#FDF1F0] text-[#B83A38] border-[#FCDDDB];
+}
+
+.badgeUnsubmitted {
+  @apply bg-[#F1F0EC] text-[#817D76] border-[#E4E0D9];
+}
+
+.badgeWrongRepeat {
+  @apply bg-[#FEF7E0] text-[#B06000] border-[#FADF91];
+}
+
+.badgeDefault {
+  @apply bg-gray-100 text-gray-800 border-gray-200;
+}
+
+.textWrapper {
+  @apply flex flex-col min-w-0;
+}
+
+.memberName {
+  @apply text-[13px] font-bold text-[#111111] leading-tight;
+}
+
+.reason {
+  @apply text-[11px] text-[#817D76] truncate mt-0.5;
+}
+
+.actionButton {
+  @apply px-3.5 py-1.5 bg-[#111111] hover:bg-[#222222] text-white text-[12px] font-bold rounded-lg transition-colors cursor-pointer shrink-0 ml-2;
+}
