@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { mockExams } from "../data/mockExams";
 
 export interface Exam {
   id: string;
@@ -22,7 +23,7 @@ export interface Submission {
   submittedAt: string;
 }
 
-export function useExamData() {
+export function useExamData(examId?: string) {
   // OMR 답변 상태 (key: 문항번호 1~40, value: 선택한 답 1~5)
   const [answers, setAnswers] = useState<Record<number, number>>({
     1: 1, 2: 2, 3: 3, 4: 4, 5: 5,
@@ -33,14 +34,16 @@ export function useExamData() {
     // 초기 24문항 마킹 상태 모킹
   });
 
-  // 시험 정보 (35회 부동산공법, 총 40문항, 제한시간 40분)
+  // 전달받은 examId로 시험 정보 매핑 (없으면 기본값)
+  const selectedExam = mockExams.find((e) => e.id === examId);
+
   const examInfo: Exam = {
-    id: "exam-live-1",
-    title: "35회 · 부동산공법",
-    totalQuestions: 40,
-    duration: 40,
+    id: selectedExam?.id || "exam-live-1",
+    title: selectedExam?.title || "35회 · 부동산공법",
+    totalQuestions: selectedExam?.totalQuestions || 40,
+    duration: selectedExam?.durationMinutes || 40,
     startedAt: new Date().toISOString(),
-    remainingSeconds: 1978, // 32:58
+    remainingSeconds: (selectedExam?.durationMinutes || 40) * 60, // 초 단위로 변환
   };
 
   const [remainingSeconds, setRemainingSeconds] = useState<number>(examInfo.remainingSeconds);

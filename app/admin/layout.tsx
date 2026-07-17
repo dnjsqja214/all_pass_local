@@ -1,26 +1,27 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { AdminSidebar } from "../../features/admin/components/AdminSidebar";
 import { AdminHeader } from "../../features/admin/components/AdminHeader";
+import { mockAuthService } from "../../features/auth/services/mockAuthService";
 
-// useSearchParams 호출을 Suspense 경계로 감싸기 위해 서브 컴포넌트로 분리
 function AdminAuthGuard({ onAuthorized }: { onAuthorized: (auth: boolean) => void }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    const userRole = searchParams.get("role");
-    
-    if (userRole === "student") {
+    const user = mockAuthService.getCurrentUser();
+    if (!user) {
+      router.replace("/login");
+      onAuthorized(false);
+    } else if (user.role !== "admin") {
       alert("관리자 권한이 없습니다. 일반 사용자 페이지로 이동합니다.");
       router.replace("/");
       onAuthorized(false);
     } else {
       onAuthorized(true);
     }
-  }, [router, searchParams, onAuthorized]);
+  }, [router, onAuthorized]);
 
   return null;
 }
@@ -32,20 +33,32 @@ export default function AdminLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const pathname = usePathname();
 
-  // 데스크톱일 경우 기본적으로 사이드바를 열어둠
+  // 현재 활성화된 메뉴 식별
+  const activeMenu = pathname.startsWith("/admin/members") ? "members" : "today";
+
+  // 데스크톱일 경우 기본적으로 사이드바를 열어두고, 로컬 스토리지에서 접힘 상태를 불러옵니다.
   useEffect(() => {
     if (window.innerWidth >= 1024) {
       setSidebarOpen(true);
     }
+    const saved = localStorage.getItem("allpass-admin-sidebar-collapsed");
+    if (saved !== null) {
+      setIsSidebarCollapsed(saved === "true");
+    }
   }, []);
+
+  const handleToggleCollapse = () => {
+    const newVal = !isSidebarCollapsed;
+    setIsSidebarCollapsed(newVal);
+    localStorage.setItem("allpass-admin-sidebar-collapsed", String(newVal));
+  };
 
   return (
     <div className="min-h-screen bg-[#F6F4F0] flex flex-col w-full font-sans overflow-x-hidden">
-      {/* 쿼리 파라미터 체크 로직을 Suspense로 래핑하여 빌드 에러 방지 */}
-      <Suspense fallback={null}>
-        <AdminAuthGuard onAuthorized={setIsAuthorized} />
-      </Suspense>
+      <AdminAuthGuard onAuthorized={setIsAuthorized} />
 
       {isAuthorized === null ? (
         <div className="min-h-screen bg-[#F6F4F0] flex items-center justify-center font-bold text-[#817D76]">
@@ -53,17 +66,19 @@ export default function AdminLayout({
         </div>
       ) : isAuthorized ? (
         <>
-          {/* 1. 관리자 사이드바 (서랍 기능 활성화) */}
+          {/* 1. 관리자 사이드바 (서랍 기능 활성화 및 접힘 접두사 연동) */}
           <AdminSidebar
-            activeMenu="today"
+            activeMenu={activeMenu}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={handleToggleCollapse}
           />
 
-          {/* 2. 관리자 메인 영역 (사이드바 공간 확보 lg:pl-60, 상태에 따라 동적 조절) */}
+          {/* 2. 관리자 메인 영역 (사이드바 공간 확보 - 접힘 상태에 따라 동적 조절) */}
           <div
-            className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${
-              sidebarOpen ? "lg:pl-60" : "lg:pl-0"
+            className={`flex-1 flex flex-col min-h-screen transition-all duration-200 ${
+              isSidebarCollapsed ? "lg:pl-[72px]" : "lg:pl-60"
             }`}
           >
             <AdminHeader onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />

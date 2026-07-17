@@ -1,7 +1,7 @@
 @reference "../../../app/globals.css";
 
 .sidebar {
-  @apply w-64 bg-[#1C1A17] text-white min-h-screen hidden xl:flex flex-col justify-between p-6 border-r border-[#2C2A27] shrink-0;
+  @apply bg-[#1C1A17] text-white min-h-screen hidden xl:flex flex-col justify-between border-r border-[#2C2A27] shrink-0 transition-all duration-200;
 }
 
 .logoArea {
