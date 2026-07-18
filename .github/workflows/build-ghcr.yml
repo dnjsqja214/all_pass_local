@@ -18,10 +18,15 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
 
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
+      - name: Validate frontend build configuration
+        run: test -n "$NEXT_PUBLIC_API_URL"
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -33,6 +38,7 @@ jobs:
       - name: Build frontend image
         run: |
           docker build \
+            --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
             -t ghcr.io/${{ github.repository_owner }}/allpass-front:${{ github.sha }} \
             -t ghcr.io/${{ github.repository_owner }}/allpass-front:latest \
             -f Dockerfile \
