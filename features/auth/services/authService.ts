@@ -1,4 +1,4 @@
-import { AuthCheckResponse, CurrentUser } from "../types/auth";
+import { CurrentUser, MeResponse } from "../types/auth";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -6,54 +6,40 @@ function buildApiUrl(path: string): string {
   return `${API_BASE_URL}${path}`;
 }
 
-function isNullableString(value: unknown): value is string | null {
-  return typeof value === "string" || value === null;
-}
-
-function isAuthCheckResponse(value: unknown): value is AuthCheckResponse {
+function isMeResponse(value: unknown): value is MeResponse {
   if (typeof value !== "object" || value === null) return false;
 
   const response = value as Record<string, unknown>;
   return (
-    typeof response.authenticated === "boolean" &&
-    isNullableString(response.name) &&
-    isNullableString(response.email) &&
-    isNullableString(response.subject) &&
-    Array.isArray(response.authorities) &&
-    response.authorities.every((authority) => typeof authority === "string") &&
-    typeof response.claims === "object" &&
-    response.claims !== null &&
-    !Array.isArray(response.claims)
+    typeof response.authUuid === "string" &&
+    typeof response.name === "string" &&
+    typeof response.email === "string" &&
+    Array.isArray(response.roles) &&
+    response.roles.every((role) => typeof role === "string")
   );
 }
 
 export const authService = {
   async getCurrentUser(signal?: AbortSignal): Promise<CurrentUser | null> {
-    const response = await fetch(buildApiUrl("/auth/check"), {
+    const response = await fetch(buildApiUrl("/api/me"), {
       method: "GET",
       credentials: "include",
       cache: "no-store",
       signal,
     });
 
+    if (response.status === 401) return null;
+
     if (!response.ok) {
       throw new Error(`인증 확인에 실패했습니다. (${response.status})`);
     }
 
     const body: unknown = await response.json();
-    if (!isAuthCheckResponse(body)) {
+    if (!isMeResponse(body)) {
       throw new Error("인증 서버 응답 형식이 올바르지 않습니다.");
     }
 
-    if (!body.authenticated) return null;
-
-    return {
-      name: body.name,
-      email: body.email,
-      subject: body.subject,
-      authorities: body.authorities,
-      claims: body.claims,
-    };
+    return body;
   },
 
   redirectToLogin(returnTo: string): void {
