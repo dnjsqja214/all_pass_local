@@ -1,11 +1,8 @@
 export interface CurrentUser {
-  name: string | null;
-  email: string | null;
-  subject: string | null;
-  authorities: string[];
-  claims: Record<string, unknown>;
+  authUuid: string;
+  name: string;
+  email: string;
+  roles: string[];
 }
 
-export interface AuthCheckResponse extends CurrentUser {
-  authenticated: boolean;
-}
+export type MeResponse = CurrentUser;
