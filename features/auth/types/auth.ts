@@ -1,7 +1,11 @@
-export type UserRole = "admin" | "user";
+export interface CurrentUser {
+  name: string | null;
+  email: string | null;
+  subject: string | null;
+  authorities: string[];
+  claims: Record<string, unknown>;
+}
 
-export interface MockAccount {
-  id: string;
-  name: string;
-  role: UserRole;
+export interface AuthCheckResponse extends CurrentUser {
+  authenticated: boolean;
 }

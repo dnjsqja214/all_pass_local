@@ -1,7 +1,5 @@
 import React from "react";
 import styles from "./AdminSidebar.module.css";
-import { useRouter } from "next/navigation";
-import { mockAuthService } from "../../auth/services/mockAuthService";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -20,6 +18,7 @@ interface AdminSidebarProps {
   onClose: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  onLogout: () => void;
 }
 
 export function AdminSidebar({
@@ -28,14 +27,8 @@ export function AdminSidebar({
   onClose,
   isCollapsed,
   onToggleCollapse,
+  onLogout,
 }: AdminSidebarProps) {
-  const router = useRouter();
-
-  const handleLogout = () => {
-    mockAuthService.logout();
-    router.push("/login");
-  };
-
   const menuItems = [
     { id: "today", label: "오늘 현황" },
     { id: "members", label: "회원 관리" },
@@ -161,7 +154,7 @@ export function AdminSidebar({
         {/* 하단 로그아웃 버튼 */}
         <div className={`border-t border-[#FFFFFF15] pt-4 mt-auto ${isCollapsed ? "lg:flex lg:justify-center" : ""}`}>
           <button
-            onClick={handleLogout}
+            onClick={onLogout}
             className={`${styles.navItem} ${styles.navInactive} ${
               isCollapsed ? "lg:justify-center lg:px-0" : "px-4"
             } w-full cursor-pointer text-left`}
@@ -183,4 +176,3 @@ export function AdminSidebar({
     </>
   );
 }
-
