@@ -4,27 +4,8 @@ import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { UserSidebar } from "../../features/dashboard/components/UserSidebar";
 import { MobileBottomNav } from "../../features/dashboard/components/MobileBottomNav";
-import { mockAuthService } from "../../features/auth/services/mockAuthService";
-import { MockAccount } from "../../features/auth/types/auth";
-
-function UserAuthGuard({ onAuthorized }: { onAuthorized: (auth: boolean) => void }) {
-  const router = useRouter();
-
-  useEffect(() => {
-    const user = mockAuthService.getCurrentUser();
-    if (!user) {
-      router.replace("/login");
-      onAuthorized(false);
-    } else if (user.role !== "user") {
-      router.replace("/admin");
-      onAuthorized(false);
-    } else {
-      onAuthorized(true);
-    }
-  }, [router, onAuthorized]);
-
-  return null;
-}
+import { useAuth } from "../../features/auth/hooks/useAuth";
+import { authService } from "../../features/auth/services/authService";
 
 export default function UserLayout({
   children,
@@ -33,15 +14,14 @@ export default function UserLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
-  const [user, setUser] = useState<MockAccount | null>(null);
+  const { status: authStatus, user, error: authError } = useAuth();
   const [isUserSidebarCollapsed, setIsUserSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    if (isAuthorized) {
-      setUser(mockAuthService.getCurrentUser());
+    if (authStatus === "unauthenticated") {
+      router.replace("/login");
     }
-  }, [isAuthorized]);
+  }, [authStatus, router]);
 
   // 로컬 스토리지에서 사이드바 접힘 선호도를 불러옵니다.
   useEffect(() => {
@@ -58,8 +38,7 @@ export default function UserLayout({
   };
 
   const handleLogout = () => {
-    mockAuthService.logout();
-    router.push("/login");
+    authService.redirectToLogout(`${window.location.origin}/login`);
   };
 
   // 현재 경로에 맞는 헤더 제목 및 D-Day 매핑
@@ -108,21 +87,26 @@ export default function UserLayout({
 
   const headerInfo = getHeaderInfo(pathname);
   const examDDay = 117; // 상수 D-Day
+  const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (
     <div className="min-h-screen bg-[#F0EFEA] flex flex-col xl:flex-row w-full font-sans overflow-x-hidden">
-      <UserAuthGuard onAuthorized={setIsAuthorized} />
-
-      {isAuthorized === null ? (
+      {authStatus === "loading" || authStatus === "unauthenticated" ? (
         <div className="min-h-screen bg-[#F6F4F0] flex items-center justify-center font-bold text-[#817D76] w-full">
-          권한 검증 중...
+          로그인 확인 중...
         </div>
-      ) : isAuthorized ? (
+      ) : authStatus === "error" ? (
+        <div className="min-h-screen bg-[#F6F4F0] flex flex-col gap-2 items-center justify-center px-4 text-center w-full">
+          <p className="font-bold text-[#111111]">로그인 상태를 확인할 수 없습니다.</p>
+          <p className="text-sm text-[#817D76]">{authError}</p>
+        </div>
+      ) : (
         <>
           {/* 1. 사이드바 네비게이션 (데스크톱 전용) */}
           <UserSidebar
             isCollapsed={isUserSidebarCollapsed}
             onToggleCollapse={handleToggleCollapse}
+            onLogout={handleLogout}
           />
 
           {/* 2. 메인 영역 */}
@@ -145,19 +129,21 @@ export default function UserLayout({
                 
                 {/* 상단 헤더로 옮겨진 사용자 프로필 카드 + 로그아웃 버튼 */}
                 <div className="flex items-center gap-4 border-l border-[#E4E0D9] pl-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-[#B83A38] flex items-center justify-center font-extrabold text-white text-[12px]">
-                      {(user?.name || "홍")[0]}
+                  {displayName ? (
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-[#B83A38] flex items-center justify-center font-extrabold text-white text-[12px]">
+                        {displayName[0]}
+                      </div>
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-[13px] font-bold text-[#111111] truncate leading-none">
+                          {displayName} 님
+                        </span>
+                        <span className="text-[10px] text-[#817D76] truncate">
+                          합격 목표
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex flex-col gap-0.5 min-w-0">
-                      <span className="text-[13px] font-bold text-[#111111] truncate leading-none">
-                        {user?.name || "홍길동"} 님
-                      </span>
-                      <span className="text-[10px] text-[#817D76] truncate">
-                        합격 목표
-                      </span>
-                    </div>
-                  </div>
+                  ) : null}
                   
                   <button
                     onClick={handleLogout}
@@ -200,7 +186,7 @@ export default function UserLayout({
             </div>
           </div>
         </>
-      ) : null}
+      )}
     </div>
   );
 }

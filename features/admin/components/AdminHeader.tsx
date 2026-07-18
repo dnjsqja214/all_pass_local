@@ -1,25 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styles from "./AdminHeader.module.css";
-import { useRouter } from "next/navigation";
-import { mockAuthService } from "../../auth/services/mockAuthService";
-import { MockAccount } from "../../auth/types/auth";
+import { CurrentUser } from "../../auth/types/auth";
 
 interface AdminHeaderProps {
   onMenuToggle: () => void;
+  user: CurrentUser | null;
+  onLogout: () => void;
 }
 
-export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
-  const router = useRouter();
-  const [adminUser, setAdminUser] = useState<MockAccount | null>(null);
-
-  useEffect(() => {
-    setAdminUser(mockAuthService.getCurrentUser());
-  }, []);
-
-  const handleLogout = () => {
-    mockAuthService.logout();
-    router.push("/login");
-  };
+export function AdminHeader({ onMenuToggle, user, onLogout }: AdminHeaderProps) {
+  const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (
     <header className={styles.header}>
@@ -53,16 +43,18 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
           운영 대시보드 모드
         </span>
         <div className="flex items-center gap-3">
-          <div className={styles.userArea}>
-            <div className={styles.userAvatar}>
-              {adminUser ? adminUser.name[0] : "AD"}
+          {displayName ? (
+            <div className={styles.userArea}>
+              <div className={styles.userAvatar}>
+                {displayName[0]}
+              </div>
+              <span className={styles.userName}>
+                {displayName}님
+              </span>
             </div>
-            <span className={styles.userName}>
-              {adminUser ? adminUser.name : "마스터"}님
-            </span>
-          </div>
+          ) : null}
           <button
-            onClick={handleLogout}
+            onClick={onLogout}
             className="text-[12px] font-bold text-[#C93A35] hover:text-[#111111] transition-all cursor-pointer border border-[#C93A35]/25 hover:border-[#111111]/20 px-3 py-1.5 rounded-lg bg-transparent ml-1"
           >
             로그아웃
@@ -72,4 +64,3 @@ export function AdminHeader({ onMenuToggle }: AdminHeaderProps) {
     </header>
   );
 }
-

@@ -2,25 +2,19 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { USER_MENU_ITEMS } from "../constants/navigation";
 import styles from "./UserSidebar.module.css";
-import { mockAuthService } from "../../auth/services/mockAuthService";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
 interface UserSidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
+  onLogout: () => void;
 }
 
-export function UserSidebar({ isCollapsed, onToggleCollapse }: UserSidebarProps) {
+export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    mockAuthService.logout();
-    router.push("/login");
-  };
 
   // 현재 URL 경로에 따라 활성 탭 식별
   const getActiveTab = () => {
@@ -187,7 +181,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse }: UserSidebarProps)
       {/* 하단 로그아웃 버튼 */}
       <div className={`border-t border-[#FFFFFF15] pt-4 mt-auto ${isCollapsed ? "xl:flex xl:justify-center" : ""}`}>
         <button
-          onClick={handleLogout}
+          onClick={onLogout}
           className={`w-full flex items-center rounded-xl text-[14px] font-bold text-[#A8A7A5] hover:text-white hover:bg-[#FFFFFF0A] transition-all duration-200 cursor-pointer text-left ${
             isCollapsed ? "xl:justify-center xl:px-0 xl:py-3.5 xl:gap-0" : "px-4 py-3.5"
           }`}
@@ -221,4 +215,3 @@ export function UserSidebar({ isCollapsed, onToggleCollapse }: UserSidebarProps)
     </aside>
   );
 }
-
