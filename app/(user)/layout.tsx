@@ -6,6 +6,7 @@ import { UserSidebar } from "../../features/dashboard/components/UserSidebar";
 import { MobileBottomNav } from "../../features/dashboard/components/MobileBottomNav";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { authService } from "../../features/auth/services/authService";
+import { ModeSwitcher } from "../../features/auth/components/ModeSwitcher";
 
 export default function UserLayout({
   children,
@@ -123,6 +124,7 @@ export default function UserLayout({
                 </span>
               </div>
               <div className="flex items-center gap-4">
+                <ModeSwitcher activeMode="user" roles={user?.roles ?? []} />
                 <span className="bg-[#B83A38] text-white text-[13px] font-bold px-4 py-2 rounded-full tracking-wide">
                   시험까지 D-{examDDay}
                 </span>
@@ -160,11 +162,16 @@ export default function UserLayout({
               <div className={`w-full max-w-md md:max-w-2xl xl:max-w-[1440px] mx-auto min-h-screen bg-[#F7F6F2] xl:bg-transparent shadow-sm xl:shadow-none flex flex-col justify-between xl:justify-start relative overflow-hidden xl:overflow-visible transition-all duration-300 ${pathname === "/exams" ? "xl:h-full xl:min-h-0" : "xl:min-h-0"}`}>
                 
                 {/* 상단 타이틀 & D-Day & 로그아웃 (모바일 / 태블릿용 헤더 공통화) */}
-                <div className="flex justify-between items-center xl:hidden px-5 pt-6 pb-1">
+                <div className="flex flex-wrap justify-between items-center gap-3 xl:hidden px-5 pt-6 pb-1">
                   <h1 className="text-[26px] font-extrabold text-[#1A1A1A] tracking-tight">
                     {headerInfo.mobileTitle}
                   </h1>
-                  <div className="flex items-center gap-2">
+                  <div className="ml-auto flex items-center gap-2">
+                    <ModeSwitcher
+                      activeMode="user"
+                      roles={user?.roles ?? []}
+                      compact
+                    />
                     <span className="bg-[#B83A38] text-white text-[12px] font-extrabold px-3 py-1.5 rounded-full tracking-wide">
                       시험까지 D-{examDDay}
                     </span>

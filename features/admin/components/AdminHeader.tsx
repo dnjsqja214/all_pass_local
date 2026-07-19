@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./AdminHeader.module.css";
 import { CurrentUser } from "../../auth/types/auth";
+import { ModeSwitcher } from "../../auth/components/ModeSwitcher";
 
 interface AdminHeaderProps {
   onMenuToggle: () => void;
@@ -39,9 +40,7 @@ export function AdminHeader({ onMenuToggle, user, onLogout }: AdminHeaderProps) 
 
       {/* 우측 영역 */}
       <div className={styles.rightSection}>
-        <span className={styles.modeLabel}>
-          운영 대시보드 모드
-        </span>
+        <ModeSwitcher activeMode="admin" roles={user?.roles ?? []} compact />
         <div className="flex items-center gap-3">
           {displayName ? (
             <div className={styles.userArea}>
