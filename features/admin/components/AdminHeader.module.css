@@ -32,10 +32,6 @@
   @apply flex items-center gap-4;
 }
 
-.modeLabel {
-  @apply hidden md:inline-block text-[12px] text-[#817D76] font-semibold;
-}
-
 .userArea {
   @apply flex items-center gap-2;
 }

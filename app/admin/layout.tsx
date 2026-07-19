@@ -17,12 +17,18 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const pathname = usePathname();
+  const hasAdminRole = user?.roles.includes("ADMIN") ?? false;
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
       router.replace("/login");
+      return;
     }
-  }, [authStatus, router]);
+
+    if (authStatus === "authenticated" && !hasAdminRole) {
+      router.replace("/");
+    }
+  }, [authStatus, hasAdminRole, router]);
 
   // 현재 활성화된 메뉴 식별
   const activeMenu = pathname.startsWith("/admin/members") ? "members" : "today";
@@ -58,6 +64,10 @@ export default function AdminLayout({
         <div className="min-h-screen bg-[#F6F4F0] flex flex-col gap-2 items-center justify-center px-4 text-center">
           <p className="font-bold text-[#111111]">로그인 상태를 확인할 수 없습니다.</p>
           <p className="text-sm text-[#817D76]">{authError}</p>
+        </div>
+      ) : !hasAdminRole ? (
+        <div className="min-h-screen bg-[#F6F4F0] flex items-center justify-center font-bold text-[#817D76]">
+          일반 사용자 화면으로 이동 중...
         </div>
       ) : (
         <>
