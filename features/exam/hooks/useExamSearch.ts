@@ -2,41 +2,47 @@ import { useState, useMemo } from "react";
 import { ExamListItem } from "../types/exam";
 
 export function useExamSearch(initialExams: ExamListItem[]) {
-  const [examNameInput, setExamNameInput] = useState("");
-  const [appliedExamName, setAppliedExamName] = useState("");
-  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [selectedSubject, setSelectedSubject] = useState("all");
   const [selectedRound, setSelectedRound] = useState("all");
 
   const handleSearch = () => {
-    setAppliedExamName(examNameInput.trim());
+    // 검색 단추 클릭 시 동작 (실시간 필터링되므로 현재는 예비용)
   };
 
   const handleReset = () => {
-    setExamNameInput("");
-    setAppliedExamName("");
-    setSelectedYear("all");
+    setSelectedType("all");
+    setSelectedSubject("all");
     setSelectedRound("all");
   };
 
   const filteredExams = useMemo(() => {
     return initialExams.filter((exam) => {
-      // 1. 시험명 검색 (공백 제거 후 부분 일치, 대소문자 무관)
-      if (appliedExamName) {
-        const cleanedTitle = exam.title.replace(/\s+/g, "").toLowerCase();
-        const cleanedKeyword = appliedExamName.replace(/\s+/g, "").toLowerCase();
-        if (!cleanedTitle.includes(cleanedKeyword)) {
+      // 1. 유형 필터 ("all" | "pre" | "mock")
+      if (selectedType !== "all") {
+        if (selectedType === "pre") {
+          // 기출문제: 제목에 "모의고사"가 없는 시험
+          if (exam.title.includes("모의고사")) return false;
+        } else if (selectedType === "mock") {
+          // 모의고사: 제목에 "모의고사"가 포함된 시험
+          if (!exam.title.includes("모의고사")) return false;
+        }
+      }
+
+      // 2. 과목 필터
+      if (selectedSubject !== "all") {
+        const subjectMapping: Record<string, string> = {
+          "공인중개사법령 및 실무": "중개사법령 및 실무",
+          "부동산 공법": "부동산공법",
+          "부동산공시법령 부동산세법": "부동산세법",
+        };
+        const targetSubject = subjectMapping[selectedSubject] || selectedSubject;
+        if (exam.subject !== targetSubject) {
           return false;
         }
       }
 
-      // 2. 연도 검색
-      if (selectedYear !== "all") {
-        if (exam.year !== parseInt(selectedYear)) {
-          return false;
-        }
-      }
-
-      // 3. 회차 검색
+      // 3. 회차 필터
       if (selectedRound !== "all") {
         if (exam.round !== parseInt(selectedRound)) {
           return false;
@@ -45,14 +51,13 @@ export function useExamSearch(initialExams: ExamListItem[]) {
 
       return true;
     });
-  }, [initialExams, appliedExamName, selectedYear, selectedRound]);
+  }, [initialExams, selectedType, selectedSubject, selectedRound]);
 
   return {
-    examNameInput,
-    setExamNameInput,
-    appliedExamName,
-    selectedYear,
-    setSelectedYear,
+    selectedType,
+    setSelectedType,
+    selectedSubject,
+    setSelectedSubject,
     selectedRound,
     setSelectedRound,
     filteredExams,

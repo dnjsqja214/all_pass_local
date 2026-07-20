@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useDashboardData } from "../../features/dashboard/hooks/useDashboardData";
 import { ActiveStudyCard } from "../../features/dashboard/components/ActiveStudyCard";
 import { TodoItemCard } from "../../features/dashboard/components/TodoItemCard";
 import { StatSummaryCard } from "../../features/dashboard/components/StatSummaryCard";
 import { RecentExamsCard } from "../../features/dashboard/components/RecentExamsCard";
 import { StudyTimeGraphCard } from "../../features/dashboard/components/StudyTimeGraphCard";
+import { ExamSelectionPage } from "../../features/exam/ExamSelectionPage";
+import { ExamSolvingModal } from "../../features/exam/components/ExamSolvingModal";
 
 export default function Home() {
   const {
@@ -16,6 +18,26 @@ export default function Home() {
     recentExams,
     dailyStudyTime,
   } = useDashboardData();
+
+  const [isSelectionOpen, setIsSelectionOpen] = useState(false);
+  const [isSolvingOpen, setIsSolvingOpen] = useState(false);
+  const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
+
+  const handleSelectExamClick = () => {
+    setIsSelectionOpen(true);
+  };
+
+  const handleSolveClick = () => {
+    // 기본 선택 시험이 없으면 "exam-live-1"로 시작
+    setSelectedExamId("exam-live-1");
+    setIsSolvingOpen(true);
+  };
+
+  const handleSelectExam = (examId: string) => {
+    setIsSelectionOpen(false);
+    setSelectedExamId(examId);
+    setIsSolvingOpen(true);
+  };
 
   return (
     <div className="flex-1 px-5 pt-6 pb-6 md:px-8 xl:p-8 space-y-6">
@@ -31,11 +53,15 @@ export default function Home() {
 
       {/* Grid Layout 구성 */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-8">
-        
+
         {/* 좌측 컬럼 (데스크톱): 실시간 스터디 + 오늘 할 일 */}
         <div className="xl:col-span-7 space-y-6">
           {/* 실시간 스터디 카드 */}
-          <ActiveStudyCard session={activeSession} />
+          <ActiveStudyCard
+            session={activeSession}
+            onSelectExamClick={handleSelectExamClick}
+            onSolveClick={handleSolveClick}
+          />
 
           {/* 오늘 할 일 섹션 */}
           <div className="space-y-3">
@@ -72,6 +98,27 @@ export default function Home() {
         </div>
 
       </div>
+
+      {/* 시험 선택 팝업 모달 */}
+      {isSelectionOpen && (
+        <ExamSelectionPage
+          isModal
+          onClose={() => setIsSelectionOpen(false)}
+          onSelectExam={handleSelectExam}
+        />
+      )}
+
+      {/* 문제 풀이 팝업 모달 */}
+      {isSolvingOpen && selectedExamId && (
+        <ExamSolvingModal
+          examId={selectedExamId}
+          isOpen={isSolvingOpen}
+          onClose={() => {
+            setIsSolvingOpen(false);
+            setSelectedExamId(null);
+          }}
+        />
+      )}
     </div>
   );
 }

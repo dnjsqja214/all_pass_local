@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export type TabType = "today" | "exam" | "incorrect" | "profile";
+export type TabType = "today" | "exam" | "incorrect" | "profile" | "apply-exam";
 
 export interface StudySessionInfo {
   title: string;
@@ -76,7 +76,7 @@ export function useDashboardData(initialTab: TabType = "today") {
     title: "오전반 실시간 스터디",
     timeRange: "10:00 - 11:00",
     badgeText: "시작 10분 전",
-    linkText: "구글미트 입장 + 문제풀이",
+    linkText: "문제풀이",
   };
 
   // 오늘 할 일 Mock 데이터

@@ -1,5 +1,5 @@
 export interface NavigationItem {
-  id: "today" | "exam" | "incorrect" | "profile";
+  id: "today" | "exam" | "incorrect" | "profile" | "apply-exam";
   label: string;
   path: string;
 }
@@ -11,9 +11,9 @@ export const USER_MENU_ITEMS: NavigationItem[] = [
     path: "/",
   },
   {
-    id: "exam",
-    label: "문제 풀이",
-    path: "/exams",
+    id: "apply-exam",
+    label: "시험 신청",
+    path: "/exam-registration",
   },
   {
     id: "incorrect",

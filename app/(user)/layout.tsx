@@ -58,6 +58,13 @@ export default function UserLayout({
         mobileTitle: "학습관리",
       };
     }
+    if (path.startsWith("/exam-registration")) {
+      return {
+        desktopTitle: "시험 신청",
+        desktopSub: "응시할 시험 일정을 추가하고 관리합니다.",
+        mobileTitle: "시험 신청",
+      };
+    }
     if (path.startsWith("/wrong-notes")) {
       return {
         desktopTitle: "오답노트",
