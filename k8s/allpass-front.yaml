@@ -22,7 +22,7 @@ spec:
       containers:
         - name: allpass-front
           # 태그는 GitHub Actions(build-ghcr.yml)가 커밋 SHA로 자동 갱신
-          image: ghcr.io/dnjsqja214/allpass-front:1eacd2dc0fd5c4ffa6202eced3276882867f8f6f
+          image: ghcr.io/dnjsqja214/allpass-front:98923c6b518da7b6c62f5818fdcf0d17a25a0526
           imagePullPolicy: Always
           ports:
             - name: http
