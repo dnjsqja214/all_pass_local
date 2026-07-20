@@ -1,5 +1,6 @@
 import React from "react";
 import { OMRQuestionRow } from "./OMRQuestionRow";
+import styles from "./OMRGrid.module.css";
 
 interface OMRGridProps {
   totalQuestions: number;
@@ -14,14 +15,10 @@ export function OMRGrid({ totalQuestions, answers, onSelectAnswer }: OMRGridProp
   const col2Questions = Array.from({ length: totalQuestions - half }, (_, i) => i + half + 1);
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-[#E4E0D9] shadow-xs w-full">
-      {/* 
-        모바일에서는 1열 스택,
-        태블릿/데스크톱(lg 이상)에서는 좌우 2열 배치로 정보 밀도를 높임
-      */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 xl:gap-x-12">
+    <div className={styles.gridContainer}>
+      <div className={styles.gridSplit}>
         {/* 1열 (1 ~ 20번 문항) */}
-        <div className="flex flex-col">
+        <div className={styles.column}>
           {col1Questions.map((qNum) => (
             <OMRQuestionRow
               key={qNum}
@@ -33,7 +30,7 @@ export function OMRGrid({ totalQuestions, answers, onSelectAnswer }: OMRGridProp
         </div>
 
         {/* 2열 (21 ~ 40번 문항) */}
-        <div className="flex flex-col">
+        <div className={styles.column}>
           {col2Questions.map((qNum) => (
             <OMRQuestionRow
               key={qNum}

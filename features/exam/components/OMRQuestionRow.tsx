@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Star } from "lucide-react";
 import { ChoiceButton } from "./ChoiceButton";
+import styles from "./OMRQuestionRow.module.css";
 
 interface OMRQuestionRowProps {
   questionNumber: number;
@@ -17,13 +18,13 @@ export function OMRQuestionRow({
   const choices = [1, 2, 3, 4, 5];
 
   return (
-    <div className="flex items-center py-1.5 border-b border-[#F6F4F0] w-full gap-4">
+    <div className={styles.row}>
       {/* 별 아이콘 + 문항 번호 그룹 (정렬 맞춤) */}
-      <div className="flex items-center gap-1 shrink-0 min-w-[52px]">
+      <div className={styles.numberGroup}>
         <button
           type="button"
           onClick={() => setIsBookmarked(!isBookmarked)}
-          className="p-1 hover:bg-[#F6F4F0] rounded-full transition-colors cursor-pointer border-none outline-none bg-transparent inline-flex items-center justify-center"
+          className={styles.starBtn}
         >
           <Star
             className={`w-[16px] h-[16px] transition-all ${
@@ -31,13 +32,13 @@ export function OMRQuestionRow({
             }`}
           />
         </button>
-        <span className="text-[14.5px] font-extrabold text-[#111111]">
+        <span className={styles.numberText}>
           {questionNumber}
         </span>
       </div>
 
       {/* 마킹 선택지 */}
-      <div className="flex gap-2">
+      <div className={styles.choicesGroup}>
         {choices.map((choice) => (
           <ChoiceButton
             key={choice}
