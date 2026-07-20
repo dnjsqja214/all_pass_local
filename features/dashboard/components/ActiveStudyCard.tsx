@@ -6,7 +6,6 @@ import styles from "./ActiveStudyCard.module.css";
 interface ActiveStudyCardProps {
   closestRegistration: ExamRegistration | null;
   session: StudySessionInfo;
-  onSelectExamClick?: () => void;
   onSolveClick?: () => void;
   onApplyExamClick?: () => void;
 }
@@ -14,7 +13,6 @@ interface ActiveStudyCardProps {
 export function ActiveStudyCard({
   closestRegistration,
   session,
-  onSelectExamClick,
   onSolveClick,
   onApplyExamClick,
 }: ActiveStudyCardProps) {

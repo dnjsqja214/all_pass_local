@@ -35,13 +35,12 @@ export default function AdminLayout({
 
   // 데스크톱일 경우 기본적으로 사이드바를 열어두고, 로컬 스토리지에서 접힘 상태를 불러옵니다.
   useEffect(() => {
-    if (window.innerWidth >= 1024) {
-      setSidebarOpen(true);
-    }
-    const saved = localStorage.getItem("allpass-admin-sidebar-collapsed");
-    if (saved !== null) {
-      setIsSidebarCollapsed(saved === "true");
-    }
+    const timer = window.setTimeout(() => {
+      if (window.innerWidth >= 1024) setSidebarOpen(true);
+      const saved = localStorage.getItem("allpass-admin-sidebar-collapsed");
+      if (saved !== null) setIsSidebarCollapsed(saved === "true");
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleToggleCollapse = () => {

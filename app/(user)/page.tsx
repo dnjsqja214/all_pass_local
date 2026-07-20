@@ -9,6 +9,7 @@ import { ExamDDayCard } from "../../features/dashboard/components/ExamDDayCard";
 import { ExamSelectionPage } from "../../features/exam/ExamSelectionPage";
 import { ExamSolvingModal } from "../../features/exam/components/ExamSolvingModal";
 import { examRegistrationService, ExamRegistration } from "../../features/exam/services/examRegistrationService";
+import { ExamListItem } from "../../features/exam/types/exam";
 
 interface ExamScoreRow {
   round: string;
@@ -22,13 +23,14 @@ const MOCK_SCORE_ROWS: ExamScoreRow[] = [
   { round: "24회차", taxLaw: "미응시", publicLaw: 40, brokerageProperty: "미응시" },
 ];
 
+function isBackendExamId(examId: string): boolean {
+  return /^exam-\d+-\d+$/.test(examId);
+}
+
 export default function Home() {
   const router = useRouter();
   const {
     activeSession,
-    todoList,
-    weeklyStats,
-    recentExams,
     dailyStudyTime,
   } = useDashboardData();
 
@@ -40,20 +42,16 @@ export default function Home() {
 
   // 마운트 시 신청된 시험 중 가장 일정이 빠른 것 가져오기
   useEffect(() => {
-    const regs = examRegistrationService.getRegistrations();
-    const activeRegs = regs.filter((reg) => reg.status === "applied");
-    if (activeRegs.length > 0) {
-      activeRegs.sort((a, b) => a.registrationDate.localeCompare(b.registrationDate));
-      setClosestRegistration(activeRegs[0]);
-    } else {
-      setClosestRegistration(null);
-    }
+    const controller = new AbortController();
+    examRegistrationService.getRegistrations(controller.signal)
+      .then((registrations) => setClosestRegistration(registrations[0] ?? null))
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted) {
+          console.error("시험 신청 내역을 불러오지 못했습니다.", reason);
+        }
+      });
+    return () => controller.abort();
   }, []);
-
-  // 가장 가까운 시험이 교체될 때 자동 팝업 실행 플래그 초기화
-  useEffect(() => {
-    setHasAutoOpened(false);
-  }, [closestRegistration]);
 
   // 선택한 시험일의 오전 10시가 되면 자동으로 OMR 문제풀이 모달 띄우기
   useEffect(() => {
@@ -68,8 +66,12 @@ export default function Home() {
 
       if (now >= targetTime) {
         setHasAutoOpened(true);
-        setSelectedExamId(closestRegistration.examId);
-        setIsSolvingOpen(true);
+        if (isBackendExamId(closestRegistration.examId)) {
+          setSelectedExamId(closestRegistration.examId);
+          setIsSolvingOpen(true);
+        } else {
+          setIsSelectionOpen(true);
+        }
       }
     };
 
@@ -79,17 +81,12 @@ export default function Home() {
     return () => clearInterval(timerId);
   }, [closestRegistration, hasAutoOpened]);
 
-  const handleSelectExamClick = () => {
-    setIsSelectionOpen(true);
-  };
-
   const handleSolveClick = () => {
-    if (closestRegistration) {
+    if (closestRegistration && isBackendExamId(closestRegistration.examId)) {
       setSelectedExamId(closestRegistration.examId);
       setIsSolvingOpen(true);
     } else {
-      setSelectedExamId("exam-live-1");
-      setIsSolvingOpen(true);
+      setIsSelectionOpen(true);
     }
   };
 
@@ -97,9 +94,9 @@ export default function Home() {
     router.push("/exam-registration?openForm=true");
   };
 
-  const handleSelectExam = (examId: string) => {
+  const handleSelectExam = (exam: ExamListItem) => {
     setIsSelectionOpen(false);
-    setSelectedExamId(examId);
+    setSelectedExamId(exam.id);
     setIsSolvingOpen(true);
   };
 
@@ -138,7 +135,6 @@ export default function Home() {
           <ActiveStudyCard
             session={activeSession}
             closestRegistration={closestRegistration}
-            onSelectExamClick={handleSelectExamClick}
             onSolveClick={handleSolveClick}
             onApplyExamClick={handleApplyExamClick}
           />

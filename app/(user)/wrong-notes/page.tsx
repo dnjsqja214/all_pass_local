@@ -22,7 +22,7 @@ export default function WrongNotes() {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedSubject, setSelectedSubject] = useState<string>("all");
   const [selectedRound, setSelectedRound] = useState<string>("all");
-  const [myNotesOnly, setMyNotesOnly] = useState<boolean>(false);
+  const myNotesOnly = false;
 
   // 검색 시점에 적용할 필터 상태 (검색하기 버튼 클릭 시 반영)
   const [appliedType, setAppliedType] = useState<string>("all");

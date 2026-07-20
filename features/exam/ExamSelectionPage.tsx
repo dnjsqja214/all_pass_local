@@ -1,23 +1,25 @@
 "use client";
 
 import React, { useRef, useEffect } from "react";
-import { mockExams } from "./data/mockExams";
 import { useExamSearch } from "./hooks/useExamSearch";
+import { ExamListItem } from "./types/exam";
 import { ExamSearchForm } from "./components/ExamSearchForm";
 import { ExamCardList } from "./components/ExamCardList";
 import { EmptyExamResult } from "./components/EmptyExamResult";
 import { X } from "lucide-react";
 
 interface ExamSelectionPageProps {
-  onSelectExam?: (examId: string) => void;
+  onSelectExam?: (exam: ExamListItem) => void;
   isModal?: boolean;
   onClose?: () => void;
+  initialExams?: ExamListItem[];
 }
 
 export function ExamSelectionPage({
   onSelectExam,
   isModal = false,
   onClose,
+  initialExams,
 }: ExamSelectionPageProps) {
   const {
     selectedType,
@@ -27,9 +29,11 @@ export function ExamSelectionPage({
     selectedRound,
     setSelectedRound,
     filteredExams,
+    isLoading,
+    error,
     handleSearch,
     handleReset,
-  } = useExamSearch(mockExams);
+  } = useExamSearch(initialExams);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +85,22 @@ export function ExamSelectionPage({
       </div>
 
       {/* 시험 목록 또는 빈 화면 (스크롤 가능하도록 배치) */}
-      {filteredExams.length > 0 ? (
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center text-[14px] font-bold text-[#817D76]">
+          시험 목록을 불러오는 중입니다.
+        </div>
+      ) : error ? (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
+          <p className="text-[14px] font-bold text-[#D93D35]">{error}</p>
+          <button
+            type="button"
+            onClick={handleSearch}
+            className="rounded-xl bg-[#151515] px-5 py-3 text-[13px] font-bold text-white cursor-pointer"
+          >
+            다시 시도
+          </button>
+        </div>
+      ) : filteredExams.length > 0 ? (
         <ExamCardList exams={filteredExams} scrollRef={scrollRef} onSelectExam={onSelectExam} />
       ) : (
         <div className="flex-1 overflow-y-auto">

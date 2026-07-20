@@ -6,7 +6,7 @@ import { Calendar, HelpCircle, Clock } from "lucide-react";
 interface ExamCardListProps {
   exams: ExamListItem[];
   scrollRef?: RefObject<HTMLDivElement | null>;
-  onSelectExam?: (examId: string) => void;
+  onSelectExam?: (exam: ExamListItem) => void;
 }
 
 export function ExamCardList({ exams, scrollRef, onSelectExam }: ExamCardListProps) {
@@ -15,7 +15,7 @@ export function ExamCardList({ exams, scrollRef, onSelectExam }: ExamCardListPro
   const handleSelect = (exam: ExamListItem) => {
     if (exam.status === "scheduled") return;
     if (onSelectExam) {
-      onSelectExam(exam.id);
+      onSelectExam(exam);
     } else {
       router.push(`/exams/${exam.id}/solve`);
     }
@@ -65,7 +65,7 @@ export function ExamCardList({ exams, scrollRef, onSelectExam }: ExamCardListPro
             {/* 우측 단추 및 스코어 영역 */}
             <div className="flex items-center justify-between md:justify-end gap-5 shrink-0 border-t border-[#F6F4F0] pt-3 md:border-t-0 md:pt-0">
               <div className="text-left md:text-right min-w-[70px]">
-                {exam.status === "completed" && exam.score !== undefined ? (
+                {exam.status === "completed" && exam.score != null ? (
                   <div className={`text-[12px] font-bold ${exam.score >= 80
                       ? "text-[#3F7D4E]"
                       : exam.score >= 60
