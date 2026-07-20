@@ -21,21 +21,22 @@ export function ExamSolvingModal({
   onClose,
   onSubmitted,
 }: ExamSolvingModalProps) {
-  if (!isOpen) return null;
-
   const {
     examInfo,
     answers,
     remainingSeconds,
     saveStatus,
     isSubmitted,
+    isSubmitting,
+    isLoading,
+    error,
     markedCount,
     unansweredCount,
     selectAnswer,
     submitExam,
     showToast,
     toastMessage,
-  } = useExamData(examId);
+  } = useExamData(isOpen ? examId : undefined);
 
   // 제출 다이얼로그 모달 노출 상태
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -49,14 +50,16 @@ export function ExamSolvingModal({
   };
 
   // 모달 확인 완료 시
-  const handleConfirmSubmit = () => {
+  const handleConfirmSubmit = async () => {
     setIsDialogOpen(false);
-    submitExam();
-    alert("정답지가 정상적으로 제출되었습니다!");
-    if (onSubmitted) {
-      onSubmitted();
+    try {
+      const result = await submitExam();
+      alert(`정답지가 정상적으로 제출되었습니다. 점수: ${result.score}점`);
+      onSubmitted?.();
+      onClose();
+    } catch {
+      // 오류 내용은 훅의 토스트로 표시한다.
     }
-    onClose();
   };
 
   // 나가기 버튼 클릭 시
@@ -67,6 +70,27 @@ export function ExamSolvingModal({
       onClose();
     }
   };
+
+  if (!isOpen) return null;
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F6F4F0] text-[14px] font-bold text-[#817D76]">
+        시험 세션을 준비하는 중입니다.
+      </div>
+    );
+  }
+
+  if (error || !examInfo) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-[#F6F4F0] p-6 text-center">
+        <p className="text-[14px] font-bold text-[#D93D35]">{error ?? "시험 정보를 불러올 수 없습니다."}</p>
+        <button type="button" onClick={onClose} className="rounded-xl bg-[#151515] px-5 py-3 text-[13px] font-bold text-white cursor-pointer">
+          닫기
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`${styles.modalOverlay} animate-in fade-in duration-200`}>
@@ -90,11 +114,11 @@ export function ExamSolvingModal({
             <div className={styles.saveStatusWrapper}>
               <div
                 className={`${styles.saveStatusIndicator} ${
-                  saveStatus === "saved" ? "bg-[#3F7D4E]" : "bg-gray-400 animate-pulse"
+                  saveStatus === "saved" ? "bg-[#3F7D4E]" : saveStatus === "error" ? "bg-[#D93D35]" : "bg-gray-400 animate-pulse"
                 }`}
               />
-              <span className={saveStatus === "saved" ? "text-[#3F7D4E]" : "text-gray-500"}>
-                {saveStatus === "saved" ? "자동 저장됨" : "저장 중..."}
+              <span className={saveStatus === "saved" ? "text-[#3F7D4E]" : saveStatus === "error" ? "text-[#D93D35]" : "text-gray-500"}>
+                {saveStatus === "saved" ? "자동 저장됨" : saveStatus === "error" ? "저장 실패" : "저장 중..."}
               </span>
             </div>
           </div>
@@ -115,10 +139,10 @@ export function ExamSolvingModal({
           {/* 제출 버튼 */}
           <button
             onClick={handleSubmitClick}
-            disabled={isSubmitted}
+            disabled={isSubmitted || isSubmitting}
             className={styles.btnSubmit}
           >
-            답안 제출
+            {isSubmitting ? "제출 중..." : "답안 제출"}
           </button>
 
           <button

@@ -1,13 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Plus, Trash2, Calendar, HelpCircle, Clock, X } from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { Plus, Trash2, Calendar, X } from "lucide-react";
 import { examRegistrationService, ExamRegistration } from "../../../features/exam/services/examRegistrationService";
 import { ExamSelectionPage } from "../../../features/exam/ExamSelectionPage";
-import { mockExams } from "../../../features/exam/data/mockExams";
+import { ExamListItem } from "../../../features/exam/types/exam";
 
 export default function ExamRegistrationPage() {
   const [registrations, setRegistrations] = useState<ExamRegistration[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSelectionOpen, setIsSelectionOpen] = useState(false);
 
@@ -16,21 +20,44 @@ export default function ExamRegistrationPage() {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [selectedExamTitle, setSelectedExamTitle] = useState<string | null>(null);
 
+  const loadRegistrations = useCallback(async (signal?: AbortSignal) => {
+    await Promise.resolve();
+    if (signal?.aborted) return;
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      setRegistrations(await examRegistrationService.getRegistrations(signal));
+    } catch (reason: unknown) {
+      if (!signal?.aborted) {
+        setLoadError(reason instanceof Error ? reason.message : "시험 신청 내역을 불러올 수 없습니다.");
+      }
+    } finally {
+      if (!signal?.aborted) setIsLoading(false);
+    }
+  }, []);
+
   // 신청 목록 마운트 시 가져오기 및 openForm 쿼리 파라미터 체크
   useEffect(() => {
-    setRegistrations(examRegistrationService.getRegistrations());
-
-    if (typeof window !== "undefined") {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      void loadRegistrations(controller.signal);
       const params = new URLSearchParams(window.location.search);
       if (params.get("openForm") === "true") {
-        handleOpenForm();
+        setTargetDate("");
+        setSelectedExamId(null);
+        setSelectedExamTitle(null);
+        setIsFormOpen(true);
 
         // URL 클린업 (옵션: 새로고침 시 계속 열려있는 것 방지)
         const newUrl = window.location.pathname;
         window.history.replaceState({}, "", newUrl);
       }
-    }
-  }, []);
+    }, 0);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [loadRegistrations]);
 
   const handleOpenForm = () => {
     setTargetDate("");
@@ -43,13 +70,10 @@ export default function ExamRegistrationPage() {
     setIsSelectionOpen(true);
   };
 
-  const handleSelectExam = (examId: string) => {
+  const handleSelectExam = (exam: ExamListItem) => {
     setIsSelectionOpen(false);
-    const exam = mockExams.find((e) => e.id === examId);
-    if (exam) {
-      setSelectedExamId(exam.id);
-      setSelectedExamTitle(exam.title);
-    }
+    setSelectedExamId(exam.id);
+    setSelectedExamTitle(exam.title);
   };
 
   const getTodayString = () => {
@@ -96,18 +120,29 @@ export default function ExamRegistrationPage() {
     }
 
     try {
-      await examRegistrationService.registerExam(selectedExamId, targetDate);
-      setRegistrations(examRegistrationService.getRegistrations());
+      setIsSubmitting(true);
+      const registered = await examRegistrationService.registerExam(selectedExamId, targetDate);
+      setRegistrations((current) => [...current, registered]
+        .sort((left, right) => left.registrationDate.localeCompare(right.registrationDate)));
       setIsFormOpen(false);
-    } catch (err: any) {
-      alert(err.message || "시험 신청에 실패했습니다.");
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : "시험 신청에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleCancelRegistration = (id: string) => {
+  const handleCancelRegistration = async (id: string) => {
     if (confirm("정말 이 시험 신청을 취소하시겠습니까?")) {
-      examRegistrationService.cancelRegistration(id);
-      setRegistrations(examRegistrationService.getRegistrations());
+      try {
+        setCancellingId(id);
+        await examRegistrationService.cancelRegistration(id);
+        setRegistrations((current) => current.filter((registration) => registration.id !== id));
+      } catch (reason: unknown) {
+        alert(reason instanceof Error ? reason.message : "시험 신청 취소에 실패했습니다.");
+      } finally {
+        setCancellingId(null);
+      }
     }
   };
 
@@ -141,7 +176,22 @@ export default function ExamRegistrationPage() {
 
       {/* 리스트 본문 영역 */}
       <div className="flex-1 overflow-y-auto min-h-0 pr-1 pb-16">
-        {registrations.length > 0 ? (
+        {isLoading ? (
+          <div className="bg-white rounded-2xl border border-[#E4E0D9] p-8 text-center text-[14px] font-bold text-[#817D76]">
+            시험 신청 내역을 불러오는 중입니다.
+          </div>
+        ) : loadError ? (
+          <div className="bg-white rounded-2xl border border-[#E4E0D9] p-8 text-center space-y-4">
+            <p className="text-[14px] font-bold text-[#D93D35]">{loadError}</p>
+            <button
+              type="button"
+              onClick={() => void loadRegistrations()}
+              className="rounded-xl bg-[#151515] px-5 py-3 text-[13px] font-bold text-white cursor-pointer"
+            >
+              다시 시도
+            </button>
+          </div>
+        ) : registrations.length > 0 ? (
           <div className="flex flex-col gap-4">
             {registrations.map((reg) => (
               <div
@@ -171,11 +221,12 @@ export default function ExamRegistrationPage() {
                 {/* 우측 제어 단추 */}
                 <div className="flex items-center justify-end shrink-0 border-t border-[#F6F4F0] pt-3 md:border-t-0 md:pt-0">
                   <button
-                    onClick={() => handleCancelRegistration(reg.id)}
+                    onClick={() => void handleCancelRegistration(reg.id)}
+                    disabled={cancellingId === reg.id}
                     className="px-4 py-2 bg-white hover:bg-[#FDF1F0] active:bg-[#FCDAD7] text-[#D93D35] border border-[#D93D35]/25 hover:border-[#D93D35]/40 font-bold text-[12px] rounded-xl transition-all cursor-pointer min-h-[38px] flex items-center gap-1"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>신청 취소</span>
+                    <span>{cancellingId === reg.id ? "취소 중" : "신청 취소"}</span>
                   </button>
                 </div>
               </div>
@@ -191,7 +242,7 @@ export default function ExamRegistrationPage() {
                 신청된 시험이 없습니다.
               </h3>
               <p className="text-[12px] text-[#817D76] font-medium">
-                상단의 "신청 추가" 버튼을 눌러 목표 시험을 추가해 보세요.
+                상단의 &quot;신청 추가&quot; 버튼을 눌러 목표 시험을 추가해 보세요.
               </p>
             </div>
             <button
@@ -285,13 +336,13 @@ export default function ExamRegistrationPage() {
               </button>
               <button
                 type="submit"
-                disabled={!selectedExamId || !targetDate}
+                disabled={!selectedExamId || !targetDate || isSubmitting}
                 className={`w-full py-3 px-4 font-bold text-[13.5px] rounded-xl transition-colors cursor-pointer border-none outline-none ${selectedExamId && targetDate
                     ? "bg-[#C93A35] hover:bg-[#A82A25] text-white"
                     : "bg-[#E4E0D9] text-[#A8A7A5] cursor-not-allowed"
                   }`}
               >
-                신청하기
+                {isSubmitting ? "신청 중" : "신청하기"}
               </button>
             </div>
           </form>

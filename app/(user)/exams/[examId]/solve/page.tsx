@@ -29,6 +29,9 @@ export default function SolvePage({ params }: PageProps) {
     remainingSeconds,
     saveStatus,
     isSubmitted,
+    isSubmitting,
+    isLoading,
+    error,
     markedCount,
     unansweredCount,
     selectAnswer,
@@ -47,12 +50,31 @@ export default function SolvePage({ params }: PageProps) {
   };
 
   // 모달 확인 완료 시
-  const handleConfirmSubmit = () => {
+  const handleConfirmSubmit = async () => {
     setIsDialogOpen(false);
-    submitExam();
-    alert("정답지가 정상적으로 제출되었습니다!");
-    router.push("/"); // 제출 완료 후 홈으로 이동
+    try {
+      const result = await submitExam();
+      alert(`정답지가 정상적으로 제출되었습니다. 점수: ${result.score}점`);
+      router.push("/");
+    } catch {
+      // 오류 내용은 훅의 토스트로 표시한다.
+    }
   };
+
+  if (isLoading) {
+    return <div className="flex-1 flex items-center justify-center text-[14px] font-bold text-[#817D76]">시험 세션을 준비하는 중입니다.</div>;
+  }
+
+  if (error || !examInfo) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="text-[14px] font-bold text-[#D93D35]">{error ?? "시험 정보를 불러올 수 없습니다."}</p>
+        <button type="button" onClick={() => router.push("/exams")} className="rounded-xl bg-[#151515] px-5 py-3 text-[13px] font-bold text-white cursor-pointer">
+          시험 목록으로
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 px-4 pt-6 pb-28 md:px-8 xl:p-8 space-y-6">
@@ -99,7 +121,7 @@ export default function SolvePage({ params }: PageProps) {
       </div>
 
       {/* 고정 제출 푸터 */}
-      <SubmitFooter onSubmitClick={handleSubmitClick} />
+      <SubmitFooter onSubmitClick={handleSubmitClick} disabled={isSubmitting || isSubmitted} />
 
       {/* 제출 확인 모달 다이얼로그 */}
       <SubmitDialog

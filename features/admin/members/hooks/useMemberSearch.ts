@@ -1,21 +1,16 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Member } from "../types/member";
 
 export function useMemberSearch(initialMembers: Member[]) {
   const [searchName, setSearchName] = useState("");
   const [activeSearchName, setActiveSearchName] = useState("");
-  const [filteredMembers, setFilteredMembers] = useState<Member[]>(initialMembers);
 
-  useEffect(() => {
+  const filteredMembers = useMemo(() => {
     const trimmed = activeSearchName.trim().toLowerCase();
-    if (!trimmed) {
-      setFilteredMembers(initialMembers);
-      return;
-    }
-    const filtered = initialMembers.filter((member) =>
+    if (!trimmed) return initialMembers;
+    return initialMembers.filter((member) =>
       member.name.toLowerCase().includes(trimmed)
     );
-    setFilteredMembers(filtered);
   }, [activeSearchName, initialMembers]);
 
   const handleSearch = (nameKeyword: string) => {
