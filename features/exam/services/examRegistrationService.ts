@@ -68,19 +68,14 @@ export const examRegistrationService = {
     }
   },
 
-  /**
-   * 시험 신청 취소
-   */
   cancelRegistration(id: string): void {
     if (typeof window === "undefined") return;
     try {
       const current = this.getRegistrations();
-      const updated = current.map((reg) => 
-        reg.id === id ? { ...reg, status: "cancelled" as const } : reg
-      );
+      const updated = current.filter((reg) => reg.id !== id);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (error) {
-      console.error("Failed to cancel registration", error);
+      console.error("Failed to cancel/remove registration", error);
     }
   }
 };

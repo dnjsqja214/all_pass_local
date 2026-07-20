@@ -32,28 +32,6 @@ export function ExamSearchForm({
       onSubmit={handleSubmit}
       className="bg-white rounded-2xl p-5 border border-[#E4E0D9] shadow-sm flex flex-col md:flex-row md:items-end gap-4"
     >
-      {/* 1. 유형 선택 */}
-      <div className="flex-1 min-w-[140px] space-y-2">
-        <label
-          htmlFor="search-type"
-          className="block text-[13px] font-bold text-[#111111] tracking-wide"
-        >
-          유형
-        </label>
-        <div className="relative">
-          <select
-            id="search-type"
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-            className="w-full bg-[#F6F4F0] border border-[#E4E0D9] rounded-xl pl-4 pr-10 py-3 text-[14px] text-[#111111] font-semibold focus:outline-none focus:border-[#C93A35] transition-all appearance-none cursor-pointer hover:bg-[#EAE8E2]"
-          >
-            <option value="all">전체</option>
-            <option value="pre">기출문제</option>
-            <option value="mock">모의고사</option>
-          </select>
-          <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#817D76] pointer-events-none" />
-        </div>
-      </div>
 
       {/* 2. 과목 선택 */}
       <div className="flex-1 md:flex-[1.5] min-w-[200px] space-y-2">

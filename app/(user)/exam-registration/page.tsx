@@ -16,9 +16,20 @@ export default function ExamRegistrationPage() {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [selectedExamTitle, setSelectedExamTitle] = useState<string | null>(null);
 
-  // 신청 목록 마운트 시 가져오기
+  // 신청 목록 마운트 시 가져오기 및 openForm 쿼리 파라미터 체크
   useEffect(() => {
     setRegistrations(examRegistrationService.getRegistrations());
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("openForm") === "true") {
+        handleOpenForm();
+
+        // URL 클린업 (옵션: 새로고침 시 계속 열려있는 것 방지)
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, "", newUrl);
+      }
+    }
   }, []);
 
   const handleOpenForm = () => {
@@ -41,9 +52,48 @@ export default function ExamRegistrationPage() {
     }
   };
 
+  const getTodayString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (dateStr: string) => {
+    const todayStr = getTodayString();
+    if (dateStr < todayStr) {
+      alert("오늘 이전의 날짜는 선택할 수 없습니다.");
+      setTargetDate("");
+      return;
+    }
+
+    const isDuplicate = registrations.some((reg) => reg.registrationDate === dateStr);
+    if (isDuplicate) {
+      alert("이미 해당 날짜에 신청된 시험이 있습니다. 다른 날짜를 선택해주세요.");
+      setTargetDate("");
+    } else {
+      setTargetDate(dateStr);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedExamId || !targetDate) return;
+
+    const todayStr = getTodayString();
+    if (targetDate < todayStr) {
+      alert("오늘 이전의 날짜는 선택할 수 없습니다.");
+      setTargetDate("");
+      return;
+    }
+
+    const isDuplicate = registrations.some((reg) => reg.registrationDate === targetDate);
+    if (isDuplicate) {
+      alert("이미 해당 날짜에 신청된 시험이 있습니다. 다른 날짜를 선택해주세요.");
+      setTargetDate("");
+      return;
+    }
 
     try {
       await examRegistrationService.registerExam(selectedExamId, targetDate);
@@ -61,30 +111,6 @@ export default function ExamRegistrationPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "cancelled":
-        return (
-          <span className="text-[11px] font-extrabold text-[#D93D35] bg-[#D93D35]/5 border border-[#D93D35]/15 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            신청 취소
-          </span>
-        );
-      case "completed":
-        return (
-          <span className="text-[11px] font-extrabold text-[#3F7D4E] bg-[#3F7D4E]/5 border border-[#3F7D4E]/15 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            응시 완료
-          </span>
-        );
-      case "applied":
-      default:
-        return (
-          <span className="text-[11px] font-extrabold text-[#C93A35] bg-[#C93A35]/5 border border-[#C93A35]/15 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-            신청 완료
-          </span>
-        );
-    }
-  };
-
   return (
     <div className="flex-grow flex flex-col h-full min-h-0 overflow-hidden px-4 pt-6 md:px-8 xl:p-8 space-y-5">
       {/* 상단 타이틀 영역 (데스크톱용은 레이아웃 헤더가 감싸고 있지만 모바일 상단 대응도 함께 구성) */}
@@ -92,9 +118,6 @@ export default function ExamRegistrationPage() {
         <h1 className="text-[28px] font-black text-[#111111] tracking-tight">
           시험 신청 목록
         </h1>
-        <p className="text-[14px] text-[#817D76] font-medium">
-          목표 시험과 응시일을 설정해 나만의 학습 일정을 추가해 보세요.
-        </p>
       </div>
 
       {/* 목록 헤더 & 버튼 */}
@@ -131,7 +154,6 @@ export default function ExamRegistrationPage() {
                     <span className="text-[10px] font-extrabold text-[#C93A35] bg-[#C93A35]/5 border border-[#C93A35]/15 px-2 py-0.5 rounded uppercase tracking-wider">
                       {reg.round}회 기출
                     </span>
-                    {getStatusBadge(reg.status)}
                   </div>
                   <h3 className="text-[16.5px] font-black text-[#111111] tracking-tight truncate">
                     {reg.examTitle}
@@ -148,15 +170,13 @@ export default function ExamRegistrationPage() {
 
                 {/* 우측 제어 단추 */}
                 <div className="flex items-center justify-end shrink-0 border-t border-[#F6F4F0] pt-3 md:border-t-0 md:pt-0">
-                  {reg.status === "applied" && (
-                    <button
-                      onClick={() => handleCancelRegistration(reg.id)}
-                      className="px-4 py-2 bg-white hover:bg-[#FDF1F0] active:bg-[#FCDAD7] text-[#D93D35] border border-[#D93D35]/25 hover:border-[#D93D35]/40 font-bold text-[12px] rounded-xl transition-all cursor-pointer min-h-[38px] flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>신청 취소</span>
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleCancelRegistration(reg.id)}
+                    className="px-4 py-2 bg-white hover:bg-[#FDF1F0] active:bg-[#FCDAD7] text-[#D93D35] border border-[#D93D35]/25 hover:border-[#D93D35]/40 font-bold text-[12px] rounded-xl transition-all cursor-pointer min-h-[38px] flex items-center gap-1"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>신청 취소</span>
+                  </button>
                 </div>
               </div>
             ))}
@@ -215,8 +235,9 @@ export default function ExamRegistrationPage() {
                 <input
                   type="date"
                   required
+                  min={getTodayString()}
                   value={targetDate}
-                  onChange={(e) => setTargetDate(e.target.value)}
+                  onChange={(e) => handleDateChange(e.target.value)}
                   className="w-full bg-white border border-[#E4E0D9] rounded-xl px-4 py-3 text-[14px] text-[#111111] font-semibold focus:outline-none focus:border-[#C93A35] transition-all cursor-pointer"
                 />
               </div>
@@ -265,11 +286,10 @@ export default function ExamRegistrationPage() {
               <button
                 type="submit"
                 disabled={!selectedExamId || !targetDate}
-                className={`w-full py-3 px-4 font-bold text-[13.5px] rounded-xl transition-colors cursor-pointer border-none outline-none ${
-                  selectedExamId && targetDate
+                className={`w-full py-3 px-4 font-bold text-[13.5px] rounded-xl transition-colors cursor-pointer border-none outline-none ${selectedExamId && targetDate
                     ? "bg-[#C93A35] hover:bg-[#A82A25] text-white"
                     : "bg-[#E4E0D9] text-[#A8A7A5] cursor-not-allowed"
-                }`}
+                  }`}
               >
                 신청하기
               </button>

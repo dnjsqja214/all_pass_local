@@ -2,11 +2,8 @@
 
 import React, { useState } from "react";
 import { useExamData } from "../hooks/useExamData";
-import { ExamTimer } from "./ExamTimer";
 import { ExamNotice } from "./ExamNotice";
-import { ExamProgress } from "./ExamProgress";
 import { OMRGrid } from "./OMRGrid";
-import { SubmitFooter } from "./SubmitFooter";
 import { SubmitDialog } from "./SubmitDialog";
 import { X } from "lucide-react";
 
@@ -72,7 +69,7 @@ export function ExamSolvingModal({
 
   return (
     <div className="fixed inset-0 bg-[#F6F4F0] z-50 overflow-y-auto flex flex-col animate-in fade-in duration-200">
-      {/* 상단바 */}
+      {/* 상단바 (Sticky Header) */}
       <header className="flex justify-between items-center bg-white px-6 py-4 border-b border-[#E4E0D9] shrink-0 sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <span className="text-[11px] font-extrabold text-[#C93A35] bg-[#C93A35]/5 border border-[#C93A35]/15 px-2 py-0.5 rounded uppercase tracking-wider">
@@ -82,16 +79,58 @@ export function ExamSolvingModal({
             {examInfo.title}
           </h2>
         </div>
-        <button
-          onClick={handleCloseClick}
-          className="p-2 hover:bg-[#F6F4F0] rounded-full transition-colors cursor-pointer text-[#817D76] hover:text-[#111111] border-none outline-none bg-transparent"
-        >
-          <X className="w-6 h-6" />
-        </button>
+        
+        <div className="flex items-center gap-3">
+          {/* 제출 진행 상황 및 자동 저장 상태 */}
+          <div className="flex items-center gap-3 bg-[#F6F4F0] px-4 py-2 rounded-xl border border-[#E4E0D9] text-[13px]">
+            <span className="font-extrabold text-[#111111] border-r border-[#E4E0D9] pr-3 mr-1">
+              제출 {markedCount} / {examInfo.totalQuestions}
+            </span>
+            <div className="flex items-center gap-1.5 font-bold">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  saveStatus === "saved" ? "bg-[#3F7D4E]" : "bg-gray-400 animate-pulse"
+                }`}
+              />
+              <span className={saveStatus === "saved" ? "text-[#3F7D4E]" : "text-gray-500"}>
+                {saveStatus === "saved" ? "자동 저장됨" : "저장 중..."}
+              </span>
+            </div>
+          </div>
+
+          {/* 타이머 */}
+          <div className="flex items-center gap-2 bg-[#F6F4F0] px-4 py-2 rounded-xl border border-[#E4E0D9]">
+            <span className="text-[11px] font-bold text-[#817D76]">남은 시간</span>
+            <span
+              className={`text-[15px] font-black leading-none tracking-tighter ${
+                remainingSeconds <= 600 ? "text-[#D93D35]" : "text-[#111111]"
+              }`}
+            >
+              {Math.floor(remainingSeconds / 60).toString().padStart(2, "0")}:
+              {(remainingSeconds % 60).toString().padStart(2, "0")}
+            </span>
+          </div>
+
+          {/* 제출 버튼 */}
+          <button
+            onClick={handleSubmitClick}
+            disabled={isSubmitted}
+            className="py-2 px-4 bg-[#C93A35] hover:bg-[#B82F2A] active:bg-[#A72420] text-white font-extrabold text-[12.5px] rounded-xl transition-all cursor-pointer border-none outline-none shadow-xs disabled:bg-[#E4E0D9] disabled:text-[#817D76] disabled:cursor-not-allowed"
+          >
+            답안 제출
+          </button>
+
+          <button
+            onClick={handleCloseClick}
+            className="p-2 hover:bg-[#F6F4F0] rounded-full transition-colors cursor-pointer text-[#817D76] hover:text-[#111111] border-none outline-none bg-transparent"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
       </header>
 
       {/* 본문 콘텐츠 */}
-      <div className="flex-1 w-full max-w-[1440px] mx-auto px-4 pt-6 pb-36 md:px-8 xl:p-8 space-y-6">
+      <div className="flex-1 w-full max-w-[1440px] mx-auto px-4 pt-6 pb-20 md:px-8 xl:p-8 space-y-6">
         
         {/* 설명 및 타이틀 */}
         <div className="flex flex-col gap-1 mb-2">
@@ -105,13 +144,7 @@ export function ExamSolvingModal({
           
           {/* 좌측 영역 (데스크톱: 4열 / 모바일: 전체) */}
           <div className="xl:col-span-4 flex flex-col gap-5">
-            <ExamTimer title={examInfo.title} remainingSeconds={remainingSeconds} />
             <ExamNotice />
-            <ExamProgress
-              markedCount={markedCount}
-              totalQuestions={examInfo.totalQuestions}
-              saveStatus={saveStatus}
-            />
           </div>
 
           {/* 우측 영역 (데스크톱: 8열 / 모바일: 전체) */}
@@ -125,9 +158,6 @@ export function ExamSolvingModal({
 
         </div>
       </div>
-
-      {/* 고정 제출 푸터 */}
-      <SubmitFooter onSubmitClick={handleSubmitClick} />
 
       {/* 제출 확인 모달 다이얼로그 */}
       <SubmitDialog

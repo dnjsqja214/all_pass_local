@@ -26,12 +26,7 @@ export interface Submission {
 export function useExamData(examId?: string) {
   // OMR 답변 상태 (key: 문항번호 1~40, value: 선택한 답 1~5)
   const [answers, setAnswers] = useState<Record<number, number>>({
-    1: 1, 2: 2, 3: 3, 4: 4, 5: 5,
-    6: 1, 7: 2, 8: 3, 9: 4, 10: 5,
-    11: 1, 12: 2, 13: 3, 14: 4, 15: 5,
-    16: 1, 17: 2, 18: 3, 19: 4, 20: 5,
-    21: 1, 22: 2, 23: 3, 24: 4,
-    // 초기 24문항 마킹 상태 모킹
+
   });
 
   // 전달받은 examId로 시험 정보 매핑 (없으면 기본값)
