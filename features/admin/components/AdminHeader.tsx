@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./AdminHeader.module.css";
 import { CurrentUser } from "../../auth/types/auth";
 import { ModeSwitcher } from "../../auth/components/ModeSwitcher";
+import { ThemeToggle } from "../../theme/components/ThemeToggle/ThemeToggle";
 
 interface AdminHeaderProps {
   onMenuToggle: () => void;
@@ -58,6 +59,7 @@ export function AdminHeader({ onMenuToggle, user, onLogout }: AdminHeaderProps) 
           >
             로그아웃
           </button>
+          <ThemeToggle />
         </div>
       </div>
     </header>

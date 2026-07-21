@@ -9,14 +9,14 @@ import { X } from "lucide-react";
 import styles from "./ExamSolvingModal.module.css";
 
 interface ExamSolvingModalProps {
-  examId: string;
+  registrationId: string;
   isOpen: boolean;
   onClose: () => void;
   onSubmitted?: () => void;
 }
 
 export function ExamSolvingModal({
-  examId,
+  registrationId,
   isOpen,
   onClose,
   onSubmitted,
@@ -36,7 +36,7 @@ export function ExamSolvingModal({
     submitExam,
     showToast,
     toastMessage,
-  } = useExamData(isOpen ? examId : undefined);
+  } = useExamData(isOpen ? registrationId : undefined);
 
   // 제출 다이얼로그 모달 노출 상태
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -54,7 +54,9 @@ export function ExamSolvingModal({
     setIsDialogOpen(false);
     try {
       const result = await submitExam();
-      alert(`정답지가 정상적으로 제출되었습니다. 점수: ${result.score}점`);
+      alert(result.gradingStatus === "pending"
+        ? "정답지가 정상적으로 제출되었습니다. 정답 등록 후 채점됩니다."
+        : `정답지가 정상적으로 제출되었습니다. 점수: ${result.score}점`);
       onSubmitted?.();
       onClose();
     } catch {

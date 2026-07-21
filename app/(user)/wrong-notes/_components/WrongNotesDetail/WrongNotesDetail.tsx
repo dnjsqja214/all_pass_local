@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Compass, Bookmark, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Bookmark, Star } from "lucide-react";
 import { ExamListItem } from "../../../../../features/exam/types/exam";
 import { WrongNote } from "../../../../../features/dashboard/hooks/useDashboardData";
 import styles from "./WrongNotesDetail.module.css";
@@ -146,8 +146,6 @@ export function WrongNotesDetail({
   selectedExam,
   examNotes,
   onBack,
-  cardCauses,
-  onCauseChange,
 }: WrongNotesDetailProps) {
   const [activeNoteIndex, setActiveNoteIndex] = useState(0);
 
@@ -201,8 +199,6 @@ export function WrongNotesDetail({
     difficulty: 2
   };
 
-  const currentCause = cardCauses[activeNote.id] || "unknown";
-
   const handlePrev = () => {
     if (activeNoteIndex > 0) {
       setActiveNoteIndex(activeNoteIndex - 1);
@@ -215,16 +211,9 @@ export function WrongNotesDetail({
     }
   };
 
-  const diagnosticButtons: { id: "unknown" | "confused" | "mistake"; label: string }[] = [
-    { id: "unknown", label: "아예 모름" },
-    { id: "confused", label: "애매함" },
-    { id: "mistake", label: "실수함" }
-  ];
-
   // aiSummary 파싱
   const aiLines = activeNote.aiSummary.split("\n");
   const conceptSummary = aiLines[0] || "핵심 개념 정리";
-  const aiDiagnosis = aiLines[1] || "개념 복습 권장";
 
   return (
     <div className={styles.detailContainer}>
