@@ -31,7 +31,9 @@ export default function AdminLayout({
   }, [authStatus, hasAdminRole, router]);
 
   // 현재 활성화된 메뉴 식별
-  const activeMenu = pathname.startsWith("/admin/members") ? "members" : "today";
+  const activeMenu = pathname.startsWith("/admin/members")
+    ? "members"
+    : pathname.startsWith("/admin/exam-schedules") ? "exam-schedules" : "today";
 
   // 데스크톱일 경우 기본적으로 사이드바를 열어두고, 로컬 스토리지에서 접힘 상태를 불러옵니다.
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F4F0] flex flex-col w-full font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--color-page-background)] text-[var(--color-text-primary)] flex flex-col w-full font-sans overflow-x-hidden">
       {authStatus === "loading" || authStatus === "unauthenticated" ? (
         <div className="min-h-screen bg-[#F6F4F0] flex items-center justify-center font-bold text-[#817D76]">
           로그인 확인 중...

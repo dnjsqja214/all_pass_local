@@ -1,0 +1,59 @@
+.page { display: flex; flex-direction: column; gap: 20px; color: var(--color-text-primary); }
+.heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.heading h1 { margin: 0; font-size: 28px; font-weight: 900; }
+.heading h1, .form h2, .cardTitle h2, .modalHeader h2 { color: var(--color-text-primary); }
+.heading p { margin: 5px 0 0; color: var(--color-text-secondary); font-size: 13px; }
+.heading button, .form button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--color-primary); color: #fff; font-weight: 800; cursor: pointer; }
+.heading svg, .cardActions svg { width: 17px; height: 17px; }
+.error { padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent); border-radius: 12px; background: color-mix(in srgb, var(--color-danger) 8%, var(--color-card-background)); color: var(--color-danger); font-weight: 700; }
+.form { display: flex; flex-direction: column; gap: 18px; padding: 24px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); }
+.form h2 { margin: 0; font-size: 19px; }
+.form label, .form fieldset { display: flex; flex-direction: column; gap: 8px; min-width: 0; color: var(--color-text-primary); font-size: 13px; font-weight: 750; }
+.form fieldset { margin: 0; padding: 0; border: 0; }
+.form legend { margin-bottom: 8px; font-weight: 800; }
+.form input:not([type="checkbox"]) { width: 100%; min-height: 43px; padding: 0 12px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-page-background); color: var(--color-text-primary); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.pickerButton { justify-content: flex-start !important; border: 1px solid var(--color-border) !important; background: var(--color-page-background) !important; color: var(--color-text-primary) !important; }
+.fieldHint { color: var(--color-text-secondary); font-size: 12px; font-weight: 500; }
+.examChoices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; max-height: min(52vh, 520px); overflow: auto; }
+.weekdays { display: flex; flex-wrap: wrap; gap: 8px; }
+.check { flex-direction: row !important; align-items: center; padding: 9px 11px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-page-background); }
+.check input { accent-color: var(--color-primary); }
+.optionTabs, .selectedTabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.optionTabs button, .selectedTabs button, .modalTools button { min-height: 36px; padding: 0 12px; border: 1px solid var(--color-border); border-radius: 999px; background: var(--color-page-background); color: var(--color-text-primary); font-weight: 750; cursor: pointer; }
+.optionTabs button[data-selected="true"] { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 13%, var(--color-card-background)); color: var(--color-primary); }
+.selectedTabs button { display: inline-flex; align-items: center; gap: 5px; border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border)); color: var(--color-primary); }
+.selectedTabs svg { width: 14px; height: 14px; }
+.inlineInput { display: flex; align-items: center; gap: 8px; max-width: 360px; }
+.inlineInput button { flex: 0 0 auto; }
+.actions { display: flex; justify-content: flex-end; gap: 10px; }
+.actions .secondary { border: 1px solid var(--color-border); background: transparent; color: var(--color-text-primary); }
+.list { display: flex; flex-direction: column; gap: 12px; }
+.card { display: flex; align-items: center; gap: 16px; padding: 19px; border: 1px solid var(--color-border); border-radius: 16px; background: var(--color-card-background); }
+.card[data-editing="true"] { border-color: var(--color-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 12%, transparent); }
+.cardIcon { display: grid; width: 44px; height: 44px; flex: 0 0 auto; place-items: center; border-radius: 13px; background: color-mix(in srgb, var(--color-primary) 12%, transparent); color: var(--color-primary); }
+.cardIcon svg { width: 21px; }
+.cardBody { min-width: 0; flex: 1; }
+.cardTitle { display: flex; align-items: center; gap: 9px; }
+.cardTitle h2 { margin: 0; font-size: 16px; }
+.cardTitle span { padding: 3px 7px; border-radius: 999px; background: var(--color-border); color: var(--color-text-secondary); font-size: 10px; font-weight: 800; }
+.cardTitle span[data-active="true"] { background: color-mix(in srgb, var(--color-success) 13%, transparent); color: var(--color-success); }
+.card p { margin: 5px 0 0; color: var(--color-text-secondary); font-size: 12px; }
+.cardActions { display: flex; align-items: center; gap: 8px; }
+.cardActions button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border: 1px solid var(--color-border); border-radius: 10px; background: transparent; font-weight: 800; cursor: pointer; }
+.edit { color: var(--color-text-primary); }
+.deactivate { color: var(--color-danger); }
+.activate { color: var(--color-success); }
+.empty { padding: 44px; border: 1px dashed var(--color-border); border-radius: 16px; color: var(--color-text-secondary); text-align: center; }
+.modalBackdrop { position: fixed; z-index: 1000; inset: 0; display: grid; padding: 24px; place-items: center; background: rgb(0 0 0 / 55%); }
+.modal { display: flex; width: min(760px, 100%); max-height: min(760px, calc(100vh - 48px)); flex-direction: column; gap: 16px; padding: 22px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); box-shadow: 0 24px 70px rgb(0 0 0 / 28%); }
+.modalHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.modalHeader h2, .modalHeader p { margin: 0; }
+.modalHeader p { margin-top: 4px; color: var(--color-text-secondary); font-size: 12px; }
+.iconButton { display: grid; width: 38px; height: 38px; padding: 0; place-items: center; border: 1px solid var(--color-border); border-radius: 10px; background: transparent; color: var(--color-text-primary); cursor: pointer; }
+.iconButton svg { width: 18px; height: 18px; }
+.modalTools { display: flex; gap: 8px; }
+.modalActions { display: flex; justify-content: flex-end; }
+.modalActions button { display: inline-flex; align-items: center; gap: 6px; min-height: 42px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--color-primary); color: #fff; font-weight: 800; cursor: pointer; }
+.modalActions svg { width: 17px; height: 17px; }
+@media (max-width: 767px) { .heading { align-items: flex-start; flex-direction: column; } .heading button { width: 100%; } .grid, .examChoices { grid-template-columns: 1fr; } .inlineInput { max-width: none; } .card { align-items: flex-start; flex-wrap: wrap; } .cardActions { width: 100%; margin-left: 60px; } .modalBackdrop { padding: 12px; } .modal { max-height: calc(100vh - 24px); padding: 16px; } }

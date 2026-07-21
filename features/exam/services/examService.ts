@@ -7,6 +7,7 @@ import {
   StartedExamSession,
   SubmittedExamSession,
 } from "../types/exam";
+import { getCsrfToken } from "../../shared/api/csrf";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -16,18 +17,11 @@ interface ApiResponse<T> {
   data: T;
 }
 
-interface CsrfToken {
-  headerName: string;
-  token: string;
-}
-
 export interface ExamSearchParams {
   type: string;
   subject: string;
   round: string;
 }
-
-let csrfTokenPromise: Promise<CsrfToken> | null = null;
 
 function buildApiUrl(path: string): string {
   return `${API_BASE_URL}${path}`;
@@ -94,12 +88,13 @@ function isSubmittedSession(value: unknown): value is SubmittedExamSession {
   return isRecord(value) &&
     typeof value.sessionId === "string" &&
     typeof value.examId === "string" &&
-    typeof value.score === "number" &&
-    typeof value.correctCount === "number" &&
-    typeof value.wrongCount === "number" &&
+    (value.score === null || typeof value.score === "number") &&
+    (value.correctCount === null || typeof value.correctCount === "number") &&
+    (value.wrongCount === null || typeof value.wrongCount === "number") &&
     typeof value.totalQuestions === "number" &&
     typeof value.submittedAt === "string" &&
-    value.status === "completed";
+    value.status === "completed" &&
+    (value.gradingStatus === "graded" || value.gradingStatus === "pending");
 }
 
 async function parseBody(response: Response): Promise<unknown> {
@@ -133,28 +128,6 @@ async function request<T>(
   return (body as unknown as ApiResponse<T>).data;
 }
 
-async function getCsrfToken(signal?: AbortSignal): Promise<CsrfToken> {
-  if (!csrfTokenPromise) {
-    csrfTokenPromise = fetch(buildApiUrl("/auth/csrf"), {
-      method: "GET",
-      credentials: "include",
-      cache: "no-store",
-      signal,
-    }).then(async (response) => {
-      const body = await parseBody(response);
-      if (!response.ok) throw new Error(errorMessage(body, response.status));
-      if (!isRecord(body) || typeof body.headerName !== "string" || typeof body.token !== "string") {
-        throw new Error("CSRF 토큰 응답 형식이 올바르지 않습니다.");
-      }
-      return { headerName: body.headerName, token: body.token };
-    }).catch((reason: unknown) => {
-      csrfTokenPromise = null;
-      throw reason;
-    });
-  }
-  return csrfTokenPromise;
-}
-
 async function mutation<T>(
   path: string,
   method: "POST" | "PUT",
@@ -185,12 +158,12 @@ export const examService = {
       (value): value is ExamListItem[] => Array.isArray(value) && value.every(isExamListItem), { signal });
   },
 
-  getExam(examId: string, signal?: AbortSignal): Promise<ExamDetail> {
-    return request(`/api/v1/exams/${encodeURIComponent(examId)}`, isExamDetail, { signal });
+  getRegisteredExam(registrationId: string, signal?: AbortSignal): Promise<ExamDetail> {
+    return request(`/api/v1/exam-registrations/${encodeURIComponent(registrationId)}/exam`, isExamDetail, { signal });
   },
 
-  startSession(examId: string, signal?: AbortSignal): Promise<StartedExamSession> {
-    return mutation(`/api/v1/exams/${encodeURIComponent(examId)}/session`, "POST", undefined,
+  startSession(registrationId: string, signal?: AbortSignal): Promise<StartedExamSession> {
+    return mutation(`/api/v1/exam-registrations/${encodeURIComponent(registrationId)}/session`, "POST", undefined,
       isStartedSession, signal);
   },
 

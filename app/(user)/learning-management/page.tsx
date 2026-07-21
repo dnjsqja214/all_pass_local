@@ -71,10 +71,10 @@ export default function LearningManagement() {
     <div className="flex-1 px-4 pt-6 pb-20 md:px-8 xl:p-8 space-y-6">
       {/* 학습관리 타이틀 (데스크톱용) */}
       <div className="hidden xl:flex flex-col gap-1 mb-2">
-        <h1 className="text-[28px] font-black text-[#111111] tracking-tight">
+        <h1 className="text-[28px] font-black text-[var(--color-text-primary)] tracking-tight">
           학습관리 대시보드
         </h1>
-        <p className="text-[14px] text-[#817D76] font-medium">
+        <p className="text-[14px] text-[var(--color-text-secondary)] font-medium">
           회차별 시험 성적 추이와 합격 기준 부합 여부를 한눈에 진단합니다.
         </p>
       </div>

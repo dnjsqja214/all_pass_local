@@ -47,10 +47,11 @@ export interface SavedExamSession {
 export interface SubmittedExamSession {
   sessionId: string;
   examId: string;
-  score: number;
-  correctCount: number;
-  wrongCount: number;
+  score: number | null;
+  correctCount: number | null;
+  wrongCount: number | null;
   totalQuestions: number;
   submittedAt: string;
   status: "completed";
+  gradingStatus: "graded" | "pending";
 }

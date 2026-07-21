@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
+  CalendarClock,
   AlertTriangle,
   BarChart3,
   PanelLeftClose,
@@ -32,6 +33,7 @@ export function AdminSidebar({
   const menuItems = [
     { id: "today", label: "오늘 현황" },
     { id: "members", label: "회원 관리" },
+    { id: "exam-schedules", label: "시험 관리" },
     { id: "attendance", label: "출석 관리" },
     { id: "incorrect", label: "오답·위험군" },
     { id: "report", label: "리포트" },
@@ -47,6 +49,8 @@ export function AdminSidebar({
         return <Users className={iconClass} />;
       case "attendance":
         return <Calendar className={iconClass} />;
+      case "exam-schedules":
+        return <CalendarClock className={iconClass} />;
       case "incorrect":
         return <AlertTriangle className={iconClass} />;
       case "report":
@@ -120,7 +124,9 @@ export function AdminSidebar({
           <nav className={styles.nav}>
             {menuItems.map((item) => {
               const isActive = activeMenu === item.id;
-              const path = item.id === "members" ? "/admin/members" : item.id === "today" ? "/admin" : "#";
+              const path = item.id === "members"
+                ? "/admin/members"
+                : item.id === "exam-schedules" ? "/admin/exam-schedules" : item.id === "today" ? "/admin" : "#";
               return (
                 <Link
                   key={item.id}

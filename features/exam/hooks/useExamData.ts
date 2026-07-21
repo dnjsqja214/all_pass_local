@@ -23,7 +23,7 @@ function toAnswerMarks(answers: Record<number, number>): AnswerMark[] {
     .sort((left, right) => left.questionNumber - right.questionNumber);
 }
 
-export function useExamData(examId?: string) {
+export function useExamData(registrationId?: string) {
   const [examInfo, setExamInfo] = useState<Exam | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -31,8 +31,8 @@ export function useExamData(examId?: string) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(examId !== undefined);
-  const [error, setError] = useState<string | null>(examId ? null : "시험을 먼저 선택해 주세요.");
+  const [isLoading, setIsLoading] = useState(registrationId !== undefined);
+  const [error, setError] = useState<string | null>(registrationId ? null : "신청한 시험을 먼저 선택해 주세요.");
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [submissionResult, setSubmissionResult] = useState<SubmittedExamSession | null>(null);
@@ -57,7 +57,7 @@ export function useExamData(examId?: string) {
 
   useEffect(() => {
     mountedRef.current = true;
-    if (!examId) {
+    if (!registrationId) {
       return () => {
         mountedRef.current = false;
       };
@@ -75,8 +75,8 @@ export function useExamData(examId?: string) {
         setSessionId(null);
         setAnswers({});
         answersRef.current = {};
-        const detail = await examService.getExam(examId, controller.signal);
-        const started = await examService.startSession(examId, controller.signal);
+        const started = await examService.startSession(registrationId, controller.signal);
+        const detail = await examService.getRegisteredExam(registrationId, controller.signal);
         if (controller.signal.aborted) return;
 
         const restoredAnswers = Object.fromEntries(detail.savedAnswers.map((answer) => [
@@ -111,7 +111,7 @@ export function useExamData(examId?: string) {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
-  }, [examId]);
+  }, [registrationId]);
 
   useEffect(() => {
     if (!sessionId || isSubmitted) return;
