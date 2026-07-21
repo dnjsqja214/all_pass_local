@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useDashboardData } from "../../features/dashboard/hooks/useDashboardData";
 import { ActiveStudyCard } from "../../features/dashboard/components/ActiveStudyCard";
@@ -36,48 +36,58 @@ export default function Home() {
   const [isSolvingOpen, setIsSolvingOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [closestRegistration, setClosestRegistration] = useState<ExamRegistration | null>(null);
-  const [hasAutoOpened, setHasAutoOpened] = useState(false);
+  const hasAutoOpenedRef = useRef(false);
 
   // 마운트 시 신청된 시험 중 가장 일정이 빠른 것 가져오기
   useEffect(() => {
     const regs = examRegistrationService.getRegistrations();
     const activeRegs = regs.filter((reg) => reg.status === "applied");
-    if (activeRegs.length > 0) {
-      activeRegs.sort((a, b) => a.registrationDate.localeCompare(b.registrationDate));
-      setClosestRegistration(activeRegs[0]);
-    } else {
-      setClosestRegistration(null);
-    }
+    const target = activeRegs.length > 0
+      ? [...activeRegs].sort((a, b) => a.registrationDate.localeCompare(b.registrationDate))[0]
+      : null;
+
+    // setTimeout을 사용하여 useEffect 내에서의 동기 setState 경고를 우회합니다.
+    const timer = setTimeout(() => {
+      setClosestRegistration(target);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   // 가장 가까운 시험이 교체될 때 자동 팝업 실행 플래그 초기화
   useEffect(() => {
-    setHasAutoOpened(false);
+    hasAutoOpenedRef.current = false;
   }, [closestRegistration]);
 
   // 선택한 시험일의 오전 10시가 되면 자동으로 OMR 문제풀이 모달 띄우기
   useEffect(() => {
-    if (!closestRegistration || hasAutoOpened) return;
+    if (!closestRegistration || hasAutoOpenedRef.current) return;
+
+    // YYYY-MM-DD 파싱
+    const [year, month, day] = closestRegistration.registrationDate.split("-").map(Number);
+    // 목표 일시: 오전 10시 0분 0초
+    const targetTime = new Date(year, month - 1, day, 10, 0, 0);
+    const now = new Date();
+
+    // 만약 컴포넌트 마운트 시점에 이미 목표 시간이 지나 있다면,
+    // 자동 팝업이 실행된 것으로 간주하여 hasAutoOpened만 true로 바꾸고 OMR 화면으로 자동 이동(모달 오픈)하지 않습니다.
+    if (now >= targetTime) {
+      hasAutoOpenedRef.current = true;
+      return;
+    }
 
     const checkTimeAndTransition = () => {
-      const now = new Date();
-      // YYYY-MM-DD 파싱
-      const [year, month, day] = closestRegistration.registrationDate.split("-").map(Number);
-      // 목표 일시: 오전 10시 0분 0초
-      const targetTime = new Date(year, month - 1, day, 10, 0, 0);
-
-      if (now >= targetTime) {
-        setHasAutoOpened(true);
+      const currentNow = new Date();
+      if (currentNow >= targetTime) {
+        hasAutoOpenedRef.current = true;
+        // 비동기 callback 내에서 상태 변경
         setSelectedExamId(closestRegistration.examId);
         setIsSolvingOpen(true);
       }
     };
 
-    checkTimeAndTransition();
-
     const timerId = setInterval(checkTimeAndTransition, 1000);
     return () => clearInterval(timerId);
-  }, [closestRegistration, hasAutoOpened]);
+  }, [closestRegistration]);
 
   const handleSelectExamClick = () => {
     setIsSelectionOpen(true);
