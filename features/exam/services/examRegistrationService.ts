@@ -86,7 +86,7 @@ export const examRegistrationService = {
     const body = await parseBody(response);
     if (!response.ok) throw new Error(errorMessage(body, response.status));
     if (!isRecord(body) || body.success !== true ||
-        !Array.isArray(body.data) || !body.data.every(isExamRegistration)) {
+      !Array.isArray(body.data) || !body.data.every(isExamRegistration)) {
       throw new Error("시험 신청 API 응답 형식이 올바르지 않습니다.");
     }
     return body.data;

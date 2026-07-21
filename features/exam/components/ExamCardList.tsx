@@ -67,10 +67,10 @@ export function ExamCardList({ exams, scrollRef, onSelectExam }: ExamCardListPro
               <div className="text-left md:text-right min-w-[70px]">
                 {exam.status === "completed" && exam.score != null ? (
                   <div className={`text-[12px] font-bold ${exam.score >= 80
-                      ? "text-[#3F7D4E]"
-                      : exam.score >= 60
-                        ? "text-[#D48A00]"
-                        : "text-[#D93D35]"
+                    ? "text-[#3F7D4E]"
+                    : exam.score >= 60
+                      ? "text-[#D48A00]"
+                      : "text-[#D93D35]"
                     }`}>
                     최근 점수 <div className="text-[16px] font-black mt-0.5">{exam.score}점</div>
                   </div>
@@ -85,8 +85,8 @@ export function ExamCardList({ exams, scrollRef, onSelectExam }: ExamCardListPro
                 onClick={() => handleSelect(exam)}
                 disabled={exam.status === "scheduled"}
                 className={`px-5 py-2.5 rounded-xl text-[12px] font-extrabold tracking-wide transition-all min-h-[42px] cursor-pointer shrink-0 ${exam.status === "scheduled"
-                    ? "bg-[#F6F4F0] text-[#A8A7A5] border border-[#E4E0D9] cursor-not-allowed"
-                    : "bg-[#C93A35] hover:bg-[#A82A25] text-white"
+                  ? "bg-[#F6F4F0] text-[#A8A7A5] border border-[#E4E0D9] cursor-not-allowed"
+                  : "bg-[#C93A35] hover:bg-[#A82A25] text-white"
                   }`}
               >
                 시험 선택

@@ -1,0 +1,377 @@
+.filterContainer {
+  background-color: var(--color-card-background, #ffffff);
+  border: 1px solid var(--color-border, #e4e0d9);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .filterContainer {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+.filterGroup {
+  flex-grow: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .filterGroupSubject {
+    flex: 1.5;
+  }
+}
+
+.filterGroupRound {
+  flex-grow: 1;
+  min-width: 140px;
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary, #111111);
+  letter-spacing: 0.025em;
+}
+
+.selectWrapper {
+  position: relative;
+}
+
+.select {
+  width: 100%;
+  background-color: var(--color-main-background, #f6f4f0);
+  border: 1px solid var(--color-border, #e4e0d9);
+  border-radius: 12px;
+  padding: 12px 40px 12px 16px;
+  font-size: 14px;
+  color: var(--color-text-primary, #111111);
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s ease;
+  appearance: none;
+  cursor: pointer;
+}
+
+.select:focus {
+  border-color: var(--color-primary-red, #c93a35);
+}
+
+.select:hover {
+  background-color: #eae8e2;
+}
+
+.selectIcon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary, #817d76);
+  pointer-events: none;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+@media (min-width: 768px) {
+  .buttonContainer {
+    width: auto;
+    margin-top: 0;
+  }
+}
+
+.resetButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 20px;
+  border: 1px solid var(--color-border, #e4e0d9);
+  background-color: #ffffff;
+  color: var(--color-text-secondary, #817d76);
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.resetButton:hover {
+  background-color: var(--color-main-background, #f6f4f0);
+  color: var(--color-text-primary, #111111);
+}
+
+@media (min-width: 768px) {
+  .resetButton {
+    flex: none;
+  }
+}
+
+.searchButton {
+  flex: 2;
+  padding: 12px 28px;
+  background-color: var(--color-primary-red, #c93a35);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 14px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.searchButton:hover {
+  background-color: #a82a25;
+}
+
+.searchButton:active {
+  background-color: #971f1a;
+}
+
+@media (min-width: 768px) {
+  .searchButton {
+    flex: none;
+  }
+}
+
+.listContainer {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 4px;
+  padding-bottom: 64px;
+}
+
+.infoState {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border, #e4e0d9);
+  border-radius: 16px;
+  padding: 48px;
+  text-align: center;
+  color: var(--color-text-secondary, #817d76);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.errorState {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border, #e4e0d9);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.errorText {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-warning-red, #d93d35);
+}
+
+.retryButton {
+  border-radius: 12px;
+  background-color: var(--color-dark-background, #151515);
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.examList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.examCard {
+  background-color: #ffffff;
+  border: 1px solid var(--color-border, #e4e0d9);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.examCard:hover {
+  border-color: rgba(201, 58, 53, 0.25);
+}
+
+@media (min-width: 768px) {
+  .examCard {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.cardInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.badgeGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.roundBadge {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--color-primary-red, #c93a35);
+  background-color: rgba(201, 58, 53, 0.05);
+  border: 1px solid rgba(201, 58, 53, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.subjectName {
+  font-size: 12px;
+  color: var(--color-text-secondary, #817d76);
+  font-weight: 700;
+}
+
+.examTitle {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--color-text-primary, #111111);
+  letter-spacing: -0.025em;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metaGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 4px;
+  font-size: 12px;
+  color: var(--color-text-secondary, #817d76);
+  font-weight: 600;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metaValue {
+  color: var(--color-text-primary, #111111);
+  font-weight: 700;
+}
+
+.divider {
+  color: var(--color-border, #e4e0d9);
+}
+
+.cardControl {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-main-background, #f6f4f0);
+  padding-top: 12px;
+}
+
+@media (min-width: 768px) {
+  .cardControl {
+    justify-content: flex-end;
+    border-top: none;
+    padding-top: 0;
+  }
+}
+
+.scoreWrapper {
+  text-align: left;
+  min-width: 75px;
+}
+
+@media (min-width: 768px) {
+  .scoreWrapper {
+    text-align: right;
+  }
+}
+
+.scoreLabel {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.scorePass {
+  color: var(--color-success-green, #3f7d4e);
+}
+
+.scoreWarning {
+  color: #d48a00;
+}
+
+.scoreFail {
+  color: var(--color-warning-red, #d93d35);
+}
+
+.scoreValue {
+  font-size: 16px;
+  font-weight: 900;
+  margin-top: 2px;
+}
+
+.noScore {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary, #817d76);
+}
+
+.selectButton {
+  background-color: var(--color-primary-red, #c93a35);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.selectButton:hover {
+  background-color: #a82a25;
+}

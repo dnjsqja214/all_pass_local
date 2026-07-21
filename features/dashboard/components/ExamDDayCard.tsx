@@ -2,21 +2,58 @@ import React from "react";
 
 interface ExamDDayCardProps {
   examRound?: number;
-  dDay?: number;
-  weeksRemaining?: number;
-  examDate?: string;
-  registrationPeriod?: string;
-  announcementDate?: string;
+  examDate?: string; // ISO format (e.g. "2026-10-31")
+  registrationStart?: string; // ISO format (e.g. "2026-08-03")
+  registrationEnd?: string; // ISO format (e.g. "2026-08-07")
+  announcementDate?: string; // ISO format (e.g. "2026-12-02")
+}
+
+// 요일 포함 날짜 포맷팅 헬퍼 (YYYY-MM-DD -> YYYY-MM-DD (요일))
+function formatDateWithDayOfWeek(dateStr: string): string {
+  if (!dateStr) return "";
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  
+  // 타임존 방지를 위해 로컬 기준으로 파싱
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day, 0, 0, 0, 0);
+  
+  if (isNaN(date.getTime())) return dateStr;
+  
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  const dayOfWeek = days[date.getDay()];
+  
+  return `${y}-${m}-${d} (${dayOfWeek})`;
+}
+
+// 로컬 자정 기준 Date 객체 생성
+function parseLocalMidnight(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
 }
 
 export function ExamDDayCard({
   examRound = 37,
-  dDay = 117,
-  weeksRemaining = 17,
-  examDate = "2026-10-31 (토)",
-  registrationPeriod = "2026-08-03 (월) ~ 2026-08-07 (금)",
-  announcementDate = "2026-12-02 (수)",
+  examDate = "2026-10-31",
+  registrationStart = "2026-08-03",
+  registrationEnd = "2026-08-07",
+  announcementDate = "2026-12-02",
 }: ExamDDayCardProps) {
+  // 실시간 D-Day 및 남은 주차 계산
+  const targetDate = parseLocalMidnight(examDate);
+  const today = new Date();
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+  
+  const diffMs = targetDate.getTime() - todayMidnight.getTime();
+  const dDay = Math.round(diffMs / (1000 * 60 * 60 * 24));
+  const weeksRemaining = Math.max(0, Math.ceil(dDay / 7));
+
+  // 화면 출력용 포맷팅
+  const formattedExamDate = formatDateWithDayOfWeek(examDate);
+  const formattedRegPeriod = `${formatDateWithDayOfWeek(registrationStart)} ~ ${formatDateWithDayOfWeek(registrationEnd)}`;
+  const formattedAnnounceDate = formatDateWithDayOfWeek(announcementDate);
+
   return (
     <div className="bg-white rounded-2xl border border-[#E4E0D9] p-5 shadow-xs flex flex-col gap-4">
       {/* 상단 타이틀 & D-day 뱃지 영역 */}
@@ -32,7 +69,9 @@ export function ExamDDayCard({
 
         {/* D-Day 뱃지 */}
         <div className="bg-[#C93A35] text-white py-2 px-3.5 rounded-2xl flex flex-col items-center justify-center min-w-[90px] shrink-0 shadow-xs">
-          <span className="text-[20px] font-black leading-none">D-{dDay}</span>
+          <span className="text-[20px] font-black leading-none">
+            {dDay > 0 ? `D-${dDay}` : dDay === 0 ? "D-Day" : `D+${Math.abs(dDay)}`}
+          </span>
           <span className="text-[10px] font-bold opacity-90 mt-1">W-{weeksRemaining}주</span>
         </div>
       </div>
@@ -41,15 +80,15 @@ export function ExamDDayCard({
       <div className="border-t border-b border-[#F6F4F0] py-3.5 space-y-3">
         <div className="flex justify-between items-center text-[13px]">
           <span className="font-bold text-[#817D76]">시험 일정</span>
-          <span className="font-black text-[#111111]">{examDate}</span>
+          <span className="font-black text-[#111111]">{formattedExamDate}</span>
         </div>
         <div className="flex justify-between items-center text-[13px]">
           <span className="font-bold text-[#817D76]">접수 일자</span>
-          <span className="font-black text-[#111111]">{registrationPeriod}</span>
+          <span className="font-black text-[#111111]">{formattedRegPeriod}</span>
         </div>
         <div className="flex justify-between items-center text-[13px]">
           <span className="font-bold text-[#817D76]">합격자 발표</span>
-          <span className="font-black text-[#111111]">{announcementDate}</span>
+          <span className="font-black text-[#111111]">{formattedAnnounceDate}</span>
         </div>
       </div>
 

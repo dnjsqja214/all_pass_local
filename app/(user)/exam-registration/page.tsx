@@ -1,5 +1,6 @@
 "use client";
 
+
 import React, { useCallback, useEffect, useState } from "react";
 import { Plus, Trash2, Calendar, X } from "lucide-react";
 import { examRegistrationService, ExamRegistration } from "../../../features/exam/services/examRegistrationService";
@@ -338,8 +339,8 @@ export default function ExamRegistrationPage() {
                 type="submit"
                 disabled={!selectedExamId || !targetDate || isSubmitting}
                 className={`w-full py-3 px-4 font-bold text-[13.5px] rounded-xl transition-colors cursor-pointer border-none outline-none ${selectedExamId && targetDate
-                    ? "bg-[#C93A35] hover:bg-[#A82A25] text-white"
-                    : "bg-[#E4E0D9] text-[#A8A7A5] cursor-not-allowed"
+                  ? "bg-[#C93A35] hover:bg-[#A82A25] text-white"
+                  : "bg-[#E4E0D9] text-[#A8A7A5] cursor-not-allowed"
                   }`}
               >
                 {isSubmitting ? "신청 중" : "신청하기"}

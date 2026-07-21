@@ -70,58 +70,6 @@ export interface WrongNote {
 
 export function useDashboardData(initialTab: TabType = "today") {
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
-
-  // 실시간 스터디 세션 Mock 데이터
-  const activeSession: StudySessionInfo = {
-    title: "오전반 실시간 스터디",
-    timeRange: "10:00 - 11:00",
-    badgeText: "시작 10분 전",
-    linkText: "문제풀이",
-  };
-
-  // 오늘 할 일 Mock 데이터
-  const todoList: TodoItem[] = [
-    {
-      id: "todo-1",
-      title: "35회 부동산공법 풀이",
-      subtitle: "실시간 세션 • 40문항",
-      status: "wait",
-      statusText: "대기",
-    },
-    {
-      id: "todo-2",
-      title: "오답 복습 5문항",
-      subtitle: "지난 세션 취약 개념",
-      status: "delayed",
-      statusText: "밀림",
-    },
-  ];
-
-  // 이번 주 학습 통계 데이터
-  const weeklyStats: WeeklyStat[] = [
-    { value: "14.5h", label: "공부 시간" },
-    { value: "6", label: "푼 회차" },
-    { value: "68%", label: "평균 정답률" },
-  ];
-
-  // 최근 시험 Mock 데이터
-  const recentExams: RecentExam[] = [
-    { id: "exam-1", title: "34회 부동산학개론", score: 85, date: "07.10", isPassed: true },
-    { id: "exam-2", title: "34회 민법 및 민사특별법", score: 72, date: "07.08", isPassed: true },
-    { id: "exam-3", title: "35회 부동산공법 (연습)", score: 58, date: "07.05", isPassed: false },
-  ];
-
-  // 공부 시간 그래프 데이터 (단위: 시간)
-  const dailyStudyTime: DailyStudyTime[] = [
-    { day: "월", hours: 2.0 },
-    { day: "화", hours: 3.5 },
-    { day: "수", hours: 1.5 },
-    { day: "목", hours: 4.0 },
-    { day: "금", hours: 2.5 },
-    { day: "토", hours: 5.0 },
-    { day: "일", hours: 1.0 },
-  ];
-
   // 학습관리용 점수 추이 Mock 데이터
   const scoreTrend: ScoreTrend[] = [
     { round: "1회", score: 142 },
@@ -204,21 +152,76 @@ export function useDashboardData(initialTab: TabType = "today") {
       similarQuestionCount: 4,
       createdAt: "07/02",
     },
+    {
+      id: "wrong-4",
+      subject: "부동산세법",
+      chapter: "등록면허세",
+      topic: "등록면허세 세율 및 비과세",
+      frequency: 2,
+      cause: "confused",
+      aiSummary: "표준세율의 50% 가감범위 · 등록세 연동 항목\n세부 등록 목적별 세율 암기 필요",
+      similarQuestionCount: 2,
+      createdAt: "07/07",
+    },
+    {
+      id: "wrong-5",
+      subject: "부동산공법",
+      chapter: "도시개발법",
+      topic: "도시개발구역의 지정권자 및 해제",
+      frequency: 3,
+      cause: "unknown",
+      aiSummary: "국토교통부장관 지정 사유 · 개발구역 지정 해제 의제일\n암기 법조문 반복 학습 권장",
+      similarQuestionCount: 5,
+      createdAt: "07/08",
+    },
+    {
+      id: "wrong-6",
+      subject: "부동산공법",
+      chapter: "건축법",
+      topic: "건축허가 및 건축신고 대상",
+      frequency: 1,
+      cause: "mistake",
+      aiSummary: "신고 대상 건축물 면적 기준 · 건축허가 제한 기간\n유사 조문 간 헷갈리기 쉬운 함정 대비",
+      similarQuestionCount: 3,
+      createdAt: "07/09",
+    },
+    {
+      id: "wrong-7",
+      subject: "중개·물권",
+      chapter: "부동산 거래신고 등에 관한 법률",
+      topic: "부동산 거래신고 기한 및 위반 과태료",
+      frequency: 2,
+      cause: "mistake",
+      aiSummary: "체결일로부터 30일 이내 신고 · 해제 등 신고 의무\n신고 기한 및 주체 명확히 구분",
+      similarQuestionCount: 3,
+      createdAt: "07/10",
+    }
   ];
 
-  const examDDay = 117; // D-117
+  // 시험 D-Day 일정 Mock 데이터 (DB에서 조회해온 원시 날짜 포맷)
+  const examDDayInfo = {
+    examRound: 37,
+    examDate: "2026-10-31",
+    registrationStart: "2026-08-03",
+    registrationEnd: "2026-08-07",
+    announcementDate: "2026-12-02",
+  };
+
+  // 실시간 D-Day 계산 헬퍼 (timezone-safe)
+  const [year, month, day] = examDDayInfo.examDate.split("-").map(Number);
+  const targetDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+  const today = new Date();
+  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+  const diffMs = targetDate.getTime() - todayMidnight.getTime();
+  const examDDay = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
   return {
     activeTab,
     setActiveTab,
-    activeSession,
-    todoList,
-    weeklyStats,
-    recentExams,
-    dailyStudyTime,
     scoreTrend,
     examAttempts,
     wrongNotes,
     examDDay,
+    examDDayInfo,
   };
 }

@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { StudySessionInfo } from "../hooks/useDashboardData";
 import { ExamRegistration } from "../../exam/services/examRegistrationService";
 import styles from "./ActiveStudyCard.module.css";
 
 interface ActiveStudyCardProps {
   closestRegistration: ExamRegistration | null;
-  session: StudySessionInfo;
+  isParticipating: boolean;
+  onParticipateChange: (val: boolean) => void;
   onSolveClick?: () => void;
   onApplyExamClick?: () => void;
 }
 
 export function ActiveStudyCard({
   closestRegistration,
-  session,
+  isParticipating,
+  onParticipateChange,
   onSolveClick,
   onApplyExamClick,
 }: ActiveStudyCardProps) {
-  const [isParticipating, setIsParticipating] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
 
   // 참여 시작 시 시험 일정(오전 10시)까지의 남은 시간을 1초마다 업데이트하는 타이머
@@ -62,7 +62,7 @@ export function ActiveStudyCard({
 
   const handleButtonClick = () => {
     if (!isParticipating) {
-      setIsParticipating(true);
+      onParticipateChange(true);
     }
   };
 
@@ -71,10 +71,10 @@ export function ActiveStudyCard({
       <div className="flex justify-between items-start">
         <div className={styles.textGroup}>
           <span className={styles.title}>
-            {session.title}
+            오전반 실시간 스터디
           </span>
           <h2 className={styles.time}>
-            {session.timeRange}
+            10:00 - 11:00
           </h2>
         </div>
       </div>

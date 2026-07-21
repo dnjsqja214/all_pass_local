@@ -167,7 +167,7 @@ export default function UserLayout({
 
             {/* 콘텐츠 뷰포트 영역 */}
             <div className={`flex-1 ${pathname === "/exams" ? "xl:overflow-hidden" : "xl:overflow-y-auto"} overflow-y-auto xl:bg-[#F7F6F2]/30`}>
-              <div className={`w-full max-w-md md:max-w-2xl xl:max-w-[1440px] mx-auto min-h-screen bg-[#F7F6F2] xl:bg-transparent shadow-sm xl:shadow-none flex flex-col justify-between xl:justify-start relative overflow-hidden xl:overflow-visible transition-all duration-300 ${pathname === "/exams" ? "xl:h-full xl:min-h-0" : "xl:min-h-0"}`}>
+              <div className={`w-full max-w-md md:max-w-2xl lg:max-w-5xl xl:max-w-[1440px] mx-auto min-h-screen bg-[#F7F6F2] xl:bg-transparent shadow-sm xl:shadow-none flex flex-col justify-between xl:justify-start relative overflow-hidden xl:overflow-visible transition-all duration-300 ${pathname === "/exams" ? "xl:h-full xl:min-h-0" : "xl:min-h-0"}`}>
                 
                 {/* 상단 타이틀 & D-Day & 로그아웃 (모바일 / 태블릿용 헤더 공통화) */}
                 <div className="flex flex-wrap justify-between items-center gap-3 xl:hidden px-5 pt-6 pb-1">
