@@ -1,129 +1,188 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { mockExams } from "../data/mockExams";
+import { useEffect, useRef, useState } from "react";
+import { examService } from "../services/examService";
+import { AnswerMark, SubmittedExamSession } from "../types/exam";
 
 export interface Exam {
   id: string;
   title: string;
   totalQuestions: number;
-  duration: number; // in minutes
+  duration: number;
   startedAt: string;
-  remainingSeconds: number;
 }
 
-export interface Answer {
-  questionNumber: number;
-  selectedChoice: number;
-}
+export type SaveStatus = "saved" | "saving" | "error";
 
-export interface Submission {
-  examId: string;
-  answers: Answer[];
-  submittedAt: string;
+function toAnswerMarks(answers: Record<number, number>): AnswerMark[] {
+  return Object.entries(answers)
+    .map(([questionNumber, selectedChoice]) => ({
+      questionNumber: Number(questionNumber),
+      selectedChoice,
+    }))
+    .sort((left, right) => left.questionNumber - right.questionNumber);
 }
 
 export function useExamData(examId?: string) {
-  // OMR 답변 상태 (key: 문항번호 1~40, value: 선택한 답 1~5)
-  const [answers, setAnswers] = useState<Record<number, number>>({
+  const [examInfo, setExamInfo] = useState<Exam | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [remainingSeconds, setRemainingSeconds] = useState(0);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("saved");
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(examId !== undefined);
+  const [error, setError] = useState<string | null>(examId ? null : "시험을 먼저 선택해 주세요.");
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [submissionResult, setSubmissionResult] = useState<SubmittedExamSession | null>(null);
 
-  });
+  const answersRef = useRef<Record<number, number>>({});
+  const remainingSecondsRef = useRef(0);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveChainRef = useRef<Promise<void>>(Promise.resolve());
+  const saveVersionRef = useRef(0);
+  const mountedRef = useRef(true);
 
-  // 전달받은 examId로 시험 정보 매핑 (없으면 기본값)
-  const selectedExam = mockExams.find((e) => e.id === examId);
-
-  const examInfo: Exam = {
-    id: selectedExam?.id || "exam-live-1",
-    title: selectedExam?.title || "35회 · 부동산공법",
-    totalQuestions: selectedExam?.totalQuestions || 40,
-    duration: selectedExam?.durationMinutes || 40,
-    startedAt: new Date().toISOString(),
-    remainingSeconds: (selectedExam?.durationMinutes || 40) * 60, // 초 단위로 변환
+  const showErrorToast = (message: string) => {
+    if (!mountedRef.current) return;
+    setToastMessage(message);
+    setShowToast(true);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => {
+      if (mountedRef.current) setShowToast(false);
+    }, 3000);
   };
 
-  const [remainingSeconds, setRemainingSeconds] = useState<number>(examInfo.remainingSeconds);
-  const [saveStatus, setSaveStatus] = useState<"saved" | "saving">("saved");
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [showToast, setShowToast] = useState<boolean>(false);
-  const [toastMessage, setToastMessage] = useState<string>("");
-
-  // 디바운스용 타이머 참조
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // 1초 단위 타이머 카운트다운
   useEffect(() => {
-    if (isSubmitted || remainingSeconds <= 0) return;
-
-    const timer = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          // 시간 초과 시 자동 제출 등 처리 가능
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [remainingSeconds, isSubmitted]);
-
-  // 답변 선택 및 자동 저장 (500ms 디바운스)
-  const selectAnswer = (questionNumber: number, choice: number) => {
-    if (isSubmitted) return;
-
-    setAnswers((prev) => {
-      const nextAnswers = { ...prev };
-      // 만약 이미 선택된 답을 다시 클릭했다면 해제 가능
-      if (nextAnswers[questionNumber] === choice) {
-        delete nextAnswers[questionNumber];
-      } else {
-        nextAnswers[questionNumber] = choice;
-      }
-      return nextAnswers;
-    });
-
-    // 자동 저장 상태 변경
-    setSaveStatus("saving");
-
-    // 이전 디바운스 타이머 클리어
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
+    mountedRef.current = true;
+    if (!examId) {
+      return () => {
+        mountedRef.current = false;
+      };
     }
 
-    // 500ms 디바운스 적용 후 저장 완료 처리
-    debounceTimerRef.current = setTimeout(() => {
-      // 10% 확률로 저장 실패 에러 시뮬레이션 (Toast 테스트용)
-      const isSuccess = Math.random() > 0.05;
-      if (isSuccess) {
-        setSaveStatus("saved");
-      } else {
-        setSaveStatus("saved"); // 실패하더라도 UI 흐름 안정성을 위해 저장 완료 표시
-        setToastMessage("답안 자동 저장 도중 일시적 통신 지연이 발생했습니다.");
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
+    const controller = new AbortController();
+    const initialize = async () => {
+      try {
+        await Promise.resolve();
+        if (controller.signal.aborted) return;
+        setIsLoading(true);
+        setError(null);
+        setIsSubmitted(false);
+        setSubmissionResult(null);
+        setSessionId(null);
+        setAnswers({});
+        answersRef.current = {};
+        const detail = await examService.getExam(examId, controller.signal);
+        const started = await examService.startSession(examId, controller.signal);
+        if (controller.signal.aborted) return;
+
+        const restoredAnswers = Object.fromEntries(detail.savedAnswers.map((answer) => [
+          answer.questionNumber,
+          answer.selectedChoice,
+        ]));
+        answersRef.current = restoredAnswers;
+        remainingSecondsRef.current = started.remainingSeconds;
+        setAnswers(restoredAnswers);
+        setSessionId(started.sessionId);
+        setRemainingSeconds(started.remainingSeconds);
+        setExamInfo({
+          id: detail.id,
+          title: detail.title,
+          totalQuestions: detail.totalQuestions,
+          duration: detail.durationMinutes,
+          startedAt: started.startedAt,
+        });
+      } catch (reason: unknown) {
+        if (!controller.signal.aborted) {
+          setError(reason instanceof Error ? reason.message : "시험 정보를 불러올 수 없습니다.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
       }
-    }, 500);
-  };
-
-  // 최종 제출 처리
-  const submitExam = () => {
-    setIsSubmitted(true);
-    // 실제 전송 구조
-    const submission: Submission = {
-      examId: examInfo.id,
-      answers: Object.entries(answers).map(([qNum, choice]) => ({
-        questionNumber: parseInt(qNum),
-        selectedChoice: choice,
-      })),
-      submittedAt: new Date().toISOString(),
     };
-    console.log("Submitted OMR Answers:", submission);
+
+    void initialize();
+    return () => {
+      mountedRef.current = false;
+      controller.abort();
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, [examId]);
+
+  useEffect(() => {
+    if (!sessionId || isSubmitted) return;
+    const timer = setInterval(() => {
+      setRemainingSeconds((previous) => {
+        const next = Math.max(0, previous - 1);
+        remainingSecondsRef.current = next;
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [isSubmitted, sessionId]);
+
+  const queueSave = (nextAnswers: Record<number, number>) => {
+    if (!sessionId) return;
+    const version = ++saveVersionRef.current;
+    const answerMarks = toAnswerMarks(nextAnswers);
+    setSaveStatus("saving");
+    saveChainRef.current = saveChainRef.current
+      .catch(() => undefined)
+      .then(async () => {
+        await examService.tempSave(sessionId, answerMarks, remainingSecondsRef.current);
+        if (mountedRef.current && version === saveVersionRef.current) setSaveStatus("saved");
+      })
+      .catch((reason: unknown) => {
+        if (mountedRef.current && version === saveVersionRef.current) {
+          setSaveStatus("error");
+          showErrorToast(reason instanceof Error ? reason.message : "답안을 자동 저장하지 못했습니다.");
+        }
+      });
   };
 
-  // 문항 마킹 수 계산
+  const selectAnswer = (questionNumber: number, choice: number) => {
+    if (isSubmitted || !sessionId || remainingSecondsRef.current <= 0) return;
+    const nextAnswers = { ...answersRef.current };
+    if (nextAnswers[questionNumber] === choice) {
+      delete nextAnswers[questionNumber];
+    } else {
+      nextAnswers[questionNumber] = choice;
+    }
+    answersRef.current = nextAnswers;
+    setAnswers(nextAnswers);
+    setSaveStatus("saving");
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => queueSave(nextAnswers), 500);
+  };
+
+  const submitExam = async (): Promise<SubmittedExamSession> => {
+    if (!sessionId) throw new Error("시험 세션이 준비되지 않았습니다.");
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    setIsSubmitting(true);
+    try {
+      await saveChainRef.current.catch(() => undefined);
+      const result = await examService.submit(sessionId, toAnswerMarks(answersRef.current));
+      if (mountedRef.current) {
+        setSubmissionResult(result);
+        setIsSubmitted(true);
+        setSaveStatus("saved");
+      }
+      return result;
+    } catch (reason: unknown) {
+      const message = reason instanceof Error ? reason.message : "시험을 제출하지 못했습니다.";
+      showErrorToast(message);
+      throw reason;
+    } finally {
+      if (mountedRef.current) setIsSubmitting(false);
+    }
+  };
+
   const markedCount = Object.keys(answers).length;
-  const unansweredCount = examInfo.totalQuestions - markedCount;
+  const unansweredCount = Math.max(0, (examInfo?.totalQuestions ?? 0) - markedCount);
 
   return {
     examInfo,
@@ -131,10 +190,14 @@ export function useExamData(examId?: string) {
     remainingSeconds,
     saveStatus,
     isSubmitted,
+    isSubmitting,
+    isLoading,
+    error,
     markedCount,
     unansweredCount,
     selectAnswer,
     submitExam,
+    submissionResult,
     showToast,
     toastMessage,
   };

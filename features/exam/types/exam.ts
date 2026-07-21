@@ -9,7 +9,48 @@ export interface ExamListItem {
   totalQuestions: number;
   durationMinutes: number;
   status: ExamStatus;
-  completedAt?: string;
-  score?: number;
+  completedAt?: string | null;
+  score?: number | null;
   description?: string;
+}
+
+export interface AnswerMark {
+  questionNumber: number;
+  selectedChoice: number;
+}
+
+export interface ExamDetail {
+  id: string;
+  title: string;
+  totalQuestions: number;
+  durationMinutes: number;
+  description: string;
+  hasActiveSession: boolean;
+  activeSessionId: string | null;
+  savedAnswers: AnswerMark[];
+}
+
+export interface StartedExamSession {
+  sessionId: string;
+  examId: string;
+  startedAt: string;
+  durationSeconds: number;
+  remainingSeconds: number;
+}
+
+export interface SavedExamSession {
+  sessionId: string;
+  updatedAt: string;
+  markedCount: number;
+}
+
+export interface SubmittedExamSession {
+  sessionId: string;
+  examId: string;
+  score: number;
+  correctCount: number;
+  wrongCount: number;
+  totalQuestions: number;
+  submittedAt: string;
+  status: "completed";
 }

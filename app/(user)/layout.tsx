@@ -26,10 +26,11 @@ export default function UserLayout({
 
   // 로컬 스토리지에서 사이드바 접힘 선호도를 불러옵니다.
   useEffect(() => {
-    const saved = localStorage.getItem("allpass-user-sidebar-collapsed");
-    if (saved !== null) {
-      setIsUserSidebarCollapsed(saved === "true");
-    }
+    const timer = window.setTimeout(() => {
+      const saved = localStorage.getItem("allpass-user-sidebar-collapsed");
+      if (saved !== null) setIsUserSidebarCollapsed(saved === "true");
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleToggleCollapse = () => {
