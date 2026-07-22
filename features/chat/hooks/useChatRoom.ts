@@ -24,16 +24,22 @@ export function useChatRoom(roomId: string | null) {
   const socketRef = useRef<WebSocket | null>(null);
   const retryRef = useRef<number | null>(null);
 
+  // 방이 바뀌면 렌더 중에 상태를 초기화한다.
+  // 효과 안에서 초기화하면 이전 방의 메시지가 한 번 그려진 뒤 지워지고, 연쇄 렌더가 생긴다.
+  const [renderedRoomId, setRenderedRoomId] = useState(roomId);
+  if (roomId !== renderedRoomId) {
+    setRenderedRoomId(roomId);
+    setMessages([]);
+    setHasMore(true);
+    setError(null);
+    setConnection("connecting");
+  }
+
   useEffect(() => {
     if (!roomId) return;
 
     let disposed = false;
     const controller = new AbortController();
-
-    setMessages([]);
-    setHasMore(true);
-    setError(null);
-    setConnection("connecting");
 
     // 순서가 중요하다: 먼저 구독을 열고 그 다음 과거를 불러온다.
     // 반대로 하면 그 사이에 도착한 메시지가 누락된다.

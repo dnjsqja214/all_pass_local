@@ -35,19 +35,27 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build frontend image
-        run: |
-          docker build \
-            --build-arg NEXT_PUBLIC_API_URL="$NEXT_PUBLIC_API_URL" \
-            -t ghcr.io/${{ github.repository_owner }}/allpass-front:${{ github.sha }} \
-            -t ghcr.io/${{ github.repository_owner }}/allpass-front:latest \
-            -f Dockerfile \
-            .
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push frontend image
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/allpass-front:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/allpass-front:latest
+      # 빌드와 push 를 한 단계로 처리한다.
+      # `docker build` 후 별도 `docker push` 로 나누면 GHCR 에서 `unknown blob` 으로 실패했다.
+      # provenance/sbom 을 끄는 이유도 같다 — 부가 매니페스트 없이 이미지만 단순하게 올린다.
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          provenance: false
+          sbom: false
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/allpass-front:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/allpass-front:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # 빌드한 이미지의 SHA 태그를 매니페스트에 써넣고 커밋·push
       # → ArgoCD가 매니페스트 변경을 감지해 자동 배포

@@ -54,13 +54,10 @@ export function ChatPanel({ myUserId }: { myUserId: string | null }) {
     if (appended > 0 && !isLoadingMore) element.scrollTop = element.scrollHeight;
   }, [messages, isLoadingMore]);
 
-  // 방을 보고 있는 동안 온 메시지는 읽은 것으로 처리해 뱃지를 지운다.
-  useEffect(() => {
-    if (!roomId || messages.length === 0) return;
-    setRooms((prev) => prev.map((room) => (room.id === roomId ? { ...room, unreadCount: 0 } : room)));
-  }, [roomId, messages.length]);
-
   const activeRoom = useMemo(() => rooms.find((room) => room.id === roomId) ?? null, [rooms, roomId]);
+
+  // 보고 있는 방의 뱃지는 항상 0으로 그린다. 그 방의 메시지는 읽는 즉시 읽은 것이기 때문이다.
+  const unreadOf = (room: ChatRoom) => (room.id === roomId ? 0 : room.unreadCount);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -86,7 +83,7 @@ export function ChatPanel({ myUserId }: { myUserId: string | null }) {
             onClick={() => handleSelect(room.id)}
           >
             <strong>{room.name}</strong>
-            {room.unreadCount > 0 && <span data-unread>{room.unreadCount}</span>}
+            {unreadOf(room) > 0 && <span data-unread>{unreadOf(room)}</span>}
             <small>{room.lastMessage ? room.lastMessage.content : "대화가 없습니다"}</small>
           </button>
         ))}
