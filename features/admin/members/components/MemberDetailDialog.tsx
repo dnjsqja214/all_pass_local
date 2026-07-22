@@ -3,9 +3,9 @@ import { X } from "lucide-react";
 import { Member } from "../types/member";
 import { mockMemberLearningDetails } from "../data/mockMemberLearningDetails";
 import { MemberStatusBadge } from "./MemberStatusBadge";
-import { ScoreTrendChart } from "../../../learning/components/ScoreTrendChart";
-import { PassingRuleCard } from "../../../learning/components/PassingRuleCard";
-import { ExamHistoryList } from "../../../learning/components/ExamHistoryList";
+import { ScoreTrendChart } from "../../../user/learning/components/ScoreTrendChart";
+import { PassingRuleCard } from "../../../user/learning/components/PassingRuleCard";
+import { ExamHistoryList } from "../../../user/learning/components/ExamHistoryList";
 
 interface MemberDetailDialogProps {
   member: Member | null;

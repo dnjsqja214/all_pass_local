@@ -2,8 +2,8 @@
 
 import { FormEvent, Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { CalendarClock, Check, Pencil, Plus, Power, X } from "lucide-react";
-import { examService } from "../../../exam/services/examService";
-import { ExamListItem } from "../../../exam/types/exam";
+import { examService } from "../../../user/exam/services/examService";
+import { ExamListItem } from "../../../user/exam/types/exam";
 import { examScheduleService, ExamSchedulePolicy } from "../services/examScheduleService";
 import styles from "./ExamScheduleManagement.module.css";
 

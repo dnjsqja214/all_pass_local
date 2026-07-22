@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { AdminSidebar } from "../../features/admin/components/AdminSidebar";
-import { AdminHeader } from "../../features/admin/components/AdminHeader";
+import { Sidebar } from "../../features/layout/components/Sidebar";
+import { Header } from "../../features/layout/components/Header";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { authService } from "../../features/auth/services/authService";
 
@@ -73,7 +73,8 @@ export default function AdminLayout({
       ) : (
         <>
           {/* 1. 관리자 사이드바 (서랍 기능 활성화 및 접힘 접두사 연동) */}
-          <AdminSidebar
+          <Sidebar
+            isAdmin
             activeMenu={activeMenu}
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
@@ -88,7 +89,8 @@ export default function AdminLayout({
               isSidebarCollapsed ? "lg:pl-[72px]" : "lg:pl-60"
             }`}
           >
-            <AdminHeader
+            <Header
+              isAdmin
               onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
               user={user}
               onLogout={handleLogout}

@@ -53,8 +53,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 * Do not write long Tailwind utility class lists directly inside TSX.
 * Component structure and styling must be separated.
-* Each reusable component must have its own folder.
-* Place the component `.tsx` file and its CSS Module file in the same folder.
 * CSS files must use the `.module.css` extension.
 * Import the CSS Module into the component and apply styles through the imported `styles` object.
 * Do not create a single large CSS file containing styles for unrelated components.
@@ -68,15 +66,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ```text
 components/
-├─ ExamCard/
-│  ├─ ExamCard.tsx
-│  └─ ExamCard.module.css
-├─ Sidebar/
-│  ├─ Sidebar.tsx
-│  └─ Sidebar.module.css
-└─ CommonButton/
-   ├─ CommonButton.tsx
-   └─ CommonButton.module.css
+├─ ExamCard.tsx
+├─ ExamCard.module.css
+├─ Sidebar.tsx
+├─ Sidebar.module.css
+├─ CommonButton.tsx
+└─ CommonButton.module.css
 ```
 
 ### Required Component Example

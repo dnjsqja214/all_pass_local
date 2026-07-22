@@ -1,0 +1,111 @@
+@reference "../../../app/globals.css";
+
+.userHeader {
+  @apply hidden xl:flex justify-between items-center px-8 py-5 border-b border-[var(--color-border)] w-full;
+  background: var(--color-card-background);
+}
+
+.adminHeader {
+  @apply h-16 px-4 lg:px-8 flex justify-between items-center w-full shrink-0 border-b border-[var(--color-border)];
+  background: var(--color-card-background);
+}
+
+.leftSection {
+  @apply flex items-center gap-3;
+}
+
+.menuToggle {
+  @apply p-1.5 rounded-lg border border-[#E4E0D9] hover:bg-[#F6F4F0]/40 text-[#111111] cursor-pointer focus:outline-none transition-colors;
+}
+
+.menuIcon {
+  @apply w-5 h-5;
+}
+
+.titleArea {
+  @apply flex items-baseline gap-2;
+}
+
+.title {
+  @apply text-[17px] font-extrabold tracking-tight leading-none;
+  color: var(--color-text-primary);
+}
+
+.prototypeBadge {
+  @apply text-[10px] bg-[#F6F4F0] border border-[#E4E0D9] text-[#817D76] font-extrabold px-1.5 py-0.5 rounded;
+}
+
+.userTitleArea {
+  @apply flex items-center gap-3;
+}
+
+.userTitle {
+  @apply text-[20px] font-extrabold tracking-tight;
+  color: var(--color-text-primary);
+}
+
+.userSubtitle {
+  @apply text-[13px] font-semibold;
+  color: var(--color-text-secondary);
+}
+
+.rightSection {
+  @apply flex items-center gap-4;
+}
+
+.rightSectionWithBorder {
+  @apply flex items-center gap-4 border-l border-[var(--color-border)] pl-4;
+}
+
+.userArea {
+  @apply flex items-center gap-2.5;
+}
+
+.userAvatar {
+  @apply w-8 h-8 rounded-full bg-[#B83A38] flex items-center justify-center font-extrabold text-white text-[12px];
+}
+
+.userMeta {
+  @apply flex flex-col gap-0.5 min-w-0;
+}
+
+.userName {
+  @apply text-[13px] font-bold truncate leading-none;
+  color: var(--color-text-primary);
+}
+
+.userGoal {
+  @apply text-[10px];
+  color: var(--color-text-secondary);
+}
+
+.adminUserArea {
+  @apply flex items-center gap-2;
+}
+
+.adminUserAvatar {
+  @apply w-8 h-8 rounded-full bg-[#C93A35] flex items-center justify-center font-bold text-white text-[12px];
+}
+
+.adminUserName {
+  @apply text-[13px] font-bold hidden sm:inline-block;
+  color: var(--color-text-primary);
+}
+
+.ddayBadge {
+  @apply bg-[#B83A38] text-white text-[13px] font-bold px-4 py-2 rounded-full tracking-wide;
+}
+
+.logoutBtn {
+  @apply text-[12px] font-bold hover:text-[var(--color-text-primary)] transition-all cursor-pointer border px-3 py-1.5 rounded-lg bg-transparent;
+  color: var(--color-primary);
+  border-color: rgba(184, 58, 56, 0.25);
+}
+
+.logoutBtn:hover {
+  border-color: rgba(17, 17, 17, 0.2);
+}
+
+.adminLogoutBtn {
+  @apply text-[12px] font-bold text-[#C93A35] hover:text-[#111111] transition-all cursor-pointer border border-[#C93A35]/25 hover:border-[#111111]/20 px-3 py-1.5 rounded-lg bg-transparent ml-1;
+}

@@ -1,0 +1,25 @@
+@reference "../../../../app/globals.css";
+
+.tooltip {
+  @apply absolute z-30 bg-[#151515]/95 text-white py-2.5 px-3 rounded-lg text-[11px] font-semibold leading-relaxed tracking-tight shadow-md select-none pointer-events-none;
+  transform: translate(-50%, -100%);
+  margin-top: -8px;
+  min-width: 140px;
+}
+
+.date {
+  @apply text-[#817D76] font-bold border-b border-[#E4E0D9]/15 pb-1 mb-1;
+}
+
+.content {
+  @apply text-white flex flex-col gap-0.5;
+}
+
+.noRecord {
+  @apply text-[#817D76] font-bold italic;
+}
+
+.arrow {
+  @apply absolute left-1/2 bottom-0 w-2 h-2 bg-[#151515] border-r border-b border-[#151515];
+  transform: translate(-50%, 50%) rotate(45deg);
+}

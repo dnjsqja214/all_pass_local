@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { UserSidebar } from "../../features/dashboard/components/UserSidebar";
-import { MobileBottomNav } from "../../features/dashboard/components/MobileBottomNav";
+import { Sidebar } from "../../features/layout/components/Sidebar";
+import { Header } from "../../features/layout/components/Header";
+import { MobileBottomNav } from "../../features/user/dashboard/components/MobileBottomNav";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { authService } from "../../features/auth/services/authService";
 import { ModeSwitcher } from "../../features/auth/components/ModeSwitcher";
@@ -113,7 +114,7 @@ export default function UserLayout({
       ) : (
         <>
           {/* 1. 사이드바 네비게이션 (데스크톱 전용) */}
-          <UserSidebar
+          <Sidebar
             isCollapsed={isUserSidebarCollapsed}
             onToggleCollapse={handleToggleCollapse}
             onLogout={handleLogout}
@@ -123,49 +124,13 @@ export default function UserLayout({
           <div className="flex-1 flex flex-col min-h-screen xl:h-screen xl:max-h-screen xl:min-h-0 overflow-hidden">
 
             {/* 상단 Header (데스크톱 전용) */}
-            <header className="hidden xl:flex justify-between items-center bg-[var(--color-card-background)] px-8 py-5 border-b border-[var(--color-border)] w-full">
-              <div className="flex items-center gap-3">
-                <h2 className="text-[20px] font-extrabold text-[var(--color-text-primary)] tracking-tight">
-                  {headerInfo.desktopTitle}
-                </h2>
-                <span className="text-[13px] font-semibold text-[var(--color-text-secondary)]">
-                  {headerInfo.desktopSub}
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <ModeSwitcher activeMode="user" roles={user?.roles ?? []} />
-                <span className="bg-[#B83A38] text-white text-[13px] font-bold px-4 py-2 rounded-full tracking-wide">
-                  시험까지 D-{examDDay}
-                </span>
-
-                {/* 상단 헤더로 옮겨진 사용자 프로필 카드 + 로그아웃 버튼 */}
-                <div className="flex items-center gap-4 border-l border-[var(--color-border)] pl-4">
-                  {displayName ? (
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-[#B83A38] flex items-center justify-center font-extrabold text-white text-[12px]">
-                        {displayName[0]}
-                      </div>
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[13px] font-bold text-[var(--color-text-primary)] truncate leading-none">
-                          {displayName} 님
-                        </span>
-                        <span className="text-[10px] text-[var(--color-text-secondary)] truncate">
-                          합격 목표
-                        </span>
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <button
-                    onClick={handleLogout}
-                    className="text-[12px] font-bold text-[var(--color-primary)] hover:text-[var(--color-text-primary)] transition-all cursor-pointer border border-[var(--color-primary)]/25 hover:border-[var(--color-text-primary)]/20 px-3 py-1.5 rounded-lg bg-transparent"
-                  >
-                    로그아웃
-                  </button>
-                  <ThemeToggle />
-                </div>
-              </div>
-            </header>
+            <Header
+              title={headerInfo.desktopTitle}
+              subTitle={headerInfo.desktopSub}
+              examDDay={examDDay}
+              user={user}
+              onLogout={handleLogout}
+            />
 
             {/* 콘텐츠 뷰포트 영역 */}
             <div className={`flex-1 ${pathname === "/exams" || pathname.startsWith("/learning-management") ? "xl:overflow-hidden" : "xl:overflow-y-auto"} overflow-y-auto bg-[var(--color-content-background)]`}>
