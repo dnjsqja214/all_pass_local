@@ -45,6 +45,9 @@ export interface ScoreTrend {
 export interface SubjectScore {
   name: string;
   score: number;
+  date?: string;
+  roundTitle?: string;
+  attemptTitle?: string;
 }
 
 export interface ExamAttempt {
@@ -83,11 +86,11 @@ export function useDashboardData(initialTab: TabType = "today") {
       id: "attempt-1",
       roundTitle: "35회",
       attemptTitle: "1회",
-      date: "07/06",
+      date: "07/22",
       subjectScores: [
-        { name: "중개", score: 72.5 },
-        { name: "공법", score: 65 },
-        { name: "세법", score: 37.5 },
+        { name: "중개", score: 72.5, date: "2026-07-22", roundTitle: "35회", attemptTitle: "1회" },
+        { name: "공법", score: 65, date: "2026-07-20", roundTitle: "34회", attemptTitle: "2회" },
+        { name: "세법", score: 37.5, date: "2026-07-21", roundTitle: "35회", attemptTitle: "1회" },
       ],
       totalScore: 175,
     },
@@ -95,11 +98,11 @@ export function useDashboardData(initialTab: TabType = "today") {
       id: "attempt-2",
       roundTitle: "34회",
       attemptTitle: "2회",
-      date: "07/04",
+      date: "07/18",
       subjectScores: [
-        { name: "중개", score: 70 },
-        { name: "공법", score: 62.5 },
-        { name: "세법", score: 55 },
+        { name: "중개", score: 70, date: "2026-07-18", roundTitle: "34회", attemptTitle: "2회" },
+        { name: "공법", score: 62.5, date: "2026-07-15", roundTitle: "33회", attemptTitle: "3회" },
+        { name: "세법", score: 55, date: "2026-07-18", roundTitle: "34회", attemptTitle: "2회" },
       ],
       totalScore: 187.5,
     },
@@ -107,13 +110,34 @@ export function useDashboardData(initialTab: TabType = "today") {
       id: "attempt-3",
       roundTitle: "33회",
       attemptTitle: "3회",
-      date: "07/02",
+      date: "07/15",
       subjectScores: [
-        { name: "중개", score: 75 },
-        { name: "공법", score: 67.5 },
-        { name: "세법", score: 45 },
+        { name: "중개", score: 75, date: "2026-07-15", roundTitle: "33회", attemptTitle: "3회" },
+        { name: "공법", score: 67.5, date: "2026-07-13", roundTitle: "33회", attemptTitle: "3회" },
+        { name: "세법", score: 45, date: "2026-07-13", roundTitle: "33회", attemptTitle: "3회" },
       ],
       totalScore: 188,
+    },
+    {
+      id: "attempt-4",
+      roundTitle: "32회",
+      attemptTitle: "4회",
+      date: "07/10",
+      subjectScores: [
+        { name: "중개", score: 80, date: "2026-07-10", roundTitle: "32회", attemptTitle: "4회" },
+        { name: "공법", score: 58, date: "2026-07-07", roundTitle: "31회", attemptTitle: "5회" },
+      ],
+      totalScore: 138,
+    },
+    {
+      id: "attempt-5",
+      roundTitle: "31회",
+      attemptTitle: "5회",
+      date: "07/06",
+      subjectScores: [
+        { name: "중개", score: 68, date: "2026-07-06", roundTitle: "31회", attemptTitle: "5회" },
+      ],
+      totalScore: 68,
     },
   ];
 

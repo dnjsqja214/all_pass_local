@@ -81,9 +81,20 @@ export default function WrongNotes() {
   const [selectedSubject, setSelectedSubject] = useState<string>("all");
   const [selectedRound, setSelectedRound] = useState<string>("all");
 
-  // 검색 시점에 적용할 필터 상태 (검색하기 버튼 클릭 시 반영)
+  // 검색 시점에 적용할 필터 상태
   const [appliedSubject, setAppliedSubject] = useState<string>("all");
   const [appliedRound, setAppliedRound] = useState<string>("all");
+
+  // 셀렉트박스 선택 시 바로 검색이 반영되도록 처리
+  const handleSubjectSelect = (val: string) => {
+    setSelectedSubject(val);
+    setAppliedSubject(val);
+  };
+
+  const handleRoundSelect = (val: string) => {
+    setSelectedRound(val);
+    setAppliedRound(val);
+  };
 
   // 시험 목록 조회
   useEffect(() => {
@@ -181,9 +192,9 @@ export default function WrongNotes() {
           isLoading={isLoading}
           error={error}
           selectedSubject={selectedSubject}
-          setSelectedSubject={setSelectedSubject}
+          setSelectedSubject={handleSubjectSelect}
           selectedRound={selectedRound}
-          setSelectedRound={setSelectedRound}
+          setSelectedRound={handleRoundSelect}
           handleSearch={handleSearch}
           handleReset={handleReset}
           onSelectExam={(exam: ExamListItem) => {

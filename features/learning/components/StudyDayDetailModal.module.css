@@ -1,0 +1,102 @@
+@reference "../../../app/globals.css";
+
+.overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6;
+}
+
+.backdrop {
+  @apply absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity;
+}
+
+.modal {
+  @apply bg-white rounded-2xl border border-[#E4E0D9] p-6 max-w-md w-full relative shadow-lg flex flex-col gap-5 z-10;
+}
+
+.header {
+  @apply flex justify-between items-center border-b border-[#F6F4F0] pb-3;
+}
+
+.title {
+  @apply text-[17px] font-black text-[#111111] tracking-tight;
+}
+
+.closeBtn {
+  @apply p-1.5 hover:bg-[#F6F4F0] rounded-full transition-colors cursor-pointer text-[#817D76] hover:text-[#111111] border-none outline-none bg-transparent;
+}
+
+.body {
+  @apply flex flex-col gap-4 text-[#111111];
+}
+
+.section {
+  @apply flex flex-col gap-1.5;
+}
+
+.sectionTitle {
+  @apply text-[11px] font-black text-[#C93A35] tracking-wider uppercase;
+}
+
+.mainValue {
+  @apply text-[22px] font-black tracking-tight leading-none text-[#111111];
+}
+
+.subjectList {
+  @apply list-none p-0 m-0 flex flex-col gap-2;
+}
+
+.examList {
+  @apply list-none p-0 m-0 flex flex-col gap-2;
+}
+
+.subjectItem {
+  @apply flex flex-row justify-between items-center bg-[#F6F4F0]/65 py-2.5 px-4 rounded-xl border border-[#E4E0D9]/40 text-[12.5px] font-semibold;
+}
+
+.examItem {
+  @apply flex flex-col gap-1.5 bg-[#F6F4F0]/65 py-2.5 px-4 rounded-xl border border-[#E4E0D9]/40 text-[12.5px] font-semibold;
+}
+
+
+.subjectName {
+  @apply text-[#111111];
+}
+
+.subjectTime {
+  @apply text-[#817D76];
+}
+
+.examHeader {
+  @apply flex justify-between items-start gap-2;
+}
+
+.examTitleText {
+  @apply text-[#111111] font-bold text-[12.5px] leading-tight;
+}
+
+.examBadge {
+  @apply text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0;
+}
+
+.badgePassed {
+  @apply bg-[#E6F4EA] text-[#137333];
+}
+
+.badgeFailed {
+  @apply bg-[#FDF1F0] text-[#B83A38];
+}
+
+.examScore {
+  @apply text-[11.5px] text-[#817D76];
+}
+
+.empty {
+  @apply flex flex-col items-center justify-center py-8 text-center gap-3;
+}
+
+.emptyIcon {
+  @apply text-[32px] leading-none;
+}
+
+.emptyText {
+  @apply text-[13px] text-[#817D76] font-bold;
+}

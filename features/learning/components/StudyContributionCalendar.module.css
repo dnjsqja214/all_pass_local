@@ -1,0 +1,153 @@
+@reference "../../../app/globals.css";
+
+.container {
+  @apply w-full bg-white rounded-2xl border border-[#E4E0D9] p-5 shadow-xs flex flex-col gap-4 relative overflow-hidden shrink-0;
+  height: 300px;
+}
+
+.header {
+  @apply flex flex-col gap-1 border-b border-[#F6F4F0] pb-3;
+}
+
+.title {
+  @apply text-[17px] font-black text-[#111111] tracking-tight;
+}
+
+.subtitle {
+  @apply text-[12px] text-[#817D76];
+}
+
+.statsWrapper {
+  @apply w-full;
+}
+
+.calendarCard {
+  @apply w-full flex flex-col gap-4 bg-[#F6F4F0]/30 rounded-xl p-4 border border-[#E4E0D9]/30 relative;
+}
+
+.scrollWrapper {
+  @apply w-full overflow-x-auto overflow-y-visible;
+  scrollbar-width: thin;
+  scrollbar-color: #E4E0D9 transparent;
+}
+
+.scrollWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scrollWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollWrapper::-webkit-scrollbar-thumb {
+  background-color: #E4E0D9;
+  border-radius: 10px;
+}
+
+.gridContainer {
+  @apply flex flex-col gap-2 relative;
+  width: 840px;
+  padding-top: 20px;
+}
+
+.monthsRow {
+  @apply absolute top-0 left-0 right-0 h-[20px] w-full text-[10px] text-[#817D76] font-bold select-none;
+}
+
+.monthLabel {
+  @apply absolute -translate-x-1/2;
+}
+
+.gridBody {
+  @apply flex gap-2 items-start;
+}
+
+.weekdaysCol {
+  @apply flex flex-col justify-between h-[102px] text-[10px] text-[#817D76] font-bold w-[24px] shrink-0 select-none;
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+.weekdayLabel {
+  @apply h-[12px] leading-[12px];
+}
+
+.weeksGrid {
+  @apply flex gap-[3px];
+}
+
+.weekColumn {
+  @apply flex flex-col gap-[3px];
+}
+
+.cell {
+  @apply w-[12px] h-[12px] rounded-[2px] transition-all duration-150 cursor-pointer;
+}
+
+.cell:hover {
+  @apply scale-[1.1] filter brightness-95 shadow-[0_0_4px_rgba(0,0,0,0.1)];
+}
+
+.stage0 {
+  @apply bg-[#E4E0D9];
+}
+
+.stage1 {
+  @apply bg-[#D2E7D6];
+}
+
+.stage2 {
+  @apply bg-[#A3D1AD];
+}
+
+.stage3 {
+  @apply bg-[#6EB57F];
+}
+
+.stage4 {
+  @apply bg-[#3F7D4E];
+}
+
+.stageFuture {
+  @apply bg-[#F6F4F0] border border-dashed border-[#E4E0D9]/40 cursor-not-allowed;
+}
+
+.stageFuture:hover {
+  @apply scale-100 filter-none shadow-none;
+}
+
+.legendContainer {
+  @apply flex justify-end items-center gap-1 text-[10px] text-[#817D76] font-bold select-none mt-1;
+}
+
+.legendText {
+  @apply px-1;
+}
+
+.legendStage0 {
+  @apply w-[10px] h-[10px] rounded-[2px] bg-[#E4E0D9];
+}
+.legendStage1 {
+  @apply w-[10px] h-[10px] rounded-[2px] bg-[#D2E7D6];
+}
+.legendStage2 {
+  @apply w-[10px] h-[10px] rounded-[2px] bg-[#A3D1AD];
+}
+.legendStage3 {
+  @apply w-[10px] h-[10px] rounded-[2px] bg-[#6EB57F];
+}
+.legendStage4 {
+  @apply w-[10px] h-[10px] rounded-[2px] bg-[#3F7D4E];
+}
+
+.loadingContainer {
+  @apply w-full bg-white rounded-2xl border border-[#E4E0D9] p-10 flex flex-col items-center justify-center gap-3 min-h-[300px];
+}
+
+.spinner {
+  @apply w-8 h-8 border-3 border-[#E4E0D9] border-t-[#3F7D4E] rounded-full animate-spin;
+}
+
+.loadingText {
+  @apply text-[13px] text-[#817D76] font-bold;
+}

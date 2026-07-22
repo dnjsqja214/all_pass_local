@@ -100,7 +100,7 @@ export default function UserLayout({
   const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (
-    <div className="min-h-screen bg-[var(--color-page-background)] text-[var(--color-text-primary)] flex flex-col xl:flex-row w-full font-sans overflow-x-hidden">
+    <div className="min-h-screen xl:h-screen xl:max-h-screen xl:overflow-hidden bg-[var(--color-page-background)] text-[var(--color-text-primary)] flex flex-col xl:flex-row w-full font-sans overflow-x-hidden">
       {authStatus === "loading" || authStatus === "unauthenticated" ? (
         <div className="min-h-screen bg-[var(--color-page-background)] flex items-center justify-center font-bold text-[var(--color-text-secondary)] w-full">
           로그인 확인 중...
@@ -120,8 +120,8 @@ export default function UserLayout({
           />
 
           {/* 2. 메인 영역 */}
-          <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-            
+          <div className="flex-1 flex flex-col min-h-screen xl:h-screen xl:max-h-screen xl:min-h-0 overflow-hidden">
+
             {/* 상단 Header (데스크톱 전용) */}
             <header className="hidden xl:flex justify-between items-center bg-[var(--color-card-background)] px-8 py-5 border-b border-[var(--color-border)] w-full">
               <div className="flex items-center gap-3">
@@ -137,7 +137,7 @@ export default function UserLayout({
                 <span className="bg-[#B83A38] text-white text-[13px] font-bold px-4 py-2 rounded-full tracking-wide">
                   시험까지 D-{examDDay}
                 </span>
-                
+
                 {/* 상단 헤더로 옮겨진 사용자 프로필 카드 + 로그아웃 버튼 */}
                 <div className="flex items-center gap-4 border-l border-[var(--color-border)] pl-4">
                   {displayName ? (
@@ -155,7 +155,7 @@ export default function UserLayout({
                       </div>
                     </div>
                   ) : null}
-                  
+
                   <button
                     onClick={handleLogout}
                     className="text-[12px] font-bold text-[var(--color-primary)] hover:text-[var(--color-text-primary)] transition-all cursor-pointer border border-[var(--color-primary)]/25 hover:border-[var(--color-text-primary)]/20 px-3 py-1.5 rounded-lg bg-transparent"
@@ -168,9 +168,9 @@ export default function UserLayout({
             </header>
 
             {/* 콘텐츠 뷰포트 영역 */}
-            <div className={`flex-1 ${pathname === "/exams" ? "xl:overflow-hidden" : "xl:overflow-y-auto"} overflow-y-auto bg-[var(--color-content-background)]`}>
-              <div className={`w-full max-w-md md:max-w-2xl lg:max-w-5xl xl:max-w-[1440px] mx-auto min-h-screen bg-[var(--color-content-background)] shadow-sm xl:shadow-none flex flex-col justify-between xl:justify-start relative overflow-hidden xl:overflow-visible transition-all duration-300 ${pathname === "/exams" ? "xl:h-full xl:min-h-0" : "xl:min-h-0"}`}>
-                
+            <div className={`flex-1 ${pathname === "/exams" || pathname.startsWith("/learning-management") ? "xl:overflow-hidden" : "xl:overflow-y-auto"} overflow-y-auto bg-[var(--color-content-background)]`}>
+              <div className={`w-full max-w-md md:max-w-2xl lg:max-w-5xl xl:max-w-[1440px] mx-auto min-h-screen bg-[var(--color-content-background)] shadow-sm xl:shadow-none flex flex-col justify-between xl:justify-start relative overflow-hidden xl:overflow-visible transition-all duration-300 ${pathname === "/exams" || pathname.startsWith("/learning-management") ? "xl:h-full xl:min-h-0" : "xl:min-h-0"}`}>
+
                 {/* 상단 타이틀 & D-Day & 로그아웃 (모바일 / 태블릿용 헤더 공통화) */}
                 <div className="flex flex-wrap justify-between items-center gap-3 xl:hidden px-5 pt-6 pb-1">
                   <h1 className="text-[26px] font-extrabold text-[var(--color-text-primary)] tracking-tight">

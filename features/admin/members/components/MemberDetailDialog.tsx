@@ -3,12 +3,9 @@ import { X } from "lucide-react";
 import { Member } from "../types/member";
 import { mockMemberLearningDetails } from "../data/mockMemberLearningDetails";
 import { MemberStatusBadge } from "./MemberStatusBadge";
-import { LearningSummaryCards } from "../../../learning/components/LearningSummaryCards";
 import { ScoreTrendChart } from "../../../learning/components/ScoreTrendChart";
-import { SubjectScoreList } from "../../../learning/components/SubjectScoreList";
 import { PassingRuleCard } from "../../../learning/components/PassingRuleCard";
 import { ExamHistoryList } from "../../../learning/components/ExamHistoryList";
-import { WeakTopicList } from "../../../learning/components/WeakTopicList";
 
 interface MemberDetailDialogProps {
   member: Member | null;
@@ -75,22 +72,24 @@ export function MemberDetailDialog({ member, onClose }: MemberDetailDialogProps)
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
           {detail ? (
             <>
-              {/* 1. 학습 요약 분석 카드 */}
-              <LearningSummaryCards
-                studyMinutes={detail.totalStudyMinutes}
-                examCount={detail.examCount}
-                averageScore={detail.averageScore}
-                wrongAnswerCount={detail.wrongAnswerCount}
-              />
 
               {/* 2. 대시보드 2단 배치 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <ScoreTrendChart
-                  trendData={detail.scoreTrend}
+                  historyData={[...detail.examHistory]
+                    .slice(0, 3)
+                    .reverse()
+                    .map((history) => ({
+                      label: `${history.examTitle} ${history.attemptTitle}`,
+                      subjects: history.subjects.map((s) => ({
+                        name: s.name,
+                        score: s.score,
+                      })),
+                    }))}
                   title="시험 성적 추이"
-                  subtitle="최근 응시한 시험의 총점 변화량"
+                  subtitle="최근 응시한 시험의 과목별 점수 변화량"
                 />
-                <SubjectScoreList subjectScores={detail.subjectScores} />
+
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -98,7 +97,6 @@ export function MemberDetailDialog({ member, onClose }: MemberDetailDialogProps)
                   totalScore={member.recentScore}
                   subjectScores={detail.subjectScores}
                 />
-                <WeakTopicList weakTopics={detail.weakTopics} />
               </div>
 
               {/* 3. 시험 이력 리스트 (아래 전체 너비) */}

@@ -1,0 +1,141 @@
+@reference "../../../app/globals.css";
+
+.container {
+  @apply bg-white rounded-2xl p-5 border border-[#E4E0D9] shadow-sm flex flex-col gap-4 relative overflow-hidden;
+}
+
+.header {
+  @apply flex flex-col gap-1 border-b border-[#F6F4F0] pb-3;
+}
+
+.title {
+  @apply text-[17px] font-bold text-[#111111] tracking-tight;
+}
+
+.subtitle {
+  @apply text-[12px] text-[#817D76];
+}
+
+.mobileContainer {
+  @apply xl:hidden flex flex-col divide-y divide-[#E4E0D9] bg-[#F6F4F0]/20 rounded-xl border border-[#E4E0D9] overflow-hidden;
+}
+
+.mobileItem {
+  @apply p-5 flex flex-col gap-3;
+}
+
+.mobileHeader {
+  @apply flex justify-between items-center;
+}
+
+.mobileExamTitle {
+  @apply text-[18px] font-extrabold text-[#111111];
+}
+
+.mobileMeta {
+  @apply text-[12px] text-[#817D76];
+}
+
+.mobileResultWrapper {
+  @apply flex justify-between items-center pt-2 border-t border-[#F6F4F0];
+}
+
+.mobileResultLabel {
+  @apply text-[12px] font-bold text-[#817D76];
+}
+
+.mobileResultValue {
+  @apply flex items-center gap-2;
+}
+
+.mobileResultScore {
+  @apply text-[13px] text-[#817D76];
+}
+
+.badgePassed {
+  @apply text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#E6F4EA] text-[#137333];
+}
+
+.badgeFailed {
+  @apply text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#FDF1F0] text-[#B83A38];
+}
+
+.desktopContainer {
+  @apply hidden xl:block bg-white rounded-xl border border-[#E4E0D9] overflow-hidden;
+}
+
+.table {
+  @apply w-full border-collapse text-left;
+}
+
+.thead {
+  @apply bg-[#F6F4F0] border-b border-[#E4E0D9] text-[13px] font-bold text-[#111111];
+}
+
+.tbody {
+  @apply divide-y divide-[#E4E0D9] text-[14px];
+}
+
+.tr {
+  @apply hover:bg-[#F6F4F0]/10 transition-colors;
+}
+
+.td {
+  @apply px-6 py-4;
+}
+
+.tdTextBold {
+  @apply font-bold text-[#111111];
+}
+
+.tdTextSecondary {
+  @apply text-[#817D76];
+}
+
+.tdCenter {
+  @apply text-center;
+}
+
+.tdCenterBold {
+  @apply text-center font-extrabold text-[#111111];
+}
+
+.badgePassedDesktop {
+  @apply text-[12px] font-bold px-3 py-1 rounded-full inline-block bg-[#E6F4EA] text-[#137333];
+}
+
+.badgeFailedDesktop {
+  @apply text-[12px] font-bold px-3 py-1 rounded-full inline-block bg-[#FDF1F0] text-[#B83A38];
+}
+
+.subjectScores {
+  @apply flex flex-wrap gap-x-2 text-[13px] text-[#817D76];
+}
+
+.subjectItem {
+  @apply inline-flex items-center;
+}
+
+.scoreFailed {
+  @apply text-[#D93D35] font-bold;
+}
+
+.scorePassed {
+  @apply text-[#3F7D4E] font-bold;
+}
+
+.scoreNormal {
+  @apply text-[#111111];
+}
+
+.dot {
+  @apply ml-2 text-[#E4E0D9];
+}
+
+.empty {
+  @apply p-6 text-center text-[13px] text-[#817D76] font-medium;
+}
+
+.emptyDesktop {
+  @apply px-6 py-12 text-center text-[13px] text-[#817D76] font-medium;
+}

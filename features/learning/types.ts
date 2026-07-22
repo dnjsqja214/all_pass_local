@@ -48,3 +48,30 @@ export interface LearningDetail {
   }[];
   weakTopics: WeakTopic[];
 }
+
+export interface SubjectStudyTime {
+  subjectName: string;
+  studyMinutes: number;
+}
+
+export interface StudyExamInfo {
+  examTitle: string;
+  score: number;
+  isPassed: boolean;
+}
+
+export interface StudyContributionItem {
+  studyDate: string; // YYYY-MM-DD
+  studyMinutes: number;
+  questionCount: number;
+  subjects: SubjectStudyTime[];
+  exams?: StudyExamInfo[];
+}
+
+export interface StudyStats {
+  totalMinutes: number;
+  studiedDaysCount: number;
+  currentStreak: number;
+  maxStreak: number;
+}
+

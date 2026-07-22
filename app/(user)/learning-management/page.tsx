@@ -2,12 +2,9 @@
 
 import React from "react";
 import { useDashboardData } from "../../../features/dashboard/hooks/useDashboardData";
-import { LearningSummaryCards } from "../../../features/learning/components/LearningSummaryCards";
 import { ScoreTrendChart } from "../../../features/learning/components/ScoreTrendChart";
-import { SubjectScoreList } from "../../../features/learning/components/SubjectScoreList";
-import { PassingRuleCard } from "../../../features/learning/components/PassingRuleCard";
 import { ExamHistoryList } from "../../../features/learning/components/ExamHistoryList";
-import { WeakTopicList } from "../../../features/learning/components/WeakTopicList";
+import { StudyContributionCalendar } from "../../../features/learning/components/StudyContributionCalendar";
 
 export default function LearningManagement() {
   const { examAttempts, scoreTrend, wrongNotes } = useDashboardData("profile");
@@ -25,9 +22,9 @@ export default function LearningManagement() {
   // 과목별 점수 데이터 구성
   const subjectScoresMapped = latestAttempt
     ? latestAttempt.subjectScores.map((sub) => ({
-        subject: mapSubjectName(sub.name),
-        score: sub.score,
-      }))
+      subject: mapSubjectName(sub.name),
+      score: sub.score,
+    }))
     : [];
 
   // 총 누적 계산
@@ -36,11 +33,6 @@ export default function LearningManagement() {
   const averageScore = examAttempts.reduce((acc, a) => acc + a.totalScore, 0) / (examAttempts.length || 1);
   const wrongAnswerCount = wrongNotes.reduce((acc, n) => acc + n.frequency, 0);
 
-  // 차트 트렌드 데이터 변환
-  const trendData = scoreTrend.map((pt) => ({
-    label: pt.round,
-    score: pt.score,
-  }));
 
   // 시험 이력 데이터 변환
   const examHistoryMapped = examAttempts.map((attempt) => {
@@ -68,48 +60,29 @@ export default function LearningManagement() {
   }));
 
   return (
-    <div className="flex-1 px-4 pt-6 pb-20 md:px-8 xl:p-8 space-y-6">
-      {/* 학습관리 타이틀 (데스크톱용) */}
-      <div className="hidden xl:flex flex-col gap-1 mb-2">
-        <h1 className="text-[28px] font-black text-[var(--color-text-primary)] tracking-tight">
-          학습관리 대시보드
-        </h1>
-        <p className="text-[14px] text-[var(--color-text-secondary)] font-medium">
-          회차별 시험 성적 추이와 합격 기준 부합 여부를 한눈에 진단합니다.
-        </p>
-      </div>
-
-      {/* 1. 학습 요약 카드 (4열) */}
-      <LearningSummaryCards
-        studyMinutes={studyMinutes}
-        examCount={examCount}
-        averageScore={averageScore}
-        wrongAnswerCount={wrongAnswerCount}
-      />
-
-      {/* 2. 상세 지표 그리드 */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+    <div className="flex-1 px-4 pt-6 pb-20 md:px-8 xl:p-8 space-y-6 xl:h-full xl:min-h-0 xl:flex xl:flex-col xl:pb-8">
+      {/* 2. 상세 지표 그리드 (좌측 차트, 우측 시험 이력 및 학습 잔디) */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:flex-1 xl:min-h-0">
         {/* 좌측: 차트 */}
-        <div className="xl:col-span-7">
-          <ScoreTrendChart trendData={trendData} />
-        </div>
-
-        {/* 우측: 합격 판정 & 과목 점수 */}
-        <div className="xl:col-span-5 flex flex-col gap-6">
-          <PassingRuleCard
-            totalScore={latestAttempt ? latestAttempt.totalScore : 0}
-            subjectScores={subjectScoresMapped}
+        <div className="xl:col-span-6 xl:h-full xl:min-h-0 flex flex-col gap-6">
+          <ScoreTrendChart
+            historyData={examAttempts.map((attempt) => ({
+              label: `${attempt.roundTitle} ${attempt.attemptTitle}`,
+              subjects: attempt.subjectScores.map((s) => ({
+                name: mapSubjectName(s.name),
+                score: s.score,
+                date: s.date || attempt.date,
+                roundTitle: s.roundTitle || attempt.roundTitle,
+                attemptTitle: s.attemptTitle || attempt.attemptTitle,
+              })),
+            }))}
           />
-          <SubjectScoreList subjectScores={subjectScoresMapped} />
         </div>
 
-        {/* 하단: 취약 단원 & 시험 이력 */}
-        <div className="xl:col-span-5">
-          <WeakTopicList weakTopics={weakTopicsMapped} />
-        </div>
-        
-        <div className="xl:col-span-7">
-          <ExamHistoryList history={examHistoryMapped} />
+        {/* 우측: 학습 잔디 & 시험 이력 */}
+        <div className="xl:col-span-6 xl:h-full xl:min-h-0 flex flex-col gap-6">
+          <StudyContributionCalendar />
+          <ExamHistoryList history={examHistoryMapped} className="xl:flex-1 xl:min-h-0" />
         </div>
       </div>
     </div>
