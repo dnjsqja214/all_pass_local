@@ -51,8 +51,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## 4. Component and CSS Separation Rules
 
-* Do not write long Tailwind utility class lists directly inside TSX.
+* Tailwind CSS has been removed from this project. Do not reintroduce it.
+* Do not write style values (colors, spacing, sizes, breakpoints) inside TSX at all.
 * Component structure and styling must be separated.
+* State-dependent styling must be passed as a `data-*` attribute; the CSS decides the appearance.
+  Do not build conditional class strings in TSX.
 * Each reusable component must have its own folder.
 * Place the component `.tsx` file and its CSS Module file in the same folder.
 * CSS files must use the `.module.css` extension.
@@ -167,9 +170,7 @@ app/
 
 * Use Next.js App Router.
 * Use TypeScript.
-* Use CSS Modules for component-specific styling.
-* Tailwind CSS may only be used for small, temporary, or highly generic utility styling.
-* Prefer CSS Modules over long Tailwind class combinations.
+* Use CSS Modules for component-specific styling. Tailwind is not installed.
 * Use `lucide-react` for icons.
 * Maintain absolute type safety.
 * Never use `any`.
@@ -179,3 +180,37 @@ app/
 * Do not alter existing functionality unless explicitly instructed.
 * Before creating a new component, check whether a similar shared component already exists.
 * Before modifying Next.js-specific code, read the relevant guide in `node_modules/next/dist/docs/`.
+
+## 7. Dependency and Lockfile Rules
+
+The CI image is built on `node:24-alpine` (Linux) and runs `npm ci`, which refuses to
+install when `package.json` and `package-lock.json` are out of sync. Because npm prunes
+platform-specific optional dependencies for the machine it runs on, **regenerating the
+lockfile on Windows silently drops Linux-only packages and breaks CI.**
+
+* Never update `package-lock.json` by running `npm install` on Windows.
+* Regenerate the lockfile inside a Linux container instead:
+
+  ```bash
+  docker run --rm -v "/path/to/repo:/src" -w /src node:24-alpine \
+    npm install --package-lock-only --ignore-scripts
+  ```
+
+* After changing dependencies, verify on Linux before pushing — a passing Windows build
+  proves nothing about CI:
+
+  ```bash
+  docker build -t allpass-front-verify .
+  ```
+
+* Keep platform-specific native binaries in `optionalDependencies`, never in
+  `dependencies`. In `dependencies` a Windows-only binary makes Linux `npm ci` fail with
+  `EBADPLATFORM`; deleting it outright breaks local Windows installs. `optionalDependencies`
+  installs on the matching platform and is skipped elsewhere.
+
+### Failures already caused by this
+
+* `@tailwindcss/oxide-win32-x64-msvc` placed in `dependencies` → CI `EBADPLATFORM`.
+* `@emnapi/core` / `@emnapi/runtime` (transitive optional deps of `@img/sharp-wasm32`)
+  pruned by a Windows `npm install` → CI failed with
+  `npm ci ... Missing: @emnapi/runtime from lock file`. Windows `npm ci` passed the whole time.

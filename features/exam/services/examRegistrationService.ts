@@ -74,6 +74,31 @@ export const examRegistrationService = {
     return body.data;
   },
 
+  /**
+   * 신청 목록과 함께 서버 시각을 돌려준다.
+   *
+   * <p>카운트다운은 브라우저 시계를 믿으면 안 된다 — 사용자 PC 가 몇 분씩 틀어져 있으면
+   * 혼자만 일찍 시작하거나 늦게 시작한다. 모든 HTTP 응답에는 `Date` 헤더가 있으므로
+   * 이 조회 하나로 시각까지 같이 받는다(서버 시각 전용 엔드포인트가 따로 필요 없다).</p>
+   */
+  async getRegistrationsWithServerTime(
+    signal?: AbortSignal,
+  ): Promise<{ registrations: ExamRegistration[]; serverNow: number; roundTripMillis: number }> {
+    const sentAt = Date.now();
+    const response = await fetch(buildApiUrl("/api/v1/exam-registrations"), { credentials: "include", cache: "no-store", signal });
+    const roundTripMillis = Date.now() - sentAt;
+    const dateHeader = response.headers.get("Date");
+    const body = await parseBody(response);
+    if (!response.ok) throw new Error(errorMessage(body, response.status));
+    if (!isRecord(body) || body.success !== true || !Array.isArray(body.data) || !body.data.every(isRegistration)) {
+      throw new Error("시험 신청 API 응답 형식이 올바르지 않습니다.");
+    }
+    // Date 헤더는 응답을 만든 시점이므로 편도 지연(왕복의 절반)만큼 보정한다.
+    const parsed = dateHeader ? Date.parse(dateHeader) : Number.NaN;
+    const serverNow = Number.isNaN(parsed) ? Date.now() : parsed + roundTripMillis / 2;
+    return { registrations: body.data, serverNow, roundTripMillis };
+  },
+
   async registerExam(slot: Pick<ExamSlot, "examId" | "startsAt">, signal?: AbortSignal): Promise<ExamRegistration> {
     const csrf = await getCsrfToken(signal);
     const response = await fetch(buildApiUrl("/api/v1/exam-registrations"), {

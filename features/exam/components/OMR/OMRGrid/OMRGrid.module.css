@@ -1,31 +1,31 @@
-.gridContainer {
+.container {
   width: 100%;
   padding: 20px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
   background: var(--color-card-background);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+}
 
-  .gridSplit {
-    display: grid;
-    grid-template-columns: 1fr;
-    column-gap: 32px;
-  }
+.columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 32px;
+}
 
-  .column {
-    display: flex;
-    flex-direction: column;
-  }
+.column {
+  display: flex;
+  flex-direction: column;
 }
 
 @media (min-width: 1024px) {
-  .gridContainer .gridSplit {
+  .columns {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1280px) {
-  .gridContainer .gridSplit {
+  .columns {
     column-gap: 48px;
   }
 }

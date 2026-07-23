@@ -8,6 +8,10 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { authService } from "@/features/auth/services/authService";
 import { ModeSwitcher } from "@/features/auth/components/ModeSwitcher";
 import { ThemeToggle } from "@/features/theme/components/ThemeToggle/ThemeToggle";
+import { SocketProvider } from "@/features/socket/SocketProvider";
+import { useExamPhase } from "@/features/exam/hooks/useExamPhase";
+import { ExamCountdown } from "@/features/exam/components/ExamCountdown";
+import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
 import styles from "./layout.module.css";
 
 export default function UserLayout({
@@ -18,6 +22,20 @@ export default function UserLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { status: authStatus, user, error: authError } = useAuth();
+  // 시험 시간이 되면 사이드바·본문 대신 대기 화면을 그린다. 덮는 게 아니라 바꿔치기라
+  // 뒤에 아무것도 남지 않는다(주소로 빠져나갈 수도 없다).
+  const {
+    phase: examPhase,
+    remainingSeconds,
+    registration,
+    error: examError,
+    markRegistrationSubmitted,
+  } = useExamPhase();
+  /** 시작 버튼을 누른 신청 건. 누르기 전까지는 대기 화면에 머문다. */
+  const [startedRegistrationId, setStartedRegistrationId] = useState<string | null>(null);
+  // 시작 시각 전이거나, 시작했지만 아직 버튼을 안 누른 동안 대기 화면을 띄운다.
+  const isExamGateOpen =
+    (examPhase === "waiting" || examPhase === "running") && registration !== null;
   const [isUserSidebarCollapsed, setIsUserSidebarCollapsed] = useState(false);
 
   useEffect(() => {
@@ -43,6 +61,13 @@ export default function UserLayout({
 
   const handleLogout = () => {
     authService.redirectToLogout(`${window.location.origin}/login`);
+  };
+
+  const handleExamSubmitted = () => {
+    if (startedRegistrationId) {
+      markRegistrationSubmitted(startedRegistrationId);
+    }
+    setStartedRegistrationId(null);
   };
 
   // 현재 경로에 맞는 헤더 제목 및 D-Day 매핑
@@ -108,6 +133,9 @@ export default function UserLayout({
   const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (
+    // SocketProvider 는 화면 분기보다 바깥이어야 한다. 안쪽에 두면 나중에 시험 대기
+    // 화면으로 바뀌는 순간 언마운트되면서 연결이 끊긴다.
+    <SocketProvider>
     <div className={styles.shell}>
       {authStatus === "loading" || authStatus === "unauthenticated" ? (
         <div className={styles.state}>로그인 확인 중...</div>
@@ -116,6 +144,22 @@ export default function UserLayout({
           <p className={styles.stateTitle}>로그인 상태를 확인할 수 없습니다.</p>
           <p className={styles.stateDetail}>{authError}</p>
         </div>
+      ) : startedRegistrationId ? (
+        <ExamSolvingModal
+          registrationId={startedRegistrationId}
+          isOpen
+          onClose={() => setStartedRegistrationId(null)}
+          onSubmitted={handleExamSubmitted}
+        />
+      ) : isExamGateOpen && registration ? (
+        <ExamCountdown
+          remainingSeconds={remainingSeconds}
+          registration={registration}
+          canStart={examPhase === "running"}
+          isStarting={false}
+          onStart={() => setStartedRegistrationId(registration.id)}
+          error={examError}
+        />
       ) : (
         <>
           {/* 1. 사이드바 네비게이션 (데스크톱 전용) */}
@@ -186,5 +230,6 @@ export default function UserLayout({
         </>
       )}
     </div>
+    </SocketProvider>
   );
 }

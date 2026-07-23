@@ -1,0 +1,107 @@
+/* 시험 시작 대기 화면. 사이드바·본문 대신 화면 전체를 차지한다. */
+.screen {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: var(--color-page-background);
+  text-align: center;
+
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
+  .examTitle {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  .subject {
+    margin-top: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  /* 남은 시간 — 이 화면의 주인공 */
+  .clock {
+    font-size: clamp(72px, 18vw, 160px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-primary);
+  }
+
+  /* 1분 이내면 강조한다. 판단은 tsx 가 data-urgent 로만 넘긴다. */
+  &[data-urgent="true"] .clock {
+    color: var(--color-primary);
+  }
+
+  .clockLabel {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+  }
+
+  .startsAt {
+    padding: 10px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 9999px;
+    background: var(--color-card-background);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  /* 카운트다운이 0이 되기 전에는 눌리지 않는다 — 시각 판단은 tsx 가 disabled 로만 넘긴다. */
+  .startButton {
+    min-width: 260px;
+    padding: 18px 32px;
+    border: none;
+    border-radius: 16px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+    }
+
+    &:disabled {
+      background: var(--color-border);
+      color: var(--color-text-secondary);
+      cursor: not-allowed;
+    }
+  }
+
+  .notice {
+    max-width: 420px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+  }
+
+  .error {
+    color: var(--color-danger);
+    font-size: 13px;
+    font-weight: 700;
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Star } from "lucide-react";
-import { ChoiceButton } from "./ChoiceButton";
+import { ChoiceButton } from "../ChoiceButton";
 import styles from "./OMRQuestionRow.module.css";
 
 interface OMRQuestionRowProps {
@@ -19,26 +19,21 @@ export function OMRQuestionRow({
 
   return (
     <div className={styles.row}>
-      {/* 별 아이콘 + 문항 번호 그룹 (정렬 맞춤) */}
-      <div className={styles.numberGroup}>
+      <div className={styles.question}>
         <button
           type="button"
-          onClick={() => setIsBookmarked(!isBookmarked)}
-          className={styles.starBtn}
+          className={styles.bookmarkButton}
+          data-bookmarked={isBookmarked}
+          aria-label={`${questionNumber}번 문항 ${isBookmarked ? "북마크 해제" : "북마크"}`}
+          aria-pressed={isBookmarked}
+          onClick={() => setIsBookmarked((bookmarked) => !bookmarked)}
         >
-          <Star
-            className={`w-[16px] h-[16px] transition-all ${
-              isBookmarked ? "fill-[#D48A00] text-[#D48A00]" : "text-[#817D76]"
-            }`}
-          />
+          <Star className={styles.bookmarkIcon} aria-hidden="true" />
         </button>
-        <span className={styles.numberText}>
-          {questionNumber}
-        </span>
+        <span className={styles.questionNumber}>{questionNumber}</span>
       </div>
 
-      {/* 마킹 선택지 */}
-      <div className={styles.choicesGroup}>
+      <div className={styles.choices}>
         {choices.map((choice) => (
           <ChoiceButton
             key={choice}

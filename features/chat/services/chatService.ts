@@ -105,10 +105,4 @@ export const chatService = {
   async markRead(roomId: string): Promise<void> {
     await post(`/api/v1/chat/rooms/${roomId}/read`);
   },
-
-  /** 실시간 수신용 WebSocket 주소. API 주소의 http(s) 를 ws(s) 로 바꾼다. */
-  socketUrl(roomId: string): string {
-    const base = API_BASE_URL.replace(/^http/, "ws");
-    return `${base}/ws/chat?roomId=${encodeURIComponent(roomId)}`;
-  },
 };

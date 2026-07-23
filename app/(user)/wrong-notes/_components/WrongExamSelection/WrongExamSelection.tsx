@@ -75,7 +75,7 @@ export function WrongExamSelection({
             onClick={handleReset}
             className={styles.resetButton}
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className={styles.resetIcon} />
             <span>초기화</span>
           </button>
           <button
@@ -131,17 +131,17 @@ export function WrongExamSelection({
                   </h3>
                   <div className={styles.metaGroup}>
                     <span className={styles.metaItem}>
-                      <Calendar className="w-3.5 h-3.5" />
+                      <Calendar className={styles.metaIcon} />
                       완료일: <strong className={styles.metaValue}>{exam.completedAt ? new Date(exam.completedAt).toLocaleDateString() : "-"}</strong>
                     </span>
                     <span className={styles.divider}>|</span>
                     <span className={styles.metaItem}>
-                      <HelpCircle className="w-3.5 h-3.5" />
+                      <HelpCircle className={styles.metaIcon} />
                       <strong className={styles.metaValue}>{exam.totalQuestions}</strong>문항
                     </span>
                     <span className={styles.divider}>|</span>
                     <span className={styles.metaItem}>
-                      <Clock className="w-3.5 h-3.5" />
+                      <Clock className={styles.metaIcon} />
                       <strong className={styles.metaValue}>{exam.durationMinutes}</strong>분
                     </span>
                   </div>

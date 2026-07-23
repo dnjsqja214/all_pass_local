@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useExamData } from "../hooks/useExamData";
 import { ExamNotice } from "./ExamNotice";
-import { OMRGrid } from "./OMRGrid";
+import { OMRGrid } from "./OMR";
 import { SubmitDialog } from "./SubmitDialog";
 import { X } from "lucide-react";
 import styles from "./ExamSolvingModal.module.css";
@@ -186,7 +186,7 @@ export function ExamSolvingModal({
 
       {/* 중간 이탈 경고 모달 */}
       {isCloseConfirmOpen && (
-        <div className={`${styles.confirmBackdrop} animate-in fade-in duration-200`}>
+        <div className={styles.confirmBackdrop}>
           <div className={styles.confirmCard}>
             <div className={styles.confirmFlex}>
               <div className={styles.confirmIconWrapper}>
