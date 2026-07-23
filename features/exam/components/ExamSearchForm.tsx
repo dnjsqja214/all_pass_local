@@ -6,6 +6,7 @@ interface ExamSearchFormProps {
   setType: (val: string) => void;
   subject: string;
   setSubject: (val: string) => void;
+  subjectOptions: string[];
   round: string;
   setRound: (val: string) => void;
   onSearch: () => void;
@@ -17,6 +18,7 @@ export function ExamSearchForm({
   setType,
   subject,
   setSubject,
+  subjectOptions,
   round,
   setRound,
   onSearch,
@@ -71,9 +73,9 @@ export function ExamSearchForm({
             className="w-full bg-[#F6F4F0] border border-[#E4E0D9] rounded-xl pl-4 pr-10 py-3 text-[14px] text-[#111111] font-semibold focus:outline-none focus:border-[#C93A35] transition-all appearance-none cursor-pointer hover:bg-[#EAE8E2]"
           >
             <option value="all">전체 과목</option>
-            <option value="공인중개사법령 및 실무">공인중개사법령 및 실무</option>
-            <option value="부동산 공법">부동산 공법</option>
-            <option value="부동산공시법령 부동산세법">부동산공시법령 부동산세법</option>
+            {subjectOptions.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
           </select>
           <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#817D76] pointer-events-none" />
         </div>

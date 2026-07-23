@@ -33,6 +33,7 @@ export function ExamSelectionPage({
     error,
     handleSearch,
     handleReset,
+    subjectOptions,
   } = useExamSearch(initialExams);
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -70,6 +71,7 @@ export function ExamSelectionPage({
           setType={setSelectedType}
           subject={selectedSubject}
           setSubject={setSelectedSubject}
+          subjectOptions={subjectOptions}
           round={selectedRound}
           setRound={setSelectedRound}
           onSearch={handleSearch}
