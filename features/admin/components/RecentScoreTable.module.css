@@ -1,96 +1,118 @@
-@reference "../../../app/globals.css";
-
 .scrollWrapper {
-  @apply w-full overflow-x-auto;
+  width: 100%;
+  overflow-x: auto;
+
+  .table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .theadRow {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-page-background);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .tbody {
+    font-size: 13px;
+  }
+
+  .trBody {
+    border-top: 1px solid var(--color-border);
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-page-background) 10%, transparent);
+    }
+  }
+
+  .th,
+  .td {
+    padding: 12px 20px;
+  }
+
+  .thCenter,
+  .tdCenter {
+    padding: 12px 20px;
+    text-align: center;
+  }
+
+  .memberCell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    background: var(--color-border);
+    color: var(--color-text-primary);
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .memberName {
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .roundText {
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
 }
 
-.table {
-  @apply w-full border-collapse text-left min-w-[600px];
+/* 과목 점수 색 */
+.scoreUnsubmitted,
+.totalUnsubmitted {
+  color: var(--color-text-secondary);
+  font-weight: 600;
 }
 
-.theadRow {
-  @apply bg-[#F6F4F0] border-b border-[#E4E0D9] text-[12px] font-bold text-[#111111];
+.scoreFail,
+.trendDown {
+  color: var(--color-danger);
+  font-weight: 700;
 }
 
-.th {
-  @apply px-5 py-3;
-}
-
-.thCenter {
-  @apply px-5 py-3 text-center;
-}
-
-.trBody {
-  @apply hover:bg-[#F6F4F0]/10 transition-colors;
-}
-
-.td {
-  @apply px-5 py-3;
-}
-
-.tdCenter {
-  @apply px-5 py-3 text-center;
-}
-
-.memberCell {
-  @apply flex items-center gap-2.5;
-}
-
-.avatar {
-  @apply w-8 h-8 rounded-full bg-[#E4E0D9] text-[#111111] flex items-center justify-center font-extrabold text-[11px] shrink-0;
-}
-
-.memberName {
-  @apply font-bold text-[#111111];
-}
-
-.roundText {
-  @apply text-[#817D76] font-medium;
-}
-
-/* Score cell render styles */
-.scoreUnsubmitted {
-  @apply text-[#817D76] font-semibold;
-}
-
-.scoreFail {
-  @apply text-[#D93D35] font-bold;
-}
-
-.scorePass {
-  @apply text-[#3F7D4E] font-bold;
+.scorePass,
+.trendUp {
+  color: var(--color-success);
+  font-weight: 700;
 }
 
 .scoreNormal {
-  @apply text-[#111111] font-semibold;
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
-/* Total score styles */
-.totalUnsubmitted {
-  @apply text-[#817D76] font-semibold;
-}
-
+/* 총점 색 */
 .totalPass {
-  @apply text-[#3F7D4E] font-extrabold;
+  color: var(--color-success);
+  font-weight: 800;
 }
 
 .totalFail {
-  @apply text-[#D93D35] font-bold;
+  color: var(--color-danger);
+  font-weight: 700;
 }
 
 .totalNormal {
-  @apply text-[#111111] font-bold;
-}
-
-/* Trend styles */
-.trendUp {
-  @apply text-[#3F7D4E] font-bold;
-}
-
-.trendDown {
-  @apply text-[#D93D35] font-bold;
+  color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .trendFlat {
-  @apply text-[#817D76] font-bold;
+  color: var(--color-text-secondary);
+  font-weight: 700;
 }

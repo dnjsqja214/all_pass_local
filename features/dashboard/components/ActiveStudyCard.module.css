@@ -1,34 +1,128 @@
-@reference "../../../app/globals.css";
-
 .card {
-  @apply w-full bg-[#B83A38] text-white rounded-3xl p-6 shadow-sm flex flex-col gap-5;
-}
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 24px;
+  border-radius: 24px;
+  background: #b83a38;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
 
-.textGroup {
-  @apply flex flex-col gap-1;
-}
+  .textGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
 
-.title {
-  @apply text-[14px] text-red-100 font-medium tracking-tight;
-}
+  .title {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: #ffe2e2;
+  }
 
-.time {
-  @apply text-[26px] font-bold tracking-tight leading-none;
-}
+  .time {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
 
-.badge {
-  @apply bg-[#FFFFFF33] text-white text-[13px] font-semibold px-3 py-1.5 rounded-full backdrop-blur-xs;
-}
+  .badge {
+    padding: 6px 12px;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.2);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+  }
 
-.button {
-  @apply w-full bg-[#1A1A1A] hover:bg-[#2A2A2A] text-white font-bold py-4 px-5 rounded-2xl flex items-center justify-center gap-2.5 transition-colors cursor-pointer text-[15px];
-}
+  .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px 20px;
+    border: none;
+    border-radius: 16px;
+    background: #1a1a1a;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 150ms ease;
 
-.button:disabled { opacity: .68; cursor: not-allowed; }
-.exam { display: flex; flex-direction: column; gap: 5px; padding: 15px; border: 1px solid #ffffff22; border-radius: 16px; background: #ffffff12; }
-.exam span { color: #ffd7d5; font-size: 10px; font-weight: 800; }
-.exam strong { overflow: hidden; color: #fff; font-size: 16px; text-overflow: ellipsis; white-space: nowrap; }
-.exam small { display: flex; align-items: center; gap: 5px; color: #ffe8e7; font-size: 11px; }
-.exam svg { width: 13px; height: 13px; }
-.empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 18px; border: 1px solid #ffffff22; border-radius: 16px; color: #ffe8e7; font-size: 13px; font-weight: 700; }
-.empty button { padding: 10px 22px; border: 0; border-radius: 11px; background: #1a1a1a; color: #fff; font-weight: 800; cursor: pointer; }
+    &:hover:not(:disabled) {
+      background: #2a2a2a;
+    }
+
+    &:disabled {
+      opacity: 0.68;
+      cursor: not-allowed;
+    }
+  }
+
+  /* 예정된 시험 요약 */
+  .exam {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 15px;
+    border: 1px solid rgb(255 255 255 / 0.13);
+    border-radius: 16px;
+    background: rgb(255 255 255 / 0.07);
+
+    span {
+      color: #ffd7d5;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    strong {
+      overflow: hidden;
+      color: #ffffff;
+      font-size: 16px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #ffe8e7;
+      font-size: 11px;
+    }
+
+    svg {
+      width: 13px;
+      height: 13px;
+    }
+  }
+
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid rgb(255 255 255 / 0.13);
+    border-radius: 16px;
+    color: #ffe8e7;
+    font-size: 13px;
+    font-weight: 700;
+
+    button {
+      padding: 10px 22px;
+      border: 0;
+      border-radius: 11px;
+      background: #1a1a1a;
+      color: #ffffff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  }
+}

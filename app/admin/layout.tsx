@@ -6,6 +6,7 @@ import { AdminSidebar } from "../../features/admin/components/AdminSidebar";
 import { AdminHeader } from "../../features/admin/components/AdminHeader";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { authService } from "../../features/auth/services/authService";
+import styles from "./layout.module.css";
 
 export default function AdminLayout({
   children,
@@ -56,20 +57,16 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-page-background)] text-[var(--color-text-primary)] flex flex-col w-full font-sans overflow-x-hidden">
+    <div className={styles.shell}>
       {authStatus === "loading" || authStatus === "unauthenticated" ? (
-        <div className="min-h-screen bg-[#F6F4F0] flex items-center justify-center font-bold text-[#817D76]">
-          로그인 확인 중...
-        </div>
+        <div className={styles.state}>로그인 확인 중...</div>
       ) : authStatus === "error" ? (
-        <div className="min-h-screen bg-[#F6F4F0] flex flex-col gap-2 items-center justify-center px-4 text-center">
-          <p className="font-bold text-[#111111]">로그인 상태를 확인할 수 없습니다.</p>
-          <p className="text-sm text-[#817D76]">{authError}</p>
+        <div className={styles.state}>
+          <p className={styles.stateTitle}>로그인 상태를 확인할 수 없습니다.</p>
+          <p className={styles.stateDetail}>{authError}</p>
         </div>
       ) : !hasAdminRole ? (
-        <div className="min-h-screen bg-[#F6F4F0] flex items-center justify-center font-bold text-[#817D76]">
-          일반 사용자 화면으로 이동 중...
-        </div>
+        <div className={styles.state}>일반 사용자 화면으로 이동 중...</div>
       ) : (
         <>
           {/* 1. 관리자 사이드바 (서랍 기능 활성화 및 접힘 접두사 연동) */}
@@ -83,19 +80,13 @@ export default function AdminLayout({
           />
 
           {/* 2. 관리자 메인 영역 (사이드바 공간 확보 - 접힘 상태에 따라 동적 조절) */}
-          <div
-            className={`flex-1 flex flex-col min-h-screen transition-all duration-200 ${
-              isSidebarCollapsed ? "lg:pl-[72px]" : "lg:pl-60"
-            }`}
-          >
+          <div className={styles.main} data-collapsed={isSidebarCollapsed}>
             <AdminHeader
               onMenuToggle={() => setSidebarOpen(!sidebarOpen)}
               user={user}
               onLogout={handleLogout}
             />
-            <main className="flex-1 p-4 lg:p-8 w-full max-w-[1440px] mx-auto">
-              {children}
-            </main>
+            <main className={styles.content}>{children}</main>
           </div>
         </>
       )}

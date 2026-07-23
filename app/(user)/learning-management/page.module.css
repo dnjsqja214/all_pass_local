@@ -1,0 +1,59 @@
+.page {
+  composes: shell from "../../../features/shared/styles/pageShell.module.css";
+  padding-bottom: 80px;
+}
+
+/* 데스크톱에서만 보이는 페이지 제목 */
+.pageTitle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+
+  .title {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  .description {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+
+  .sideColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page {
+    padding-bottom: 32px;
+  }
+
+  .pageTitle {
+    display: flex;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+
+    .mainColumn {
+      grid-column: span 7 / span 7;
+    }
+
+    .sideColumn {
+      grid-column: span 5 / span 5;
+    }
+  }
+}

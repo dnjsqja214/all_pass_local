@@ -8,6 +8,7 @@ import { SubjectScoreList } from "../../../features/learning/components/SubjectS
 import { PassingRuleCard } from "../../../features/learning/components/PassingRuleCard";
 import { ExamHistoryList } from "../../../features/learning/components/ExamHistoryList";
 import { WeakTopicList } from "../../../features/learning/components/WeakTopicList";
+import styles from "./page.module.css";
 
 export default function LearningManagement() {
   const { examAttempts, scoreTrend, wrongNotes } = useDashboardData("profile");
@@ -68,13 +69,11 @@ export default function LearningManagement() {
   }));
 
   return (
-    <div className="flex-1 px-4 pt-6 pb-20 md:px-8 xl:p-8 space-y-6">
+    <div className={styles.page}>
       {/* 학습관리 타이틀 (데스크톱용) */}
-      <div className="hidden xl:flex flex-col gap-1 mb-2">
-        <h1 className="text-[28px] font-black text-[var(--color-text-primary)] tracking-tight">
-          학습관리 대시보드
-        </h1>
-        <p className="text-[14px] text-[var(--color-text-secondary)] font-medium">
+      <div className={styles.pageTitle}>
+        <h1 className={styles.title}>학습관리 대시보드</h1>
+        <p className={styles.description}>
           회차별 시험 성적 추이와 합격 기준 부합 여부를 한눈에 진단합니다.
         </p>
       </div>
@@ -88,14 +87,14 @@ export default function LearningManagement() {
       />
 
       {/* 2. 상세 지표 그리드 */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className={styles.metrics}>
         {/* 좌측: 차트 */}
-        <div className="xl:col-span-7">
+        <div className={styles.mainColumn}>
           <ScoreTrendChart trendData={trendData} />
         </div>
 
         {/* 우측: 합격 판정 & 과목 점수 */}
-        <div className="xl:col-span-5 flex flex-col gap-6">
+        <div className={styles.sideColumn}>
           <PassingRuleCard
             totalScore={latestAttempt ? latestAttempt.totalScore : 0}
             subjectScores={subjectScoresMapped}
@@ -104,11 +103,11 @@ export default function LearningManagement() {
         </div>
 
         {/* 하단: 취약 단원 & 시험 이력 */}
-        <div className="xl:col-span-5">
+        <div className={styles.sideColumn}>
           <WeakTopicList weakTopics={weakTopicsMapped} />
         </div>
-        
-        <div className="xl:col-span-7">
+
+        <div className={styles.mainColumn}>
           <ExamHistoryList history={examHistoryMapped} />
         </div>
       </div>

@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "../features/theme/themes/light.css";
 import "../features/theme/themes/dark.css";
-import { ThemeProvider } from "../features/theme/provider/ThemeProvider";
+import { ThemeProvider } from "@/features/theme/provider/ThemeProvider";
+import React from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,9 +30,9 @@ export default function RootLayout({
     <html
       lang="ko"
       data-theme="light"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
-      <body className="min-h-full flex flex-col">
+      <body>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

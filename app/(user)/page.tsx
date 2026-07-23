@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ActiveStudyCard } from "../../features/dashboard/components/ActiveStudyCard";
-import { ExamDDayCard } from "../../features/dashboard/components/ExamDDayCard";
-import { useDashboardData } from "../../features/dashboard/hooks/useDashboardData";
-import { ExamSolvingModal } from "../../features/exam/components/ExamSolvingModal";
-import { ExamRegistration, examRegistrationService } from "../../features/exam/services/examRegistrationService";
+import { ActiveStudyCard } from "@/features/dashboard/components/ActiveStudyCard";
+import { ExamDDayCard } from "@/features/dashboard/components/ExamDDayCard";
+import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData";
+import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
+import { ExamRegistration, examRegistrationService } from "@/features/exam/services/examRegistrationService";
+import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
@@ -26,13 +27,22 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex-1 px-5 pt-6 pb-6 md:px-8 xl:p-8 space-y-6 text-[var(--color-text-primary)]">
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-8">
-        <div className="xl:col-span-7 space-y-6">
-          <ActiveStudyCard closestRegistration={closestRegistration} onStart={setSolving} onApplyExamClick={() => router.push("/exam-registration?openForm=true")} />
-          <section className="space-y-3"><h3 className="text-[14px] font-bold text-[var(--color-primary)] tracking-widest uppercase">회차별 성적 현황</h3><div className="bg-[var(--color-card-background)] rounded-2xl border border-[var(--color-border)] p-10 text-center text-[13px] text-[var(--color-text-secondary)]">제출 완료된 시험 성적이 없습니다.</div></section>
+    <div className={styles.page}>
+      <div className={styles.layout}>
+        <div className={styles.mainColumn}>
+          <ActiveStudyCard
+            closestRegistration={closestRegistration}
+            onStart={setSolving}
+            onApplyExamClick={() => router.push("/exam-registration?openForm=true")}
+          />
+          <section className={styles.scoreSection}>
+            <h3 className={styles.sectionTitle}>회차별 성적 현황</h3>
+            <div className={styles.emptyBox}>제출 완료된 시험 성적이 없습니다.</div>
+          </section>
         </div>
-        <div className="xl:col-span-5 space-y-6"><ExamDDayCard {...examDDayInfo} /></div>
+        <div className={styles.sideColumn}>
+          <ExamDDayCard {...examDDayInfo} />
+        </div>
       </div>
       {solving ? <ExamSolvingModal registrationId={solving.id} isOpen onClose={() => setSolving(null)} onSubmitted={() => setClosestRegistration(null)} /> : null}
     </div>

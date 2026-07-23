@@ -1,17 +1,39 @@
-@reference "../../../app/globals.css";
-
 .grid {
-  @apply grid grid-cols-3 gap-3 w-full;
-}
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: 100%;
 
-.item {
-  @apply bg-white border border-[#EDEDED] rounded-[20px] py-4 px-2 shadow-[0_2px_8px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center gap-1.5 transition-all hover:scale-[1.02];
-}
+  .item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 8px;
+    border: 1px solid #ededed;
+    border-radius: 20px;
+    background: var(--color-card-background);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.02);
+    transition: transform 150ms ease;
 
-.value {
-  @apply text-[22px] font-extrabold text-[#1A1A1A] tracking-tight leading-none;
-}
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
 
-.label {
-  @apply text-[12px] text-[#8E8E8E] font-bold tracking-tight;
+  .value {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  .label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #8e8e8e;
+  }
 }

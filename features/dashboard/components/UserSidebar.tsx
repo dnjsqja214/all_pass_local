@@ -27,7 +27,6 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
 
   // SVG 아이콘 맵퍼
   const getIcon = (id: string) => {
-    const iconClass = "w-5 h-5 shrink-0";
     switch (id) {
       case "today":
         return (
@@ -37,7 +36,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className={iconClass}
+            className={styles.navIcon}
           >
             <path
               strokeLinecap="round"
@@ -54,7 +53,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className={iconClass}
+            className={styles.navIcon}
           >
             <path
               strokeLinecap="round"
@@ -71,7 +70,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className={iconClass}
+            className={styles.navIcon}
           >
             <path
               strokeLinecap="round"
@@ -88,7 +87,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className={iconClass}
+            className={styles.navIcon}
           >
             <path
               strokeLinecap="round"
@@ -105,7 +104,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className={iconClass}
+            className={styles.navIcon}
           >
             <path
               strokeLinecap="round"
@@ -122,7 +121,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className={iconClass}
+            className={styles.navIcon}
           >
             <path
               strokeLinecap="round"
@@ -137,34 +136,14 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
   };
 
   return (
-    <aside
-      className={`${styles.sidebar} ${
-        isCollapsed ? "xl:w-[72px] xl:p-3" : "xl:w-64 xl:p-6"
-      } w-64 p-6`}
-    >
-      <div className="flex flex-col gap-8">
+    <aside className={styles.sidebar} data-collapsed={isCollapsed}>
+      <div className={styles.top}>
         {/* 로고 영역 (접힘 상태에 따라 수직 정렬로 변환) */}
-        <div
-          className={`flex items-center transition-all duration-200 ${
-            isCollapsed
-              ? "flex-col gap-4 px-0 pb-3 border-b border-[#ffffff0a] items-center"
-              : "justify-between px-2 border-b border-[#ffffff0a] pb-3"
-          }`}
-        >
-          <div className="flex items-center gap-3">
-            <div className={styles.logoBadge}>
-              A
-            </div>
-            <span
-              className={`transition-all duration-200 overflow-hidden whitespace-nowrap ${
-                isCollapsed
-                  ? "opacity-0 invisible w-0 max-w-0"
-                  : "opacity-100 visible max-w-xs"
-              }`}
-            >
-              <span className={styles.logoBrand}>
-                All Pass
-              </span>
+        <div className={styles.logoArea}>
+          <div className={styles.logoGroup}>
+            <div className={styles.logoBadge}>A</div>
+            <span className={styles.collapsible}>
+              <span className={styles.logoBrand}>All Pass</span>
             </span>
           </div>
 
@@ -173,52 +152,38 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             type="button"
             onClick={onToggleCollapse}
             aria-label={isCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
-            className="hidden xl:flex items-center justify-center w-10 h-10 rounded-xl border border-[#ffffff15] text-[#A8A7A5] hover:text-white hover:bg-[#ffffff0A] transition-all duration-200 cursor-pointer focus:outline-none shrink-0"
+            className={styles.toggleButton}
           >
             {isCollapsed ? (
-              <PanelLeftOpen className="w-5 h-5" />
+              <PanelLeftOpen className={styles.toggleIcon} />
             ) : (
-              <PanelLeftClose className="w-5 h-5" />
+              <PanelLeftClose className={styles.toggleIcon} />
             )}
           </button>
         </div>
 
         {/* 네비게이션 메뉴 */}
         <nav className={styles.nav}>
-          {USER_MENU_ITEMS.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <Link
-                key={item.id}
-                href={item.path}
-                className={`${styles.navLink} ${isActive ? styles.navActive : styles.navInactive} ${
-                  isCollapsed ? "xl:justify-center xl:px-0 xl:gap-0" : "px-4"
-                }`}
-                title={isCollapsed ? item.label : undefined}
-              >
-                {getIcon(item.id)}
-                <span
-                  className={`transition-all duration-200 overflow-hidden whitespace-nowrap ${
-                    isCollapsed
-                      ? "xl:opacity-0 xl:invisible xl:w-0 xl:max-w-0 xl:ml-0"
-                      : "opacity-100 visible max-w-xs ml-3"
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
+          {USER_MENU_ITEMS.map((item) => (
+            <Link
+              key={item.id}
+              href={item.path}
+              className={styles.navLink}
+              data-active={activeTab === item.id}
+              title={isCollapsed ? item.label : undefined}
+            >
+              {getIcon(item.id)}
+              <span className={styles.collapsible}>{item.label}</span>
+            </Link>
+          ))}
         </nav>
       </div>
 
       {/* 하단 로그아웃 버튼 */}
-      <div className={`border-t border-[#FFFFFF15] pt-4 mt-auto ${isCollapsed ? "xl:flex xl:justify-center" : ""}`}>
+      <div className={styles.bottom}>
         <button
           onClick={onLogout}
-          className={`w-full flex items-center rounded-xl text-[14px] font-bold text-[#A8A7A5] hover:text-white hover:bg-[#FFFFFF0A] transition-all duration-200 cursor-pointer text-left ${
-            isCollapsed ? "xl:justify-center xl:px-0 xl:py-3.5 xl:gap-0" : "px-4 py-3.5"
-          }`}
+          className={styles.logoutButton}
           title={isCollapsed ? "로그아웃" : undefined}
         >
           <svg
@@ -227,7 +192,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             viewBox="0 0 24 24"
             strokeWidth={2}
             stroke="currentColor"
-            className="w-5 h-5 text-[#A8A7A5] shrink-0"
+            className={styles.logoutIcon}
           >
             <path
               strokeLinecap="round"
@@ -235,15 +200,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
               d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9"
             />
           </svg>
-          <span
-            className={`transition-all duration-200 overflow-hidden whitespace-nowrap ${
-              isCollapsed
-                ? "xl:opacity-0 xl:invisible xl:w-0 xl:max-w-0 xl:ml-0"
-                : "opacity-100 visible max-w-xs ml-3.5"
-            }`}
-          >
-            로그아웃
-          </span>
+          <span className={styles.collapsible}>로그아웃</span>
         </button>
       </div>
     </aside>

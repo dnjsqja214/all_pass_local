@@ -1,0 +1,55 @@
+.timer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid #2c2a27;
+  border-radius: 16px;
+  background: var(--color-dark-background);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .caption {
+    font-size: 13px;
+    font-weight: 500;
+    color: #9ca3af;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  .remaining {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .remainingLabel {
+    margin-bottom: 2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+  }
+
+  .clock {
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  /* 10분 이하 경고. tsx 는 data-warning 만 넘긴다. */
+  &[data-warning="true"] .clock {
+    color: var(--color-danger);
+  }
+}

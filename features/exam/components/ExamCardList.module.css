@@ -1,0 +1,185 @@
+.scroller {
+  flex: 1 1 0;
+  min-height: 0;
+  padding-right: 4px;
+  padding-bottom: 96px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-card-background);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+    transition: box-shadow 150ms ease, border-color 150ms ease;
+
+    &:hover {
+      border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+  }
+
+  .info {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .roundBadge {
+    align-self: flex-start;
+    padding: 2px 8px;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+    color: var(--color-primary);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .title {
+    overflow: hidden;
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+
+    .metaItem {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .metaIcon {
+      width: 14px;
+      height: 14px;
+    }
+
+    .divider {
+      color: var(--color-border);
+    }
+  }
+
+  .actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-page-background);
+  }
+
+  .scoreBox {
+    min-width: 70px;
+    text-align: left;
+  }
+
+  /* 점수 색은 tsx 가 data-grade 만 넘긴다. */
+  .score {
+    font-size: 12px;
+    font-weight: 700;
+
+    &[data-grade="high"] {
+      color: var(--color-success);
+    }
+
+    &[data-grade="mid"] {
+      color: #d48a00;
+    }
+
+    &[data-grade="low"] {
+      color: var(--color-danger);
+    }
+
+    .scoreValue {
+      margin-top: 2px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+  }
+
+  .noScore {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+  }
+
+  .selectButton {
+    flex-shrink: 0;
+    min-height: 42px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-hover);
+    }
+
+    &:disabled {
+      border: 1px solid var(--color-border);
+      background: var(--color-page-background);
+      color: #a8a7a5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .scroller {
+    .card {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .actions {
+      justify-content: flex-end;
+      padding-top: 0;
+      border-top: none;
+    }
+
+    .scoreBox {
+      text-align: right;
+    }
+  }
+}
+
+@media (min-width: 1280px) {
+  .scroller {
+    padding-bottom: 24px;
+  }
+}

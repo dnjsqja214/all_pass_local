@@ -1,0 +1,29 @@
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #f6eaa9;
+  border-radius: 12px;
+  background: #fffdf0;
+  color: #785e08;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+
+  .icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    color: #a88a1a;
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.625;
+    letter-spacing: -0.01em;
+  }
+}

@@ -1,0 +1,54 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .headerText {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .title {
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  .description {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  .countBadge {
+    flex-shrink: 0;
+    align-self: flex-start;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    background: var(--color-text-primary);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+}
+
+@media (min-width: 640px) {
+  .page .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .page .countBadge {
+    align-self: center;
+  }
+}

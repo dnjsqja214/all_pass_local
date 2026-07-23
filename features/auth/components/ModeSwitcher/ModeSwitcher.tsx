@@ -1,4 +1,5 @@
 import Link from "next/link";
+import styles from "./ModeSwitcher.module.css";
 
 type AppMode = "user" | "admin";
 
@@ -25,30 +26,17 @@ export function ModeSwitcher({
   }
 
   return (
-    <nav
-      aria-label="화면 모드 전환"
-      className="inline-flex shrink-0 items-center rounded-lg border border-[#E4E0D9] bg-[#F6F4F0] p-1"
-    >
-      {modes.map(({ mode, label, href }) => {
-        const isActive = activeMode === mode;
-
-        return (
-          <Link
-            key={mode}
-            href={href}
-            aria-current={isActive ? "page" : undefined}
-            className={`rounded-md font-bold transition-colors ${
-              compact ? "px-2 py-1 text-[10px]" : "px-3 py-1.5 text-[11px]"
-            } ${
-              isActive
-                ? "bg-[#151515] text-white shadow-sm"
-                : "text-[#817D76] hover:bg-white hover:text-[#111111]"
-            }`}
-          >
-            {label}
-          </Link>
-        );
-      })}
+    <nav aria-label="화면 모드 전환" className={styles.switcher} data-compact={compact}>
+      {modes.map(({ mode, label, href }) => (
+        <Link
+          key={mode}
+          href={href}
+          aria-current={activeMode === mode ? "page" : undefined}
+          className={styles.link}
+        >
+          {label}
+        </Link>
+      ))}
     </nav>
   );
 }

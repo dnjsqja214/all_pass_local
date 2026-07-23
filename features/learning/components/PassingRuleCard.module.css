@@ -1,0 +1,107 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  height: 100%;
+  padding: 20px;
+  border: 1px solid #2c2a27;
+  border-radius: 16px;
+  background: var(--color-dark-background);
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .headRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .headLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .headTitle {
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #d1d5db;
+  }
+
+  .summary {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.625;
+    letter-spacing: -0.02em;
+    color: #f3f4f6;
+
+    .strongTotal {
+      font-size: 16px;
+      color: #ffffff;
+    }
+
+    .strongSubject {
+      font-size: 16px;
+      color: var(--color-primary);
+    }
+  }
+
+  .message {
+    margin-top: 8px;
+    padding: 12px;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    background: #262626;
+    color: #d1d5db;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.625;
+  }
+}
+
+/* 합격 판정은 tsx 가 data-state 만 넘기고 색은 여기서 정한다. */
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: var(--color-primary);
+
+  &[data-state="passed"] {
+    background: var(--color-success);
+  }
+
+  &[data-state="warning"] {
+    background: rgb(254 247 224 / 0.8);
+  }
+}
+
+.statusBadge {
+  padding: 2px 8px;
+  border: 1px solid #fcdddb;
+  border-radius: 4px;
+  background: #fdf1f0;
+  color: #b83a38;
+  font-size: 11px;
+  font-weight: 700;
+
+  &[data-state="passed"] {
+    border-color: #ceead6;
+    background: #e6f4ea;
+    color: #137333;
+  }
+
+  &[data-state="warning"] {
+    border-color: #feefc3;
+    background: #fef7e0;
+    color: #b06000;
+  }
+}

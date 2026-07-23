@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "./SubmitFooter.module.css";
 
 interface SubmitFooterProps {
   onSubmitClick: () => void;
@@ -7,13 +8,13 @@ interface SubmitFooterProps {
 
 export function SubmitFooter({ onSubmitClick, disabled = false }: SubmitFooterProps) {
   return (
-    <div className="fixed bottom-0 left-0 xl:left-64 right-0 bg-white border-t border-[#E4E0D9] px-4 py-3.5 flex justify-center z-30 shadow-md">
-      <div className="w-full max-w-md md:max-w-2xl xl:max-w-[1440px] flex justify-center">
+    <div className={styles.footer}>
+      <div className={styles.inner}>
         <button
           type="button"
           onClick={onSubmitClick}
           disabled={disabled}
-          className="w-full xl:w-auto xl:px-24 bg-[#C93A35] hover:bg-[#B82F2A] text-white text-[15px] font-extrabold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-[#C93A35] disabled:bg-[#E4E0D9] disabled:text-[#817D76] disabled:cursor-not-allowed"
+          className={styles.submitButton}
         >
           {/* Send 대체 인라인 SVG */}
           <svg
@@ -22,7 +23,7 @@ export function SubmitFooter({ onSubmitClick, disabled = false }: SubmitFooterPr
             viewBox="0 0 24 24"
             strokeWidth={2.5}
             stroke="currentColor"
-            className="w-4 h-4"
+            className={styles.icon}
           >
             <path
               strokeLinecap="round"

@@ -1,53 +1,100 @@
-@reference "../../../app/globals.css";
-
 .grid {
-  @apply grid grid-cols-4 sm:grid-cols-8 lg:grid-cols-4 gap-2.5 py-1;
-}
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 
-.seat {
-  @apply h-11 rounded-xl border flex flex-col items-center justify-center font-extrabold text-[13px];
+  .seat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .seatNumber {
+    margin-bottom: 2px;
+    font-size: 9px;
+    line-height: 1;
+    opacity: 0.75;
+  }
+
+  .seatStatus {
+    font-size: 12px;
+    line-height: 1;
+  }
 }
 
 .seatNormal {
-  @apply bg-[#E6F4EA] border-[#C2E7CD] text-[#137333];
+  border-color: #c2e7cd;
+  background: #e6f4ea;
+  color: #137333;
 }
 
 .seatLate {
-  @apply bg-[#FEF7E0] border-[#FADF91] text-[#B06000];
+  border-color: #fadf91;
+  background: #fef7e0;
+  color: #b06000;
 }
 
 .seatAbsent {
-  @apply bg-[#FDF1F0] border-[#FCDDDB] text-[#B83A38];
-}
-
-.seatNumber {
-  @apply text-[9px] opacity-75 leading-none mb-0.5;
-}
-
-.seatStatus {
-  @apply leading-none text-[12px];
+  border-color: #fcdddb;
+  background: #fdf1f0;
+  color: #b83a38;
 }
 
 .legend {
-  @apply flex justify-center gap-4 pt-3 border-t border-[#F6F4F0] text-[11px] font-bold text-[#817D76];
-}
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-page-background);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
 
-.legendItem {
-  @apply flex items-center gap-1.5;
-}
+  .legendItem {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
-.legendDot {
-  @apply w-2.5 h-2.5 rounded-full border;
+  .legendDot {
+    width: 10px;
+    height: 10px;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+  }
 }
 
 .legendDotNormal {
-  @apply bg-[#E6F4EA] border-[#C2E7CD];
+  border-color: #c2e7cd;
+  background: #e6f4ea;
 }
 
 .legendDotLate {
-  @apply bg-[#FEF7E0] border-[#FADF91];
+  border-color: #fadf91;
+  background: #fef7e0;
 }
 
 .legendDotAbsent {
-  @apply bg-[#FDF1F0] border-[#FCDDDB];
+  border-color: #fcdddb;
+  background: #fdf1f0;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

@@ -77,17 +77,15 @@ export function ExamSolvingModal({
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#F6F4F0] text-[14px] font-bold text-[#817D76]">
-        시험 세션을 준비하는 중입니다.
-      </div>
+      <div className={styles.fullScreenState}>시험 세션을 준비하는 중입니다.</div>
     );
   }
 
   if (error || !examInfo) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-[#F6F4F0] p-6 text-center">
-        <p className="text-[14px] font-bold text-[#D93D35]">{error ?? "시험 정보를 불러올 수 없습니다."}</p>
-        <button type="button" onClick={onClose} className="rounded-xl bg-[#151515] px-5 py-3 text-[13px] font-bold text-white cursor-pointer">
+      <div className={styles.fullScreenState}>
+        <p className={styles.errorText}>{error ?? "시험 정보를 불러올 수 없습니다."}</p>
+        <button type="button" onClick={onClose} className={styles.stateButton}>
           닫기
         </button>
       </div>
@@ -95,7 +93,7 @@ export function ExamSolvingModal({
   }
 
   return (
-    <div className={`${styles.modalOverlay} animate-in fade-in duration-200`}>
+    <div className={styles.modalOverlay}>
       {/* 상단바 (Sticky Header) */}
       <header className={styles.stickyHeader}>
         <div className={styles.headerLeft}>
@@ -113,13 +111,9 @@ export function ExamSolvingModal({
             <span className={styles.progressCountText}>
               제출 {markedCount} / {examInfo.totalQuestions}
             </span>
-            <div className={styles.saveStatusWrapper}>
-              <div
-                className={`${styles.saveStatusIndicator} ${
-                  saveStatus === "saved" ? "bg-[#3F7D4E]" : saveStatus === "error" ? "bg-[#D93D35]" : "bg-gray-400 animate-pulse"
-                }`}
-              />
-              <span className={saveStatus === "saved" ? "text-[#3F7D4E]" : saveStatus === "error" ? "text-[#D93D35]" : "text-gray-500"}>
+            <div className={styles.saveStatusWrapper} data-status={saveStatus}>
+              <div className={styles.saveStatusIndicator} />
+              <span>
                 {saveStatus === "saved" ? "자동 저장됨" : saveStatus === "error" ? "저장 실패" : "저장 중..."}
               </span>
             </div>
@@ -128,11 +122,7 @@ export function ExamSolvingModal({
           {/* 타이머 */}
           <div className={styles.timerWrapper}>
             <span className={styles.timerLabel}>남은 시간</span>
-            <span
-              className={`${styles.timerText} ${
-                remainingSeconds <= 600 ? "text-[#D93D35]" : "text-[#111111]"
-              }`}
-            >
+            <span className={styles.timerText} data-warning={remainingSeconds <= 600}>
               {Math.floor(remainingSeconds / 60).toString().padStart(2, "0")}:
               {(remainingSeconds % 60).toString().padStart(2, "0")}
             </span>
@@ -151,7 +141,7 @@ export function ExamSolvingModal({
             onClick={handleCloseClick}
             className={styles.btnClose}
           >
-            <X className="w-6 h-6" />
+            <X className={styles.closeIcon} />
           </button>
         </div>
       </header>

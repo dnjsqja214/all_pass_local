@@ -8,6 +8,7 @@ import { MemberTable } from "./components/MemberTable";
 import { MemberMobileCardList } from "./components/MemberMobileCardList";
 import { MemberDetailDialog } from "./components/MemberDetailDialog";
 import { Member } from "./types/member";
+import styles from "./AdminMembersPage.module.css";
 
 export function AdminMembersPage() {
   const {
@@ -26,20 +27,16 @@ export function AdminMembersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className={styles.page}>
       {/* 1. 헤더 영역 */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-[26px] font-black text-[#111111] tracking-tight">
-            회원 관리
-          </h1>
-          <p className="text-[13px] text-[#817D76] font-semibold">
+      <div className={styles.header}>
+        <div className={styles.headerText}>
+          <h1 className={styles.title}>회원 관리</h1>
+          <p className={styles.description}>
             등록된 사용자를 검색하고 학습 현황을 확인할 수 있습니다.
           </p>
         </div>
-        <div className="bg-[#111111] text-white text-[12px] font-extrabold px-4 py-2 rounded-full tracking-wide shrink-0 self-start sm:self-center">
-          전체 회원 {filteredMembers.length}명
-        </div>
+        <div className={styles.countBadge}>전체 회원 {filteredMembers.length}명</div>
       </div>
 
       {/* 2. 검색 필터 */}

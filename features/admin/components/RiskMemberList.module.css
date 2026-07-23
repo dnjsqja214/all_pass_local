@@ -1,49 +1,109 @@
-@reference "../../../app/globals.css";
-
 .listWrapper {
-  @apply flex flex-col divide-y divide-[#F6F4F0];
-}
+  display: flex;
+  flex-direction: column;
 
-.rowItem {
-  @apply flex justify-between items-center py-3.5 first:pt-1 last:pb-1;
-}
+  .rowItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-top: 1px solid var(--color-page-background);
 
-.infoWrapper {
-  @apply flex flex-col sm:flex-row sm:items-center gap-2 min-w-0;
+    &:first-child {
+      padding-top: 4px;
+      border-top: 0;
+    }
+
+    &:last-child {
+      padding-bottom: 4px;
+    }
+  }
+
+  .infoWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .textWrapper {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .memberName {
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--color-text-primary);
+  }
+
+  .reason {
+    overflow: hidden;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .actionButton {
+    flex-shrink: 0;
+    margin-left: 8px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-text-primary);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background: #222222;
+    }
+  }
 }
 
 .badgeBase {
-  @apply text-[10px] font-extrabold px-2 py-0.5 rounded-md border shrink-0 w-fit;
+  flex-shrink: 0;
+  width: fit-content;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .badgeFailRisk {
-  @apply bg-[#FDF1F0] text-[#B83A38] border-[#FCDDDB];
+  border-color: #fcdddb;
+  background: #fdf1f0;
+  color: #b83a38;
 }
 
 .badgeUnsubmitted {
-  @apply bg-[#F1F0EC] text-[#817D76] border-[#E4E0D9];
+  border-color: var(--color-border);
+  background: #f1f0ec;
+  color: var(--color-text-secondary);
 }
 
 .badgeWrongRepeat {
-  @apply bg-[#FEF7E0] text-[#B06000] border-[#FADF91];
+  border-color: #fadf91;
+  background: #fef7e0;
+  color: #b06000;
 }
 
 .badgeDefault {
-  @apply bg-gray-100 text-gray-800 border-gray-200;
+  border-color: #e5e7eb;
+  background: #f3f4f6;
+  color: #1f2937;
 }
 
-.textWrapper {
-  @apply flex flex-col min-w-0;
-}
-
-.memberName {
-  @apply text-[13px] font-bold text-[#111111] leading-tight;
-}
-
-.reason {
-  @apply text-[11px] text-[#817D76] truncate mt-0.5;
-}
-
-.actionButton {
-  @apply px-3.5 py-1.5 bg-[#111111] hover:bg-[#222222] text-white text-[12px] font-bold rounded-lg transition-colors cursor-pointer shrink-0 ml-2;
+@media (min-width: 640px) {
+  .listWrapper .infoWrapper {
+    flex-direction: row;
+    align-items: center;
+  }
 }

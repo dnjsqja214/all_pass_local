@@ -1,0 +1,137 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 20px;
+  height: 100%;
+  min-height: 0;
+  padding: 24px 16px 0;
+  overflow: hidden;
+
+  /* 모달로 띄울 때는 사방 여백을 동일하게 */
+  &[data-modal="true"] {
+    padding: 24px;
+  }
+
+  .header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+
+    .title {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+
+    .closeButton {
+      padding: 8px;
+      border: none;
+      border-radius: 9999px;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: background-color 150ms ease, color 150ms ease;
+
+      &:hover {
+        background: var(--color-border);
+        color: var(--color-text-primary);
+      }
+
+      .closeIcon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  .filter {
+    flex-shrink: 0;
+  }
+
+  .resultCount {
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+
+    .countValue {
+      color: var(--color-primary);
+      font-weight: 900;
+    }
+  }
+
+  .state {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+    text-align: center;
+
+    .errorText {
+      color: var(--color-danger);
+    }
+
+    .retryButton {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      background: var(--color-dark-background);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  }
+
+  .emptyScroller {
+    flex: 1 1 0;
+    overflow-y: auto;
+  }
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.6);
+
+  .modalCard {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 56rem;
+    height: 85vh;
+    border: 1px solid var(--color-border);
+    border-radius: 24px;
+    background: var(--color-page-background);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 768px) {
+  .page {
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .page {
+    padding: 32px;
+  }
+}

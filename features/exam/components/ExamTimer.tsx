@@ -1,4 +1,5 @@
 import React from "react";
+import styles from "./ExamTimer.module.css";
 
 interface ExamTimerProps {
   title: string;
@@ -16,20 +17,14 @@ export function ExamTimer({ title, remainingSeconds }: ExamTimerProps) {
   const isWarning = remainingSeconds <= 600; // 10분 이하 여부
 
   return (
-    <div className="bg-[#151515] text-white rounded-2xl p-5 border border-[#2C2A27] flex justify-between items-center shadow-md">
-      <div className="flex flex-col gap-1">
-        <span className="text-[13px] text-gray-400 font-medium">실시간 문제풀이</span>
-        <h3 className="text-[18px] font-black text-white tracking-tight">{title}</h3>
+    <div className={styles.timer} data-warning={isWarning}>
+      <div className={styles.info}>
+        <span className={styles.caption}>실시간 문제풀이</span>
+        <h3 className={styles.title}>{title}</h3>
       </div>
-      <div className="text-right flex flex-col items-end">
-        <span className="text-[11px] text-gray-400 font-semibold mb-0.5">남은 시간</span>
-        <span
-          className={`text-[28px] font-black leading-none tracking-tighter ${
-            isWarning ? "text-[#D93D35]" : "text-white"
-          }`}
-        >
-          {formatTime(remainingSeconds)}
-        </span>
+      <div className={styles.remaining}>
+        <span className={styles.remainingLabel}>남은 시간</span>
+        <span className={styles.clock}>{formatTime(remainingSeconds)}</span>
       </div>
     </div>
   );

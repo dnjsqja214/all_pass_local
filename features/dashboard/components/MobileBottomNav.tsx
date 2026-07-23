@@ -18,9 +18,8 @@ export function MobileBottomNav() {
 
   const activeTab = getActiveTab();
 
-  // SVG 아이콘 맵퍼
-  const getIcon = (id: string, isActive: boolean) => {
-    const strokeColor = isActive ? "#B83A38" : "#A8A7A5";
+  // SVG 아이콘 맵퍼. 색은 부모(.navItem)에서 상속받는다.
+  const getIcon = (id: string) => {
     switch (id) {
       case "today":
         return (
@@ -29,8 +28,8 @@ export function MobileBottomNav() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
-            stroke={strokeColor}
-            className="w-6 h-6"
+            stroke="currentColor"
+            className={styles.icon}
           >
             <path
               strokeLinecap="round"
@@ -46,8 +45,8 @@ export function MobileBottomNav() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
-            stroke={strokeColor}
-            className="w-6 h-6"
+            stroke="currentColor"
+            className={styles.icon}
           >
             <path
               strokeLinecap="round"
@@ -68,8 +67,8 @@ export function MobileBottomNav() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
-            stroke={strokeColor}
-            className="w-6 h-6"
+            stroke="currentColor"
+            className={styles.icon}
           >
             <path
               strokeLinecap="round"
@@ -85,8 +84,8 @@ export function MobileBottomNav() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
-            stroke={strokeColor}
-            className="w-6 h-6"
+            stroke="currentColor"
+            className={styles.icon}
           >
             <path
               strokeLinecap="round"
@@ -102,8 +101,8 @@ export function MobileBottomNav() {
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}
-            stroke={strokeColor}
-            className="w-6 h-6"
+            stroke="currentColor"
+            className={styles.icon}
           >
             <path
               strokeLinecap="round"
@@ -119,22 +118,17 @@ export function MobileBottomNav() {
 
   return (
     <div className={styles.container}>
-      {USER_MENU_ITEMS.map((item) => {
-        const isActive = activeTab === item.id;
-        return (
-          <Link
-            key={item.id}
-            href={item.path}
-            className={styles.navItem}
-          >
-            {getIcon(item.id, isActive)}
-            <span className={`${styles.label} ${isActive ? styles.labelActive : styles.labelInactive}`}>
-              {item.label}
-            </span>
-          </Link>
-        );
-      })}
+      {USER_MENU_ITEMS.map((item) => (
+        <Link
+          key={item.id}
+          href={item.path}
+          className={styles.navItem}
+          data-active={activeTab === item.id}
+        >
+          {getIcon(item.id)}
+          <span className={styles.label}>{item.label}</span>
+        </Link>
+      ))}
     </div>
   );
 }
-

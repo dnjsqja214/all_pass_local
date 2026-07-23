@@ -1,0 +1,129 @@
+.wrapper {
+  display: none;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-card-background);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+  overflow: hidden;
+
+  .scroller {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  thead tr {
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-page-background);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  th,
+  td {
+    padding: 16px 20px;
+  }
+
+  tbody {
+    font-size: 14px;
+
+    tr {
+      border-top: 1px solid var(--color-border);
+      transition: background-color 150ms ease;
+
+      &:hover {
+        background: color-mix(in srgb, var(--color-page-background) 10%, transparent);
+      }
+    }
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  .name {
+    font-weight: 700;
+    color: var(--color-text-primary);
+  }
+
+  .email {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    word-break: break-all;
+  }
+
+  .date {
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .studyTime {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* 점수 색은 data-grade 로만 갈린다. */
+  .score {
+    text-align: center;
+    color: var(--color-text-primary);
+    font-weight: 600;
+
+    &[data-grade="high"] {
+      color: var(--color-success);
+      font-weight: 800;
+    }
+
+    &[data-grade="low"] {
+      color: var(--color-danger);
+      font-weight: 800;
+    }
+  }
+
+  .wrongCount {
+    color: var(--color-primary);
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .actionCell {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .detailButton {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-text-primary);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 200ms ease;
+
+    &:hover {
+      background: var(--color-primary);
+    }
+  }
+
+  .emptyCell {
+    padding: 64px 24px;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .wrapper {
+    display: block;
+  }
+}

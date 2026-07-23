@@ -1,5 +1,6 @@
 import React from "react";
 import { ScoreTrendPoint } from "../types";
+import styles from "./ScoreTrendChart.module.css";
 
 interface ScoreTrendChartProps {
   trendData: ScoreTrendPoint[];
@@ -43,13 +44,13 @@ export function ScoreTrendChart({
     const latest = trendData[pointsCount - 1];
     const passed = latest.score >= 180;
     return (
-      <span className="text-[13px] text-[#111111] font-medium leading-relaxed tracking-tight">
+      <span className={styles.summary}>
         최근 회차 결과 —{" "}
-        <strong className={passed ? "text-[#3F7D4E]" : "text-[#C93A35]"}>
+        <strong className={styles.highlight} data-passed={passed}>
           {latest.label} {latest.score}점
         </strong>
         ,{" "}
-        <strong className={passed ? "text-[#3F7D4E]" : "text-[#817D76]"}>
+        <strong className={styles.verdict} data-passed={passed}>
           {passed ? "합격선 통과" : "합격선 미달"}
         </strong>
       </span>
@@ -57,20 +58,16 @@ export function ScoreTrendChart({
   };
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-[#E4E0D9] shadow-sm flex flex-col gap-5 h-full">
-      <div className="flex flex-col gap-1 border-b border-[#F6F4F0] pb-3">
-        <h3 className="text-[17px] font-bold text-[#111111] tracking-tight">
-          {title}
-        </h3>
-        <p className="text-[12px] text-[#817D76]">
-          {subtitle}
-        </p>
+    <div className={styles.card}>
+      <div className={styles.head}>
+        <h3 className={styles.title}>{title}</h3>
+        <p className={styles.subtitle}>{subtitle}</p>
       </div>
 
       {/* SVG 선형 차트 영역 */}
-      <div className="w-full bg-[#F6F4F0]/30 rounded-xl p-3 flex justify-center">
+      <div className={styles.chartBox}>
         {pointsCount > 0 ? (
-          <svg viewBox="0 0 400 180" className="w-full max-w-[450px] overflow-visible">
+          <svg viewBox="0 0 400 180" className={styles.chart}>
             {/* 가로 그리드선 및 점수 라벨 */}
             <line x1="40" y1="150" x2="380" y2="150" stroke="#E4E0D9" strokeDasharray="3 3" />
             <text x="30" y="154" fill="#817D76" fontSize="10" textAnchor="end">100</text>
@@ -137,16 +134,12 @@ export function ScoreTrendChart({
             })}
           </svg>
         ) : (
-          <div className="h-[180px] flex items-center justify-center text-[13px] text-[#817D76] font-medium">
-            점수 기록이 없습니다.
-          </div>
+          <div className={styles.empty}>점수 기록이 없습니다.</div>
         )}
       </div>
 
       {/* 하단 격려 및 정보 문구 */}
-      <div className="bg-[#F6F4F0] p-4 rounded-xl border border-[#E4E0D9] text-center mt-auto">
-        {getEncouragementText()}
-      </div>
+      <div className={styles.footer}>{getEncouragementText()}</div>
     </div>
   );
 }

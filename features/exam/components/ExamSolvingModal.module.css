@@ -1,125 +1,411 @@
-@reference "../../../app/globals.css";
-
+/* 응시 모달 — 전체 화면을 덮는 시험지 화면 */
 .modalOverlay {
-  @apply fixed inset-0 bg-[#F6F4F0] z-50 overflow-y-auto flex flex-col;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--color-page-background);
+
+  /* 상단 고정 헤더 */
+  .stickyHeader {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-card-background);
+
+    .headerLeft,
+    .headerRight {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .headerStatusBadge {
+      padding: 2px 8px;
+      border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);
+      border-radius: 4px;
+      background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+      color: var(--color-primary);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .headerTitleText {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--color-text-primary);
+    }
+
+    .progressWrapper,
+    .timerWrapper {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      background: var(--color-page-background);
+    }
+
+    .progressWrapper {
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .progressCountText {
+      margin-right: 4px;
+      padding-right: 12px;
+      border-right: 1px solid var(--color-border);
+      font-weight: 800;
+      color: var(--color-text-primary);
+    }
+
+    .saveStatusWrapper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+    }
+
+    .saveStatusIndicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 9999px;
+      background: var(--color-text-secondary);
+      animation: savePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* 저장 상태 색은 tsx 가 아니라 data-status 로 갈린다. */
+    .saveStatusWrapper[data-status="saved"] {
+      color: var(--color-success);
+
+      .saveStatusIndicator {
+        background: var(--color-success);
+        animation: none;
+      }
+    }
+
+    .saveStatusWrapper[data-status="error"] {
+      color: var(--color-danger);
+
+      .saveStatusIndicator {
+        background: var(--color-danger);
+        animation: none;
+      }
+    }
+
+    .timerWrapper {
+      gap: 8px;
+    }
+
+    .timerLabel {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+    }
+
+    .timerText {
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      color: var(--color-text-primary);
+
+      /* 10분 이하 경고 */
+      &[data-warning="true"] {
+        color: var(--color-danger);
+      }
+    }
+
+    .btnSubmit {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 12px;
+      background: var(--color-primary);
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 800;
+      outline: none;
+      box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+      cursor: pointer;
+      transition: background-color 150ms ease;
+
+      &:hover:not(:disabled) {
+        background: var(--color-primary-hover);
+      }
+
+      &:active:not(:disabled) {
+        background: #a72420;
+      }
+
+      &:disabled {
+        background: var(--color-border);
+        color: var(--color-text-secondary);
+        cursor: not-allowed;
+      }
+    }
+
+    .btnClose {
+      padding: 8px;
+      border: none;
+      border-radius: 9999px;
+      background: transparent;
+      color: var(--color-text-secondary);
+      outline: none;
+      cursor: pointer;
+      transition: background-color 150ms ease, color 150ms ease;
+
+      &:hover {
+        background: var(--color-page-background);
+        color: var(--color-text-primary);
+      }
+
+      .closeIcon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+
+  /* 본문 */
+  .bodyContainer {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+
+    .descWrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .descText {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-text-secondary);
+    }
+
+    .layoutGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: start;
+      gap: 24px;
+    }
+
+    .leftColumn {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+  }
 }
 
-.stickyHeader {
-  @apply flex justify-between items-center bg-white px-6 py-4 border-b border-[#E4E0D9] shrink-0 sticky top-0 z-40;
+/* 세션 준비 중 / 오류 전체화면 */
+.fullScreenState {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  background: var(--color-page-background);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+
+  .errorText {
+    color: var(--color-danger);
+  }
+
+  .stateButton {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    background: var(--color-dark-background);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
 }
 
-.headerLeft {
-  @apply flex items-center gap-3;
+@keyframes savePulse {
+  50% {
+    opacity: 0.5;
+  }
 }
 
-.headerStatusBadge {
-  @apply text-[11px] font-extrabold text-[#C93A35] bg-[#C93A35]/5 border border-[#C93A35]/15 px-2 py-0.5 rounded uppercase tracking-wider;
-}
-
-.headerTitleText {
-  @apply text-[18px] font-extrabold text-[#111111] tracking-tight;
-}
-
-.headerRight {
-  @apply flex items-center gap-3;
-}
-
-.progressWrapper {
-  @apply flex items-center gap-3 bg-[#F6F4F0] px-4 py-2 rounded-xl border border-[#E4E0D9] text-[13px];
-}
-
-.progressCountText {
-  @apply font-extrabold text-[#111111] border-r border-[#E4E0D9] pr-3 mr-1;
-}
-
-.saveStatusWrapper {
-  @apply flex items-center gap-1.5 font-bold;
-}
-
-.saveStatusIndicator {
-  @apply w-2 h-2 rounded-full;
-}
-
-.timerWrapper {
-  @apply flex items-center gap-2 bg-[#F6F4F0] px-4 py-2 rounded-xl border border-[#E4E0D9];
-}
-
-.timerLabel {
-  @apply text-[11px] font-bold text-[#817D76];
-}
-
-.timerText {
-  @apply text-[15px] font-black leading-none tracking-tighter;
-}
-
-.btnSubmit {
-  @apply py-2 px-4 bg-[#C93A35] hover:bg-[#B82F2A] active:bg-[#A72420] text-white font-extrabold text-[12.5px] rounded-xl transition-all cursor-pointer border-none outline-none shadow-xs disabled:bg-[#E4E0D9] disabled:text-[#817D76] disabled:cursor-not-allowed;
-}
-
-.btnClose {
-  @apply p-2 hover:bg-[#F6F4F0] rounded-full transition-colors cursor-pointer text-[#817D76] hover:text-[#111111] border-none outline-none bg-transparent;
-}
-
-.bodyContainer {
-  @apply flex-1 w-full max-w-[1440px] mx-auto px-4 pt-6 pb-20 md:px-8 xl:p-8 space-y-6;
-}
-
-.descWrapper {
-  @apply flex flex-col gap-1 mb-2;
-}
-
-.descText {
-  @apply text-[13px] text-[#817D76] font-semibold;
-}
-
-.layoutGrid {
-  @apply grid grid-cols-1 xl:grid-cols-12 gap-6 items-start;
-}
-
-.leftColumn {
-  @apply xl:col-span-4 flex flex-col gap-5;
-}
-
-.rightColumn {
-  @apply xl:col-span-8;
-}
-
+/* 이탈 확인 모달 */
 .confirmBackdrop {
-  @apply fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[60];
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 0.6);
+
+  .confirmCard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 24rem;
+    padding: 24px;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-card-background);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  }
+
+  .confirmFlex {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .confirmIconWrapper {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-top: 2px;
+    border-radius: 9999px;
+    background: #fffdf0;
+    color: var(--color-danger);
+  }
+
+  .confirmTitle {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  .confirmDesc {
+    margin-top: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  .confirmGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 8px;
+  }
+
+  .btnConfirmKeep,
+  .btnConfirmLeave {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 150ms ease;
+  }
+
+  .btnConfirmKeep {
+    border: 1px solid var(--color-border);
+    background: var(--color-page-background);
+    color: var(--color-text-primary);
+
+    &:hover {
+      background: #eae8e2;
+    }
+  }
+
+  .btnConfirmLeave {
+    border: none;
+    background: var(--color-primary);
+    color: #ffffff;
+
+    &:hover {
+      background: var(--color-primary-hover);
+    }
+  }
 }
 
-.confirmCard {
-  @apply bg-white rounded-2xl max-w-sm w-full p-6 border border-[#E4E0D9] shadow-2xl flex flex-col gap-4;
-}
-
-.confirmFlex {
-  @apply flex items-start gap-3;
-}
-
-.confirmIconWrapper {
-  @apply w-10 h-10 rounded-full bg-[#FFFDF0] flex items-center justify-center text-[#D93D35] shrink-0 mt-0.5;
-}
-
-.confirmTitle {
-  @apply text-[17px] font-extrabold text-[#111111] tracking-tight leading-tight;
-}
-
-.confirmDesc {
-  @apply text-[13px] text-[#817D76] font-medium mt-1;
-}
-
-.confirmGrid {
-  @apply grid grid-cols-2 gap-3 pt-2;
-}
-
-.btnConfirmKeep {
-  @apply w-full py-3 px-4 bg-[#F6F4F0] border border-[#E4E0D9] text-[#111111] font-bold text-[14px] rounded-xl hover:bg-[#EAE8E2] transition-colors cursor-pointer;
-}
-
-.btnConfirmLeave {
-  @apply w-full py-3 px-4 bg-[#C93A35] text-white font-bold text-[14px] rounded-xl hover:bg-[#B82F2A] transition-colors cursor-pointer;
-}
-
+/* 저장 실패 등 안내 토스트 */
 .toastWrapper {
-  @apply fixed bottom-24 left-1/2 -translate-x-1/2 bg-[#D93D35] text-white px-4 py-3 rounded-xl shadow-lg text-[13px] font-bold z-[55] flex items-center gap-2 animate-bounce;
+  position: fixed;
+  bottom: 96px;
+  left: 50%;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--color-danger);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  transform: translateX(-50%);
+  animation: toastBounce 1s infinite;
+}
+
+@keyframes toastBounce {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+@media (min-width: 768px) {
+  .modalOverlay .bodyContainer {
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .modalOverlay .bodyContainer {
+    padding: 32px;
+
+    .layoutGrid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .leftColumn {
+      grid-column: span 4 / span 4;
+    }
+
+    .rightColumn {
+      grid-column: span 8 / span 8;
+    }
+  }
 }

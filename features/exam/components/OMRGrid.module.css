@@ -1,13 +1,31 @@
-@reference "../../../app/globals.css";
-
 .gridContainer {
-  @apply bg-white rounded-2xl p-5 border border-[#E4E0D9] shadow-xs w-full;
+  width: 100%;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-card-background);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+
+  .gridSplit {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: 32px;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
-.gridSplit {
-  @apply grid grid-cols-1 lg:grid-cols-2 gap-x-8 xl:gap-x-12;
+@media (min-width: 1024px) {
+  .gridContainer .gridSplit {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.column {
-  @apply flex flex-col;
+@media (min-width: 1280px) {
+  .gridContainer .gridSplit {
+    column-gap: 48px;
+  }
 }

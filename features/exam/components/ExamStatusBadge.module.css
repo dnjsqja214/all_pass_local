@@ -1,0 +1,27 @@
+/* 상태별 색은 tsx 가 아니라 data-status 로 여기서 갈린다. */
+.badge {
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+
+  &[data-status="available"] {
+    border-color: color-mix(in srgb, var(--color-success) 20%, transparent);
+    background: color-mix(in srgb, var(--color-success) 10%, transparent);
+    color: var(--color-success);
+  }
+
+  &[data-status="completed"] {
+    border-color: color-mix(in srgb, var(--color-text-secondary) 20%, transparent);
+    background: color-mix(in srgb, var(--color-text-secondary) 10%, transparent);
+    color: var(--color-text-secondary);
+  }
+
+  &[data-status="scheduled"] {
+    border-color: color-mix(in srgb, var(--color-danger) 20%, transparent);
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+    color: var(--color-danger);
+  }
+}

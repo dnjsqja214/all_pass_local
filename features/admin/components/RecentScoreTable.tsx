@@ -76,7 +76,7 @@ export function RecentScoreTable({ scores }: RecentScoreTableProps) {
               <th className={styles.thCenter}>추이</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E4E0D9] text-[13px]">
+          <tbody className={styles.tbody}>
             {scores.map((score) => {
               // 과락(40점 미만) 여부 계산
               const hasFail = score.subjectScores.some(

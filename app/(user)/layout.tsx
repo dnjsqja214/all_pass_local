@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { UserSidebar } from "../../features/dashboard/components/UserSidebar";
-import { MobileBottomNav } from "../../features/dashboard/components/MobileBottomNav";
-import { useAuth } from "../../features/auth/hooks/useAuth";
-import { authService } from "../../features/auth/services/authService";
-import { ModeSwitcher } from "../../features/auth/components/ModeSwitcher";
-import { ThemeToggle } from "../../features/theme/components/ThemeToggle/ThemeToggle";
+import { UserSidebar } from "@/features/dashboard/components/UserSidebar";
+import { MobileBottomNav } from "@/features/dashboard/components/MobileBottomNav";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { authService } from "@/features/auth/services/authService";
+import { ModeSwitcher } from "@/features/auth/components/ModeSwitcher";
+import { ThemeToggle } from "@/features/theme/components/ThemeToggle/ThemeToggle";
+import styles from "./layout.module.css";
 
 export default function UserLayout({
   children,
@@ -107,15 +108,13 @@ export default function UserLayout({
   const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (
-    <div className="min-h-screen bg-[var(--color-page-background)] text-[var(--color-text-primary)] flex flex-col xl:flex-row w-full font-sans overflow-x-hidden">
+    <div className={styles.shell}>
       {authStatus === "loading" || authStatus === "unauthenticated" ? (
-        <div className="min-h-screen bg-[var(--color-page-background)] flex items-center justify-center font-bold text-[var(--color-text-secondary)] w-full">
-          로그인 확인 중...
-        </div>
+        <div className={styles.state}>로그인 확인 중...</div>
       ) : authStatus === "error" ? (
-        <div className="min-h-screen bg-[var(--color-page-background)] flex flex-col gap-2 items-center justify-center px-4 text-center w-full">
-          <p className="font-bold text-[var(--color-text-primary)]">로그인 상태를 확인할 수 없습니다.</p>
-          <p className="text-sm text-[var(--color-text-secondary)]">{authError}</p>
+        <div className={styles.state}>
+          <p className={styles.stateTitle}>로그인 상태를 확인할 수 없습니다.</p>
+          <p className={styles.stateDetail}>{authError}</p>
         </div>
       ) : (
         <>
@@ -127,46 +126,31 @@ export default function UserLayout({
           />
 
           {/* 2. 메인 영역 */}
-          <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
-            
+          <div className={styles.main}>
+
             {/* 상단 Header (데스크톱 전용) */}
-            <header className="hidden xl:flex justify-between items-center bg-[var(--color-card-background)] px-8 py-5 border-b border-[var(--color-border)] w-full">
-              <div className="flex items-center gap-3">
-                <h2 className="text-[20px] font-extrabold text-[var(--color-text-primary)] tracking-tight">
-                  {headerInfo.desktopTitle}
-                </h2>
-                <span className="text-[13px] font-semibold text-[var(--color-text-secondary)]">
-                  {headerInfo.desktopSub}
-                </span>
+            <header className={styles.desktopHeader}>
+              <div className={styles.titleGroup}>
+                <h2 className={styles.title}>{headerInfo.desktopTitle}</h2>
+                <span className={styles.subtitle}>{headerInfo.desktopSub}</span>
               </div>
-              <div className="flex items-center gap-4">
+              <div className={styles.actions}>
                 <ModeSwitcher activeMode="user" roles={user?.roles ?? []} />
-                <span className="bg-[#B83A38] text-white text-[13px] font-bold px-4 py-2 rounded-full tracking-wide">
-                  시험까지 D-{examDDay}
-                </span>
-                
+                <span className={styles.dDayBadge}>시험까지 D-{examDDay}</span>
+
                 {/* 상단 헤더로 옮겨진 사용자 프로필 카드 + 로그아웃 버튼 */}
-                <div className="flex items-center gap-4 border-l border-[var(--color-border)] pl-4">
+                <div className={styles.profileGroup}>
                   {displayName ? (
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-[#B83A38] flex items-center justify-center font-extrabold text-white text-[12px]">
-                        {displayName[0]}
-                      </div>
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <span className="text-[13px] font-bold text-[var(--color-text-primary)] truncate leading-none">
-                          {displayName} 님
-                        </span>
-                        <span className="text-[10px] text-[var(--color-text-secondary)] truncate">
-                          합격 목표
-                        </span>
+                    <div className={styles.profile}>
+                      <div className={styles.avatar}>{displayName[0]}</div>
+                      <div className={styles.profileText}>
+                        <span className={styles.profileName}>{displayName} 님</span>
+                        <span className={styles.profileGoal}>합격 목표</span>
                       </div>
                     </div>
                   ) : null}
-                  
-                  <button
-                    onClick={handleLogout}
-                    className="text-[12px] font-bold text-[var(--color-primary)] hover:text-[var(--color-text-primary)] transition-all cursor-pointer border border-[var(--color-primary)]/25 hover:border-[var(--color-text-primary)]/20 px-3 py-1.5 rounded-lg bg-transparent"
-                  >
+
+                  <button onClick={handleLogout} className={styles.logoutButton}>
                     로그아웃
                   </button>
                   <ThemeToggle />
@@ -175,27 +159,16 @@ export default function UserLayout({
             </header>
 
             {/* 콘텐츠 뷰포트 영역 */}
-            <div className={`flex-1 ${pathname === "/exams" ? "xl:overflow-hidden" : "xl:overflow-y-auto"} overflow-y-auto bg-[var(--color-content-background)]`}>
-              <div className={`w-full max-w-md md:max-w-2xl lg:max-w-5xl xl:max-w-[1440px] mx-auto min-h-screen bg-[var(--color-content-background)] shadow-sm xl:shadow-none flex flex-col justify-between xl:justify-start relative overflow-hidden xl:overflow-visible transition-all duration-300 ${pathname === "/exams" ? "xl:h-full xl:min-h-0" : "xl:min-h-0"}`}>
-                
+            <div className={styles.viewport} data-fixed-height={pathname === "/exams"}>
+              <div className={styles.contentBox}>
+
                 {/* 상단 타이틀 & D-Day & 로그아웃 (모바일 / 태블릿용 헤더 공통화) */}
-                <div className="flex flex-wrap justify-between items-center gap-3 xl:hidden px-5 pt-6 pb-1">
-                  <h1 className="text-[26px] font-extrabold text-[var(--color-text-primary)] tracking-tight">
-                    {headerInfo.mobileTitle}
-                  </h1>
-                  <div className="ml-auto flex items-center gap-2">
-                    <ModeSwitcher
-                      activeMode="user"
-                      roles={user?.roles ?? []}
-                      compact
-                    />
-                    <span className="bg-[#B83A38] text-white text-[12px] font-extrabold px-3 py-1.5 rounded-full tracking-wide">
-                      시험까지 D-{examDDay}
-                    </span>
-                    <button
-                      onClick={handleLogout}
-                      className="text-[11px] font-bold bg-[var(--color-card-background)] text-[var(--color-primary)] border border-[var(--color-border)] px-2.5 py-1.5 rounded-full tracking-wide shadow-sm cursor-pointer"
-                    >
+                <div className={styles.mobileHeader}>
+                  <h1 className={styles.mobileTitle}>{headerInfo.mobileTitle}</h1>
+                  <div className={styles.mobileActions}>
+                    <ModeSwitcher activeMode="user" roles={user?.roles ?? []} compact />
+                    <span className={styles.mobileDDay}>시험까지 D-{examDDay}</span>
+                    <button onClick={handleLogout} className={styles.mobileLogout}>
                       로그아웃
                     </button>
                     <ThemeToggle />

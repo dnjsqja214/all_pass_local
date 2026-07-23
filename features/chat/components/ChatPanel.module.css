@@ -1,240 +1,273 @@
+/*
+ * 색은 전부 features/theme 의 테마 변수를 쓴다.
+ * (예전에는 --color-surface / --color-accent 처럼 이 프로젝트에 없는 이름을 써서
+ *  항상 폴백값인 흰색·보라색으로 떨어졌고, 그래서 다크모드가 먹지 않았다.)
+ */
 .chat {
   display: grid;
   grid-template-columns: minmax(220px, 280px) 1fr;
   gap: 16px;
-  height: calc(100dvh - 180px);
+  /* 화면 높이에서 헤더·하단탭·페이지 여백을 뺀 만큼 채운다. */
+  height: calc(100dvh - 210px);
   min-height: 420px;
-}
+  color: var(--color-text-primary);
 
-/* 방 목록 */
-.chat > aside {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow-y: auto;
-  padding: 12px;
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 12px;
-  background: var(--color-surface, #fff);
-}
+  /* 방 목록 */
+  > aside {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-card-background);
+    overflow-y: auto;
 
-.chat > aside > button {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2px 8px;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  color: inherit;
-}
+    > button {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2px 8px;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
 
-.chat > aside > button:hover {
-  background: var(--color-surface-hover, #f3f4f6);
-}
+      &:hover {
+        background: var(--color-page-background);
+      }
 
-.chat > aside > button[data-selected="true"] {
-  background: var(--color-accent-soft, #eef2ff);
-  font-weight: 600;
-}
+      &[data-selected="true"] {
+        background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+        color: var(--color-primary);
+        font-weight: 600;
+      }
 
-.chat > aside > button > strong {
-  font-size: 0.95rem;
-  font-weight: inherit;
-}
+      > strong {
+        font-size: 0.95rem;
+        font-weight: inherit;
+      }
 
-.chat > aside > button > small {
-  grid-column: 1 / -1;
-  color: var(--color-text-muted, #6b7280);
-  font-size: 0.8rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+      > small {
+        grid-column: 1 / -1;
+        overflow: hidden;
+        color: var(--color-text-secondary);
+        font-size: 0.8rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
 
-.chat > aside > button > span[data-unread] {
-  align-self: center;
-  min-width: 20px;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-align: center;
-}
+      > span[data-unread] {
+        align-self: center;
+        min-width: 20px;
+        padding: 1px 7px;
+        border-radius: 999px;
+        background: var(--color-danger);
+        color: #ffffff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-align: center;
+      }
+    }
+  }
 
-/* 대화 영역 */
-.chat > section {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 12px;
-  background: var(--color-surface, #fff);
-  overflow: hidden;
-}
+  /* 대화 영역 */
+  > section {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-card-background);
+    overflow: hidden;
 
-.chat > section > header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border, #e5e7eb);
-}
+    > header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--color-border);
 
-.chat > section > header > h2 {
-  margin: 0;
-  font-size: 1rem;
-}
+      > h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--color-text-primary);
+      }
 
-.chat > section > header > span[data-state] {
-  margin-left: auto;
-  font-size: 0.78rem;
-  color: var(--color-text-muted, #6b7280);
-}
+      > span[data-state] {
+        margin-left: auto;
+        color: var(--color-text-secondary);
+        font-size: 0.78rem;
+      }
 
-.chat > section > header > span[data-state="live"]::before {
-  content: "●";
-  margin-right: 4px;
-  color: #22c55e;
-}
+      > span[data-state="live"]::before {
+        content: "●";
+        margin-right: 4px;
+        color: var(--color-success);
+      }
 
-.chat > section > header > span[data-state="offline"]::before,
-.chat > section > header > span[data-state="connecting"]::before {
-  content: "●";
-  margin-right: 4px;
-  color: #9ca3af;
-}
+      > span[data-state="offline"]::before,
+      > span[data-state="connecting"]::before {
+        content: "●";
+        margin-right: 4px;
+        color: var(--color-text-secondary);
+      }
+    }
 
-.chat > section > div[data-list] {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-  padding: 16px;
-}
+    /* 메시지 목록 */
+    > div[data-list] {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px;
+      overflow-y: auto;
 
-.chat > section > div[data-list] > p[data-empty] {
-  margin: auto;
-  color: var(--color-text-muted, #6b7280);
-}
+      > p[data-empty] {
+        margin: auto;
+        color: var(--color-text-secondary);
+      }
 
-.chat > section > div[data-list] > button[data-more] {
-  align-self: center;
-  padding: 4px 12px;
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--color-text-muted, #6b7280);
-  font-size: 0.8rem;
-  cursor: pointer;
-}
+      > button[data-more] {
+        align-self: center;
+        padding: 4px 12px;
+        border: 1px solid var(--color-border);
+        border-radius: 999px;
+        background: transparent;
+        color: var(--color-text-secondary);
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+    }
 
-/* 말풍선 */
-.chat article {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  max-width: min(70%, 520px);
-}
+    /* 입력 */
+    > form {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      border-top: 1px solid var(--color-border);
 
-.chat article[data-mine="true"] {
-  align-self: flex-end;
-  align-items: flex-end;
-}
+      > input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        background: var(--color-page-background);
+        color: var(--color-text-primary);
 
-.chat article > span[data-sender] {
-  font-size: 0.76rem;
-  color: var(--color-text-muted, #6b7280);
-}
+        &::placeholder {
+          color: var(--color-text-secondary);
+        }
 
-.chat article > p {
-  margin: 0;
-  padding: 8px 12px;
-  border-radius: 14px;
-  background: var(--color-surface-hover, #f3f4f6);
-  line-height: 1.45;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
+        &:focus {
+          border-color: var(--color-primary);
+          outline: none;
+        }
+      }
 
-.chat article[data-mine="true"] > p {
-  background: var(--color-accent, #4f46e5);
-  color: #fff;
-}
+      > button {
+        padding: 10px 18px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--color-primary);
+        color: #ffffff;
+        font-weight: 600;
+        cursor: pointer;
 
-.chat article[data-deleted="true"] > p {
-  background: transparent;
-  border: 1px dashed var(--color-border, #e5e7eb);
-  color: var(--color-text-muted, #6b7280);
-  font-style: italic;
-}
+        &:hover:not(:disabled) {
+          background: var(--color-primary-hover);
+        }
 
-.chat article > time {
-  font-size: 0.72rem;
-  color: var(--color-text-muted, #9ca3af);
-}
+        &:disabled {
+          opacity: 0.5;
+          cursor: default;
+        }
+      }
+    }
+  }
 
-/* 입력 */
-.chat > section > form {
-  display: flex;
-  gap: 8px;
-  padding: 12px;
-  border-top: 1px solid var(--color-border, #e5e7eb);
-}
+  /* 말풍선 */
+  article {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-width: min(70%, 520px);
 
-.chat > section > form > input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 10px;
-  background: transparent;
-  color: inherit;
-}
+    > span[data-sender] {
+      color: var(--color-text-secondary);
+      font-size: 0.76rem;
+    }
 
-.chat > section > form > button {
-  padding: 10px 18px;
-  border: 0;
-  border-radius: 10px;
-  background: var(--color-accent, #4f46e5);
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
+    /* 남의 말풍선 — 카드 배경과 구분되도록 한 단계 다른 면을 쓴다. */
+    > p {
+      margin: 0;
+      padding: 8px 12px;
+      border-radius: 14px;
+      background: var(--color-page-background);
+      color: var(--color-text-primary);
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
 
-.chat > section > form > button:disabled {
-  opacity: 0.5;
-  cursor: default;
+    > time {
+      color: var(--color-text-secondary);
+      font-size: 0.72rem;
+    }
+
+    &[data-mine="true"] {
+      align-self: flex-end;
+      align-items: flex-end;
+
+      > p {
+        background: var(--color-primary);
+        color: #ffffff;
+      }
+    }
+
+    &[data-deleted="true"] > p {
+      border: 1px dashed var(--color-border);
+      background: transparent;
+      color: var(--color-text-secondary);
+      font-style: italic;
+    }
+  }
 }
 
 .error {
   margin: 0 16px;
-  color: #dc2626;
+  color: var(--color-danger);
   font-size: 0.84rem;
+}
+
+/* 데스크톱은 하단 탭바가 없어 여유가 더 있다. */
+@media (min-width: 1280px) {
+  .chat {
+    height: calc(100dvh - 150px);
+  }
 }
 
 @media (max-width: 768px) {
   .chat {
     grid-template-columns: 1fr;
-    height: calc(100dvh - 200px);
-  }
+    height: calc(100dvh - 240px);
 
-  .chat > aside {
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 8px;
-  }
+    > aside {
+      flex-direction: row;
+      padding: 8px;
+      overflow-x: auto;
 
-  .chat > aside > button {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+      > button {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 6px;
 
-  .chat > aside > button > small {
-    display: none;
+        > small {
+          display: none;
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,65 @@
+.progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-card-background);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+
+  .count {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+  }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--color-text-secondary);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+  }
+
+  /* 저장 상태는 tsx 가 data-status 만 넘기고, 색은 여기서 정한다. */
+  &[data-status="saved"] {
+    .dot {
+      background: var(--color-success);
+      animation: none;
+    }
+
+    .label {
+      color: var(--color-success);
+    }
+  }
+
+  &[data-status="error"] {
+    .dot {
+      background: var(--color-danger);
+      animation: none;
+    }
+
+    .label {
+      color: var(--color-danger);
+    }
+  }
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.5;
+  }
+}

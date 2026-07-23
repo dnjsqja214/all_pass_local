@@ -1,69 +1,258 @@
-@reference "../../../app/globals.css";
-
 .backdrop {
-  @apply fixed inset-0 bg-black/40 z-40 lg:hidden;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(0 0 0 / 0.4);
 }
 
 .sidebar {
-  @apply fixed top-0 bottom-0 left-0 bg-[#1C1A17] text-white border-r border-[#2C2A27] z-40 flex flex-col justify-between transition-all duration-200;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 15rem;
+  padding: 24px;
+  border-right: 1px solid #2c2a27;
+  background: #1c1a17;
+  color: #ffffff;
+  transition: transform 200ms ease, width 200ms ease, padding 200ms ease;
+
+  .top {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .logoArea {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px 12px;
+    border-bottom: 1px solid rgb(255 255 255 / 0.04);
+  }
+
+  .logoGroup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logoText {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 접었을 때 숨겨지는 글자 */
+  .collapsible {
+    overflow: hidden;
+    max-width: 20rem;
+    white-space: nowrap;
+    transition: opacity 200ms ease, max-width 200ms ease;
+  }
+
+  .toggleButton {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    border-radius: 12px;
+    background: transparent;
+    color: #a8a7a5;
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease;
+
+    &:hover {
+      background: rgb(255 255 255 / 0.04);
+      color: #ffffff;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  .bottom {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgb(255 255 255 / 0.08);
+  }
+
+  .logoBadge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .logoBrand {
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+
+  .logoSub {
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #817d76;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* 활성 여부는 data-active 로만 넘어온다. */
+  .navItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: #a8a7a5;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 200ms ease, color 200ms ease;
+
+    &:hover {
+      background: rgb(255 255 255 / 0.04);
+      color: #ffffff;
+    }
+
+    &[data-active="true"] {
+      background: var(--color-primary);
+      color: #ffffff;
+      box-shadow: 0 4px 6px -1px color-mix(in srgb, var(--color-primary) 15%, transparent);
+    }
+  }
+
+  .profilePanel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid rgb(255 255 255 / 0.04);
+    border-radius: 16px;
+    background: rgb(255 255 255 / 0.02);
+  }
+
+  .profileAvatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    background: #4b5563;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .profileInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .profileName {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .profileEmail {
+    overflow: hidden;
+    font-size: 10px;
+    color: #a8a7a5;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .sidebarOpen {
-  @apply translate-x-0;
+  transform: translateX(0);
 }
 
 .sidebarClosed {
-  @apply -translate-x-full;
+  transform: translateX(-100%);
 }
 
-.logoArea {
-  @apply flex items-center gap-3 px-2 py-3 border-b border-[#ffffff0a];
-}
+@media (min-width: 1024px) {
+  .backdrop {
+    display: none;
+  }
 
-.logoBadge {
-  @apply w-8 h-8 rounded-lg bg-[#C93A35] flex items-center justify-center font-black text-white text-lg;
-}
+  .sidebar {
+    transform: translateX(0);
 
-.logoBrand {
-  @apply text-sm font-black tracking-wider uppercase text-white leading-none;
-}
+    .toggleButton {
+      display: flex;
+    }
 
-.logoSub {
-  @apply text-[10px] text-[#817D76] font-bold mt-1;
-}
+    /* 접힌 상태 */
+    &[data-collapsed="true"] {
+      width: 72px;
+      padding: 12px;
 
-.nav {
-  @apply flex flex-col gap-1.5;
-}
+      .logoArea {
+        flex-direction: column;
+        gap: 16px;
+        padding-right: 0;
+        padding-left: 0;
+      }
 
-.navItem {
-  @apply w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[14px] font-bold tracking-tight transition-all duration-200 cursor-pointer text-left;
-}
+      .collapsible {
+        max-width: 0;
+        opacity: 0;
+        visibility: hidden;
+      }
 
-.navActive {
-  @apply bg-[#C93A35] text-white shadow-md shadow-[#C93A35]/15;
-}
+      .navItem {
+        gap: 0;
+        justify-content: center;
+        padding-right: 0;
+        padding-left: 0;
+      }
 
-.navInactive {
-  @apply text-[#A8A7A5] hover:text-white hover:bg-[#ffffff0a];
-}
-
-.profilePanel {
-  @apply bg-[#ffffff05] border border-[#ffffff0a] rounded-2xl p-4 flex items-center gap-3;
-}
-
-.profileAvatar {
-  @apply w-9 h-9 rounded-full bg-gray-600 flex items-center justify-center text-xs font-bold text-white uppercase;
-}
-
-.profileInfo {
-  @apply flex flex-col gap-0.5 min-w-0;
-}
-
-.profileName {
-  @apply text-[13px] font-bold text-white truncate;
-}
-
-.profileEmail {
-  @apply text-[10px] text-[#A8A7A5] truncate;
+      .bottom {
+        display: flex;
+        justify-content: center;
+      }
+    }
+  }
 }

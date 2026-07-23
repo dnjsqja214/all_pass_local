@@ -41,7 +41,7 @@ export function AdminSidebar({
 
   // 메뉴 아이콘 반환 함수
   const getMenuIcon = (id: string) => {
-    const iconClass = "w-5 h-5 shrink-0";
+    const iconClass = styles.icon;
     switch (id) {
       case "today":
         return <LayoutDashboard className={iconClass} />;
@@ -72,35 +72,16 @@ export function AdminSidebar({
 
       {/* 사이드바 본체 (접힘 상태에 따라 너비/패딩 조절, 데스크톱에서 항상 유지) */}
       <aside
-        className={`${styles.sidebar} ${
-          isOpen ? styles.sidebarOpen : styles.sidebarClosed
-        } ${
-          isCollapsed ? "lg:w-[72px] lg:p-3" : "lg:w-60 lg:p-6"
-        } lg:translate-x-0 w-60 p-6`}
+        className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : styles.sidebarClosed}`}
+        data-collapsed={isCollapsed}
       >
-        <div className="flex flex-col gap-8">
+        <div className={styles.top}>
           {/* 로고 영역 (접힘 상태에 따라 수직 정렬로 변환) */}
-          <div
-            className={`flex items-center transition-all duration-200 ${
-              isCollapsed
-                ? "flex-col gap-4 px-0 pb-3 border-b border-[#ffffff0a] items-center"
-                : "justify-between px-2 border-b border-[#ffffff0a] pb-3"
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={styles.logoBadge}>
-                A
-              </div>
-              <div
-                className={`flex flex-col transition-all duration-200 overflow-hidden whitespace-nowrap ${
-                  isCollapsed
-                    ? "opacity-0 invisible w-0 max-w-0"
-                    : "opacity-100 visible max-w-xs"
-                }`}
-              >
-                <span className={styles.logoBrand}>
-                  ALLPASS
-                </span>
+          <div className={styles.logoArea}>
+            <div className={styles.logoGroup}>
+              <div className={styles.logoBadge}>A</div>
+              <div className={`${styles.logoText} ${styles.collapsible}`}>
+                <span className={styles.logoBrand}>ALLPASS</span>
                 <span className={styles.logoSub}>Study OS Admin</span>
               </div>
             </div>
@@ -110,12 +91,12 @@ export function AdminSidebar({
               type="button"
               onClick={onToggleCollapse}
               aria-label={isCollapsed ? "사이드바 펼치기" : "사이드바 접기"}
-              className="hidden lg:flex items-center justify-center w-10 h-10 rounded-xl border border-[#ffffff15] text-[#A8A7A5] hover:text-white hover:bg-[#ffffff0A] transition-all duration-200 cursor-pointer focus:outline-none shrink-0"
+              className={styles.toggleButton}
             >
               {isCollapsed ? (
-                <PanelLeftOpen className="w-5 h-5" />
+                <PanelLeftOpen className={styles.icon} />
               ) : (
-                <PanelLeftClose className="w-5 h-5" />
+                <PanelLeftClose className={styles.icon} />
               )}
             </button>
           </div>
@@ -123,7 +104,6 @@ export function AdminSidebar({
           {/* 메뉴 네비게이션 */}
           <nav className={styles.nav}>
             {menuItems.map((item) => {
-              const isActive = activeMenu === item.id;
               const path = item.id === "members"
                 ? "/admin/members"
                 : item.id === "exam-schedules" ? "/admin/exam-schedules" : item.id === "today" ? "/admin" : "#";
@@ -136,21 +116,12 @@ export function AdminSidebar({
                       onClose();
                     }
                   }}
-                  className={`${styles.navItem} ${
-                    isActive ? styles.navActive : styles.navInactive
-                  } ${isCollapsed ? "lg:justify-center lg:px-0" : "px-4"}`}
+                  className={styles.navItem}
+                  data-active={activeMenu === item.id}
                   title={isCollapsed ? item.label : undefined}
                 >
                   {getMenuIcon(item.id)}
-                  <span
-                    className={`transition-all duration-200 overflow-hidden whitespace-nowrap ${
-                      isCollapsed
-                        ? "lg:opacity-0 lg:invisible lg:w-0 lg:max-w-0 lg:ml-0"
-                        : "opacity-100 visible max-w-xs ml-3"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
+                  <span className={styles.collapsible}>{item.label}</span>
                 </Link>
               );
             })}
@@ -158,24 +129,14 @@ export function AdminSidebar({
         </div>
 
         {/* 하단 로그아웃 버튼 */}
-        <div className={`border-t border-[#FFFFFF15] pt-4 mt-auto ${isCollapsed ? "lg:flex lg:justify-center" : ""}`}>
+        <div className={styles.bottom}>
           <button
             onClick={onLogout}
-            className={`${styles.navItem} ${styles.navInactive} ${
-              isCollapsed ? "lg:justify-center lg:px-0" : "px-4"
-            } w-full cursor-pointer text-left`}
+            className={styles.navItem}
             title={isCollapsed ? "로그아웃" : undefined}
           >
-            <LogOut className="w-5 h-5 text-[#A8A7A5] shrink-0" />
-            <span
-              className={`transition-all duration-200 overflow-hidden whitespace-nowrap ${
-                isCollapsed
-                  ? "lg:opacity-0 lg:invisible lg:w-0 lg:max-w-0 lg:ml-0"
-                  : "opacity-100 visible max-w-xs ml-3"
-              }`}
-            >
-              로그아웃
-            </span>
+            <LogOut className={styles.icon} />
+            <span className={styles.collapsible}>로그아웃</span>
           </button>
         </div>
       </aside>

@@ -1,17 +1,31 @@
-@reference "../../../app/globals.css";
-
 .card {
-  @apply bg-white rounded-2xl p-5 border border-[#E4E0D9] shadow-xs flex flex-col gap-4 w-full;
-}
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-card-background);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
 
-.header {
-  @apply flex flex-col gap-0.5 border-b border-[#F6F4F0] pb-2;
-}
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-page-background);
+  }
 
-.title {
-  @apply text-[15px] font-bold text-[#111111] tracking-tight;
-}
+  .title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
 
-.subtitle {
-  @apply text-[12px] text-[#817D76];
+  .subtitle {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
 }

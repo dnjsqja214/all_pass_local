@@ -1,21 +1,45 @@
-@reference "../../../app/globals.css";
-
 .row {
-  @apply flex items-center py-1.5 border-b border-[#F6F4F0] w-full gap-4;
-}
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-page-background);
 
-.numberGroup {
-  @apply flex items-center gap-1 shrink-0 min-w-[52px];
-}
+  .numberGroup {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    min-width: 52px;
+  }
 
-.starBtn {
-  @apply p-1 hover:bg-[#F6F4F0] rounded-full transition-colors cursor-pointer border-none outline-none bg-transparent inline-flex items-center justify-center;
-}
+  .starBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border: none;
+    border-radius: 9999px;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 150ms ease;
 
-.numberText {
-  @apply text-[14.5px] font-extrabold text-[#111111];
-}
+    &:hover {
+      background: var(--color-page-background);
+    }
+  }
 
-.choicesGroup {
-  @apply flex gap-2;
+  .numberText {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--color-text-primary);
+  }
+
+  .choicesGroup {
+    display: flex;
+    gap: 8px;
+  }
 }

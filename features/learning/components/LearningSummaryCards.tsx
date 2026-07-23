@@ -1,5 +1,6 @@
 import React from "react";
 import { formatStudyTime } from "../utils";
+import styles from "./LearningSummaryCards.module.css";
 
 interface LearningSummaryCardsProps {
   studyMinutes: number;
@@ -18,36 +19,31 @@ export function LearningSummaryCards({
     {
       label: "누적 공부 시간",
       value: formatStudyTime(studyMinutes),
-      textColor: "text-[#111111]",
+      tone: "default",
     },
     {
       label: "응시 시험 수",
       value: `${examCount}회`,
-      textColor: "text-[#111111]",
+      tone: "default",
     },
     {
       label: "평균 점수",
       value: `${averageScore.toFixed(1)}점`,
-      textColor: averageScore >= 180 ? "text-[#3F7D4E]" : "text-[#111111]",
+      tone: averageScore >= 180 ? "success" : "default",
     },
     {
       label: "누적 오답 수",
       value: `${wrongAnswerCount}개`,
-      textColor: "text-[#C93A35]",
+      tone: "danger",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className={styles.grid}>
       {cards.map((card, idx) => (
-        <div
-          key={idx}
-          className="bg-white rounded-xl p-4 border border-[#E4E0D9] shadow-sm flex flex-col justify-between"
-        >
-          <span className="text-[12px] font-bold text-[#817D76] tracking-tight uppercase">
-            {card.label}
-          </span>
-          <span className={`text-[20px] font-black tracking-tight ${card.textColor} mt-2`}>
+        <div key={idx} className={styles.card}>
+          <span className={styles.label}>{card.label}</span>
+          <span className={styles.value} data-tone={card.tone}>
             {card.value}
           </span>
         </div>

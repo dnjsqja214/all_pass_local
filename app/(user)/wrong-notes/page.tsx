@@ -6,6 +6,7 @@ import { examService } from "../../../features/exam/services/examService";
 import { ExamListItem } from "../../../features/exam/types/exam";
 import { WrongExamSelection } from "./_components/WrongExamSelection/WrongExamSelection";
 import { WrongNotesDetail } from "./_components/WrongNotesDetail/WrongNotesDetail";
+import styles from "./page.module.css";
 
 const MOCK_COMPLETED_EXAMS: ExamListItem[] = [
   {
@@ -173,7 +174,7 @@ export default function WrongNotes() {
   });
 
   return (
-    <div className="flex-grow flex flex-col h-full min-h-0 overflow-hidden px-4 pt-6 md:px-8 xl:p-8 space-y-6">
+    <div className={styles.page}>
       {/* 상태에 따른 화면 렌더링 */}
       {!selectedExam ? (
         <WrongExamSelection

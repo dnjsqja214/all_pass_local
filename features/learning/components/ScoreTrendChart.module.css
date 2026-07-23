@@ -1,0 +1,83 @@
+.card {
+  composes: panel from "../../shared/styles/panel.module.css";
+  gap: 20px;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-page-background);
+
+  .title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+}
+
+.chartBox {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-page-background) 30%, transparent);
+
+  .chart {
+    width: 100%;
+    max-width: 450px;
+    overflow: visible;
+  }
+
+  .empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+  }
+}
+
+.footer {
+  margin-top: auto;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-page-background);
+  text-align: center;
+
+  .summary {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.625;
+    letter-spacing: -0.02em;
+    color: var(--color-text-primary);
+  }
+
+  /* 합격 여부에 따른 강조 색 */
+  .highlight {
+    color: var(--color-primary);
+
+    &[data-passed="true"] {
+      color: var(--color-success);
+    }
+  }
+
+  .verdict {
+    color: var(--color-text-secondary);
+
+    &[data-passed="true"] {
+      color: var(--color-success);
+    }
+  }
+}

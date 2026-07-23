@@ -1,29 +1,36 @@
-@reference "../../../app/globals.css";
-
 .badge {
-  @apply text-[11px] font-bold px-2 py-0.5 rounded-full border inline-flex items-center justify-center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
 }
 
-.normal {
-  @apply bg-[#E6F4EA] border-[#C2E7CD] text-[#137333];
+.normal,
+.pass {
+  border-color: #c2e7cd;
+  background: #e6f4ea;
+  color: #137333;
 }
 
 .late {
-  @apply bg-[#FEF7E0] border-[#FADF91] text-[#B06000];
+  border-color: #fadf91;
+  background: #fef7e0;
+  color: #b06000;
 }
 
-.absent {
-  @apply bg-[#FDF1F0] border-[#FCDDDB] text-[#B83A38];
-}
-
-.pass {
-  @apply bg-[#E6F4EA] border-[#C2E7CD] text-[#137333];
-}
-
+.absent,
 .fail {
-  @apply bg-[#FDF1F0] border-[#FCDDDB] text-[#B83A38];
+  border-color: #fcdddb;
+  background: #fdf1f0;
+  color: #b83a38;
 }
 
 .unsubmitted {
-  @apply bg-[#F1F0EC] border-[#E4E0D9] text-[#817D76];
+  border-color: var(--color-border);
+  background: #f1f0ec;
+  color: var(--color-text-secondary);
 }
