@@ -262,7 +262,7 @@ export function ScoreTrendChart({
       {historyCount > 0 ? (
         <div
           ref={containerRef}
-          className="flex-1 w-full bg-[#F6F4F0]/30 rounded-xl p-0 flex justify-center items-center min-h-[180px] xl:min-h-[220px] relative overflow-hidden"
+          className="flex-1 w-full bg-[#F6F4F0]/30 rounded-xl p-0 flex justify-center items-center min-h-[150px] lg:min-h-[180px] relative overflow-hidden"
         >
           <svg
             viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
@@ -483,7 +483,7 @@ export function ScoreTrendChart({
       )}
 
       {/* Encouragement text box at the bottom */}
-      <div className="bg-[#F6F4F0] p-4 rounded-xl border border-[#E4E0D9] text-center mt-auto">
+      <div className="bg-[#F6F4F0] p-3 rounded-xl border border-[#E4E0D9] text-center mt-auto shrink-0">
         {getEncouragementText()}
       </div>
     </div>

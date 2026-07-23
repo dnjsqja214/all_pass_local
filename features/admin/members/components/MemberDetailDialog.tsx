@@ -3,9 +3,9 @@ import { X } from "lucide-react";
 import { Member } from "../types/member";
 import { mockMemberLearningDetails } from "../data/mockMemberLearningDetails";
 import { MemberStatusBadge } from "./MemberStatusBadge";
-import { ScoreTrendChart } from "../../../user/learning/components/ScoreTrendChart";
-import { PassingRuleCard } from "../../../user/learning/components/PassingRuleCard";
-import { ExamHistoryList } from "../../../user/learning/components/ExamHistoryList";
+import { ScoreTrendChart } from "../../../user/learningMng/components/ScoreTrendChart";
+import { StudyContributionCalendar } from "../../../user/learningMng/components/StudyContributionCalendar";
+import { ExamHistoryList } from "../../../user/learningMng/components/ExamHistoryList";
 
 interface MemberDetailDialogProps {
   member: Member | null;
@@ -38,12 +38,12 @@ export function MemberDetailDialog({ member, onClose }: MemberDetailDialogProps)
       />
 
       {/* 다이얼로그 본체 */}
-      <div className="relative w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-[900px] xl:max-w-[1000px] bg-[#F6F4F0] sm:rounded-2xl border border-[#E4E0D9] shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
+      <div className="relative w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-[900px] lg:max-w-[1024px] xl:max-w-[1150px] bg-[#F6F4F0] sm:rounded-2xl border border-[#E4E0D9] shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
         {/* 상단 헤더 정보 영역 */}
         <header className="bg-white border-b border-[#E4E0D9] p-5 sm:p-6 shrink-0 flex justify-between items-start gap-4">
           <div className="flex flex-col gap-2">
             <span className="text-[12px] font-bold text-[#C93A35] tracking-widest uppercase">
-              ALLPASS STUDY OS
+              관리자 대시보드
             </span>
             <div className="flex items-center gap-3">
               <h2 className="text-[20px] sm:text-[24px] font-black text-[#111111] tracking-tight">
@@ -71,39 +71,31 @@ export function MemberDetailDialog({ member, onClose }: MemberDetailDialogProps)
         {/* 바디 영역 (스크롤 가능) */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6">
           {detail ? (
-            <>
-
-              {/* 2. 대시보드 2단 배치 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 좌측: 차트 */}
+              <div className="flex flex-col min-h-0 h-[350px] lg:h-[390px]">
                 <ScoreTrendChart
                   historyData={[...detail.examHistory]
-                    .slice(0, 3)
                     .reverse()
                     .map((history) => ({
                       label: `${history.examTitle} ${history.attemptTitle}`,
                       subjects: history.subjects.map((s) => ({
                         name: s.name,
                         score: s.score,
+                        date: history.date,
+                        roundTitle: history.examTitle,
+                        attemptTitle: history.attemptTitle,
                       })),
                     }))}
-                  title="시험 성적 추이"
-                  subtitle="최근 응시한 시험의 과목별 점수 변화량"
-                />
-
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <PassingRuleCard
-                  totalScore={member.recentScore}
-                  subjectScores={detail.subjectScores}
                 />
               </div>
 
-              {/* 3. 시험 이력 리스트 (아래 전체 너비) */}
-              <div className="border-t border-[#E4E0D9] pt-6">
+              {/* 우측: 학습 잔디 & 시험 이력 */}
+              <div className="flex flex-col gap-6 min-h-0">
+                <StudyContributionCalendar memberId={member.id} />
                 <ExamHistoryList history={detail.examHistory} />
               </div>
-            </>
+            </div>
           ) : (
             <div className="py-20 text-center text-[14px] text-[#817D76] font-medium bg-white rounded-2xl border border-[#E4E0D9]">
               선택한 회원의 학습 상세 데이터를 찾을 수 없습니다.

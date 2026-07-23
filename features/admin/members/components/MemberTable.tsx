@@ -1,7 +1,7 @@
 import React from "react";
 import { Member } from "../types/member";
 import { MemberStatusBadge } from "./MemberStatusBadge";
-import { formatStudyTime } from "../../../user/learning/utils";
+import { formatStudyTime } from "../../../user/learningMng/utils";
 
 interface MemberTableProps {
   members: Member[];

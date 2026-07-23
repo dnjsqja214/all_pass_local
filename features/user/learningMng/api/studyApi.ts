@@ -1,17 +1,20 @@
 import { StudyContributionItem } from "../types";
-import { mockStudyContributionData } from "../data/mockStudyContribution";
+import { mockStudyContributionData, generateMockStudyContributionData } from "../data/mockStudyContribution";
 
 /**
  * 날짜 범위(startDate ~ endDate)에 해당하는 학습 기록 데이터를 가져옵니다.
  * @param startDate 시작일 (YYYY-MM-DD)
  * @param endDate 종료일 (YYYY-MM-DD)
+ * @param memberId 조회 대상 회원 ID (선택)
  */
 export async function getStudyContributionData(
   startDate: string,
-  endDate: string
+  endDate: string,
+  memberId?: string
 ): Promise<StudyContributionItem[]> {
   return new Promise((resolve) => {
-    const filtered = mockStudyContributionData.filter(
+    const data = generateMockStudyContributionData(memberId);
+    const filtered = data.filter(
       (item) => item.studyDate >= startDate && item.studyDate <= endDate
     );
     resolve(filtered);

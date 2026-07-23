@@ -9,7 +9,11 @@ import styles from "./StudyContributionCalendar.module.css";
 
 const DISPLAY_WEEKDAYS = ["", "월", "", "수", "", "금", ""];
 
-export function StudyContributionCalendar() {
+interface StudyContributionCalendarProps {
+  memberId?: string;
+}
+
+export function StudyContributionCalendar({ memberId }: StudyContributionCalendarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +30,8 @@ export function StudyContributionCalendar() {
 
   useEffect(() => {
     let active = true;
-    getStudyContributionSummary()
+    setLoading(true);
+    getStudyContributionSummary(memberId)
       .then((res) => {
         if (!active) return;
         setData(res.items);
@@ -41,7 +46,7 @@ export function StudyContributionCalendar() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [memberId]);
 
   useEffect(() => {
     if (!loading && scrollWrapperRef.current) {

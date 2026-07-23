@@ -81,7 +81,9 @@ export function formatMinutesToHoursAndMinutes(minutes: number): string {
 /**
  * 최근 365일 학습 잔디 데이터 및 결합 통계를 가져옵니다.
  */
-export async function getStudyContributionSummary(): Promise<{
+export async function getStudyContributionSummary(
+  memberId?: string
+): Promise<{
   items: StudyContributionItem[];
   stats: StudyStats;
 }> {
@@ -91,7 +93,7 @@ export async function getStudyContributionSummary(): Promise<{
   const startDate = formatLocalYYYYMMDD(startDateObj);
   const endDate = formatLocalYYYYMMDD(today);
 
-  const items = await getStudyContributionData(startDate, endDate);
+  const items = await getStudyContributionData(startDate, endDate, memberId);
   const stats = calculateStudyStats(items);
 
   return {

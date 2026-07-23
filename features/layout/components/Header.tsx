@@ -56,8 +56,7 @@ export function Header({
           </button>
 
           <div className={styles.titleArea}>
-            <h2 className={styles.title}>ALLPASS Study OS</h2>
-            <span className={styles.prototypeBadge}>프로토타입</span>
+            <h2 className={styles.title}>관리자 대시보드</h2>
           </div>
         </div>
 

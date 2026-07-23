@@ -38,12 +38,6 @@ export interface MemberScore {
   trend: "up" | "down" | "flat";
 }
 
-// 오늘 현황 실시간 세션 정보
-export const liveSessionInfo = {
-  title: "오늘 현황",
-  sessionStatus: "오전반 실시간 세션 진행 중 · 10:05–10:55",
-};
-
 // 1. KPI 지표 카드 Mock 데이터
 export const adminMetrics: AdminMetric[] = [
   {

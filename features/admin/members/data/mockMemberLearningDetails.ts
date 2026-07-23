@@ -1,4 +1,4 @@
-import { LearningDetail } from "../../../user/learning/types";
+import { LearningDetail } from "../../../user/learningMng/types";
 
 export const mockMemberLearningDetails: Record<string, LearningDetail> = {
   "mem-001": {
