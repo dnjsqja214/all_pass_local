@@ -44,10 +44,10 @@ export function Sidebar({
     ? [
       { id: "today", label: "오늘 현황", path: "/admin" },
       { id: "members", label: "회원 관리", path: "/admin/members" },
-      { id: "exam-schedules", label: "시험 관리", path: "/admin/exam-schedules" },
-      { id: "attendance", label: "출석 관리", path: "#" },
-      { id: "incorrect", label: "오답·위험군", path: "#" },
-      { id: "report", label: "리포트", path: "#" },
+      // { id: "exam-schedules", label: "시험 관리", path: "/admin/exam-schedules" },
+      // { id: "attendance", label: "출석 관리", path: "#" },
+      // { id: "incorrect", label: "오답·위험군", path: "#" },
+      // { id: "report", label: "리포트", path: "#" },
     ]
     : [
       { id: "today", label: "오늘 학습", path: "/" },
@@ -115,8 +115,8 @@ export function Sidebar({
     }`;
 
   const logoAreaClass = `flex items-center transition-all duration-200 ${isCollapsed
-      ? "flex-col gap-4 px-0 pb-3 border-b border-[#ffffff0a] items-center"
-      : "justify-between px-2 border-b border-[#ffffff0a] pb-3"
+    ? "flex-col gap-4 px-0 pb-3 border-b border-[#ffffff0a] items-center"
+    : "justify-between px-2 border-b border-[#ffffff0a] pb-3"
     }`;
 
   const navLinkClass = (isActive: boolean) => {
@@ -127,8 +127,8 @@ export function Sidebar({
   };
 
   const labelSpanClass = `transition-all duration-200 overflow-hidden whitespace-nowrap ${isCollapsed
-      ? `${isAdmin ? "lg" : "xl"}:opacity-0 ${isAdmin ? "lg" : "xl"}:invisible ${isAdmin ? "lg" : "xl"}:w-0 ${isAdmin ? "lg" : "xl"}:max-w-0 ${isAdmin ? "lg" : "xl"}:ml-0`
-      : "opacity-100 visible max-w-xs ml-3"
+    ? `${isAdmin ? "lg" : "xl"}:opacity-0 ${isAdmin ? "lg" : "xl"}:invisible ${isAdmin ? "lg" : "xl"}:w-0 ${isAdmin ? "lg" : "xl"}:max-w-0 ${isAdmin ? "lg" : "xl"}:ml-0`
+    : "opacity-100 visible max-w-xs ml-3"
     }`;
 
   const toggleButtonClass = `hidden ${isAdmin ? "lg:flex" : "xl:flex"} items-center justify-center w-10 h-10 rounded-xl border border-[#ffffff15] text-[#A8A7A5] hover:text-white hover:bg-[#ffffff0A] transition-all duration-200 cursor-pointer focus:outline-none shrink-0`;
@@ -152,8 +152,8 @@ export function Sidebar({
               <div className={styles.logoBadge}>A</div>
               <div
                 className={`flex flex-col transition-all duration-200 overflow-hidden whitespace-nowrap ${isCollapsed
-                    ? "opacity-0 invisible w-0 max-w-0"
-                    : "opacity-100 visible max-w-xs"
+                  ? "opacity-0 invisible w-0 max-w-0"
+                  : "opacity-100 visible max-w-xs"
                   }`}
               >
                 <span className={styles.logoBrand}>ALLPASS</span>
