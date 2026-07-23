@@ -11,6 +11,7 @@ function isMeResponse(value: unknown): value is MeResponse {
 
   const response = value as Record<string, unknown>;
   return (
+    typeof response.id === "string" &&
     typeof response.authUuid === "string" &&
     typeof response.name === "string" &&
     typeof response.email === "string" &&

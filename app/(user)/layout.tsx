@@ -54,6 +54,13 @@ export default function UserLayout({
         mobileTitle: "오늘의 학습",
       };
     }
+    if (path.startsWith("/chat")) {
+      return {
+        desktopTitle: "스터디 채팅",
+        desktopSub: "함께 공부하는 사람들",
+        mobileTitle: "채팅",
+      };
+    }
     if (path.startsWith("/learning-management")) {
       return {
         desktopTitle: "학습관리",
