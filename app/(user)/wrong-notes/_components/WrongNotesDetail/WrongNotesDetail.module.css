@@ -266,6 +266,12 @@
   outline: none;
 }
 
+.navIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
 .navButton:hover:not(:disabled) {
   background-color: var(--color-main-background, #f6f4f0);
   border-color: var(--color-text-secondary, #817d76);
@@ -448,8 +454,18 @@
   color: var(--color-text-primary, #111111);
 }
 
-.bookmarkActive {
-  color: var(--color-primary-red, #c93a35) !important;
+.bookmarkBadge[data-active="true"] {
+  color: var(--color-primary-red, #c93a35);
+}
+
+.bookmarkIcon {
+  width: 16px;
+  height: 16px;
+  transition: fill 150ms ease;
+}
+
+.bookmarkIcon[data-active="true"] {
+  fill: currentColor;
 }
 
 .difficultyGroup {
@@ -466,11 +482,13 @@
   margin-right: 4px;
 }
 
-.starFilled {
-  fill: #d48a00;
-  color: #d48a00;
+.difficultyStar {
+  width: 14px;
+  height: 14px;
+  color: var(--color-border, #e4e0d9);
 }
 
-.starEmpty {
-  color: var(--color-border, #e4e0d9);
+.difficultyStar[data-filled="true"] {
+  fill: #d48a00;
+  color: #d48a00;
 }

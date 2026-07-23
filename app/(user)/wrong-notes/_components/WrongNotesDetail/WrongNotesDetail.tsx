@@ -244,30 +244,28 @@ export function WrongNotesDetail({
                 <button
                   type="button"
                   onClick={() => toggleBookmark(activeNote.id)}
-                  className={`${styles.bookmarkBadge} ${
-                    bookmarks[activeNote.id] ? styles.bookmarkActive : ""
-                  }`}
+                  className={styles.bookmarkBadge}
+                  data-active={bookmarks[activeNote.id]}
+                  aria-pressed={bookmarks[activeNote.id]}
                   title={bookmarks[activeNote.id] ? "북마크 해제" : "북마크 추가"}
                 >
                   <Bookmark
-                    className={`w-[16px] h-[16px] ${
-                      bookmarks[activeNote.id] ? "fill-[#C93A35]" : ""
-                    }`}
+                    className={styles.bookmarkIcon}
+                    data-active={bookmarks[activeNote.id]}
+                    aria-hidden="true"
                   />
                   <span>{bookmarks[activeNote.id] ? "북마크됨" : "북마크 없음"}</span>
                 </button>
 
                 {/* 난이도 별 표시 */}
-                <div className={styles.difficultyGroup}>
+                <div className={styles.difficultyGroup} aria-label={`난이도 ${qDetail.difficulty || 2}점`}>
                   <span className={styles.difficultyLabel}>난이도:</span>
                   {[1, 2, 3].map((star) => (
                     <Star
                       key={star}
-                      className={`w-[14px] h-[14px] ${
-                        star <= (qDetail.difficulty || 2)
-                          ? styles.starFilled
-                          : styles.starEmpty
-                      }`}
+                      className={styles.difficultyStar}
+                      data-filled={star <= (qDetail.difficulty || 2)}
+                      aria-hidden="true"
                     />
                   ))}
                 </div>
@@ -323,7 +321,7 @@ export function WrongNotesDetail({
                 disabled={activeNoteIndex === 0}
                 className={styles.navButton}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className={styles.navIcon} />
                 이전 문제
               </button>
               <span className={styles.navProgressText}>
@@ -335,7 +333,7 @@ export function WrongNotesDetail({
                 className={styles.navButton}
               >
                 다음 문제
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className={styles.navIcon} />
               </button>
             </div>
           </div>

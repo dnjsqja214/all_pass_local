@@ -112,6 +112,12 @@
   cursor: pointer;
 }
 
+.resetIcon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
 .resetButton:hover {
   background-color: var(--color-main-background, #f6f4f0);
   color: var(--color-text-primary, #111111);
@@ -289,6 +295,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.metaIcon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
 }
 
 .metaValue {
