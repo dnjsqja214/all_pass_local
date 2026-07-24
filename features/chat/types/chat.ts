@@ -1,5 +1,3 @@
-export type ChatRoomType = "lounge" | "subject";
-
 export interface ChatMessage {
   id: string;
   roomId: string;
@@ -12,9 +10,25 @@ export interface ChatMessage {
 
 export interface ChatRoom {
   id: string;
-  type: ChatRoomType;
+  isPublic: boolean;
+  ownerUserId: string;
   name: string;
-  subjectId: string | null;
-  lastMessage: ChatMessage | null;
+}
+
+export interface ChatRoomSummary extends ChatRoom {
   unreadCount: number;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+}
+
+export interface ChatRoomDirectory {
+  publicRooms: ChatRoomSummary[];
+  privateRooms: ChatRoomSummary[];
+  totalUnread: number;
+}
+
+export interface InvitedUser {
+  id: string;
+  email: string;
+  name: string;
 }
