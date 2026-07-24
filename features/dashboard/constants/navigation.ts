@@ -1,5 +1,5 @@
 export interface NavigationItem {
-  id: "today" | "exam" | "incorrect" | "profile" | "apply-exam" | "chat";
+  id: "today" | "exam" | "incorrect" | "profile" | "apply-exam";
   label: string;
   path: string;
 }
@@ -24,10 +24,5 @@ export const USER_MENU_ITEMS: NavigationItem[] = [
     id: "profile",
     label: "학습 관리",
     path: "/learning-management",
-  },
-  {
-    id: "chat",
-    label: "스터디 채팅",
-    path: "/chat",
   },
 ];

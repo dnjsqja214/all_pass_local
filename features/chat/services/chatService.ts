@@ -1,5 +1,11 @@
 import { getCsrfToken } from "../../shared/api/csrf";
-import type { ChatMessage, ChatRoom, ChatRoomType } from "../types/chat";
+import type {
+  ChatMessage,
+  ChatRoom,
+  ChatRoomDirectory,
+  ChatRoomSummary,
+  InvitedUser,
+} from "../types/chat";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -11,10 +17,6 @@ interface ApiResponse<T> {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
-}
-
-function isRoomType(value: unknown): value is ChatRoomType {
-  return value === "lounge" || value === "subject";
 }
 
 export function isChatMessage(value: unknown): value is ChatMessage {
@@ -31,11 +33,40 @@ export function isChatMessage(value: unknown): value is ChatMessage {
 function isChatRoom(value: unknown): value is ChatRoom {
   return isRecord(value) &&
     typeof value.id === "string" &&
-    isRoomType(value.type) &&
-    typeof value.name === "string" &&
-    (value.subjectId === null || typeof value.subjectId === "string") &&
-    (value.lastMessage === null || isChatMessage(value.lastMessage)) &&
-    typeof value.unreadCount === "number";
+    typeof value.isPublic === "boolean" &&
+    typeof value.ownerUserId === "string" &&
+    typeof value.name === "string";
+}
+
+function isChatRoomSummary(value: unknown): value is ChatRoomSummary {
+  if (!isChatRoom(value) || !isRecord(value)) return false;
+  return typeof value["unreadCount"] === "number" &&
+    (value["lastMessage"] === null || typeof value["lastMessage"] === "string") &&
+    (value["lastMessageAt"] === null || typeof value["lastMessageAt"] === "string");
+}
+
+function isChatRoomDirectory(value: unknown): value is ChatRoomDirectory {
+  return isRecord(value) &&
+    Array.isArray(value.publicRooms) &&
+    value.publicRooms.every(isChatRoomSummary) &&
+    Array.isArray(value.privateRooms) &&
+    value.privateRooms.every(isChatRoomSummary) &&
+    typeof value.totalUnread === "number";
+}
+
+function isInvitedUser(value: unknown): value is InvitedUser {
+  return isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.email === "string" &&
+    typeof value.name === "string";
+}
+
+function isUnread(value: unknown): value is { unreadCount: number } {
+  return isRecord(value) && typeof value.unreadCount === "number";
+}
+
+function isChatMessageList(value: unknown): value is ChatMessage[] {
+  return Array.isArray(value) && value.every(isChatMessage);
 }
 
 async function parseBody(response: Response): Promise<unknown> {
@@ -48,7 +79,11 @@ function errorMessage(body: unknown, status: number): string {
     : `채팅 요청에 실패했습니다. (${status})`;
 }
 
-async function get<T>(path: string, isValid: (value: unknown) => value is T, signal?: AbortSignal): Promise<T> {
+async function get<T>(
+  path: string,
+  isValid: (value: unknown) => value is T,
+  signal?: AbortSignal,
+): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     credentials: "include",
     cache: "no-store",
@@ -56,11 +91,12 @@ async function get<T>(path: string, isValid: (value: unknown) => value is T, sig
   });
   const body = (await parseBody(response)) as ApiResponse<unknown> | null;
   if (!response.ok) throw new Error(errorMessage(body, response.status));
-  if (!isRecord(body) || !isValid(body.data)) throw new Error("채팅 응답 형식이 올바르지 않습니다.");
+  if (!isRecord(body) || !isValid(body.data)) {
+    throw new Error("채팅 응답 형식이 올바르지 않습니다.");
+  }
   return body.data;
 }
 
-/** 쓰기 요청은 세션 쿠키와 CSRF 토큰을 함께 보낸다. */
 async function post(path: string, payload?: unknown): Promise<unknown> {
   const csrf = await getCsrfToken();
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -77,23 +113,39 @@ async function post(path: string, payload?: unknown): Promise<unknown> {
   return isRecord(body) ? body.data : null;
 }
 
-function isChatRoomList(value: unknown): value is ChatRoom[] {
-  return Array.isArray(value) && value.every(isChatRoom);
-}
-
-function isChatMessageList(value: unknown): value is ChatMessage[] {
-  return Array.isArray(value) && value.every(isChatMessage);
-}
-
 export const chatService = {
-  async findRooms(signal?: AbortSignal): Promise<ChatRoom[]> {
-    return get("/api/v1/chat/rooms", isChatRoomList, signal);
+  async findRooms(signal?: AbortSignal): Promise<ChatRoomDirectory> {
+    return get("/api/v1/chat/rooms", isChatRoomDirectory, signal);
   },
 
-  /** before 를 주면 그보다 오래된 메시지를 가져온다(위로 스크롤). */
-  async findMessages(roomId: string, before?: string, signal?: AbortSignal): Promise<ChatMessage[]> {
+  async createRoom(name: string, isPublic: boolean): Promise<ChatRoom> {
+    const data = await post("/api/v1/chat/rooms", { name, isPublic });
+    if (!isChatRoom(data)) throw new Error("채팅방 생성 응답 형식이 올바르지 않습니다.");
+    return data;
+  },
+
+  async invite(roomId: string, email: string): Promise<InvitedUser> {
+    const data = await post(`/api/v1/chat/rooms/${roomId}/participants`, { email });
+    if (!isInvitedUser(data)) throw new Error("초대 응답 형식이 올바르지 않습니다.");
+    return data;
+  },
+
+  async leave(roomId: string): Promise<void> {
+    await post(`/api/v1/chat/rooms/${roomId}/leave`);
+  },
+
+  async findMessages(
+    roomId: string,
+    before?: string,
+    signal?: AbortSignal,
+  ): Promise<ChatMessage[]> {
     const query = before ? `?before=${encodeURIComponent(before)}` : "";
     return get(`/api/v1/chat/rooms/${roomId}/messages${query}`, isChatMessageList, signal);
+  },
+
+  async unreadCount(roomId: string, signal?: AbortSignal): Promise<number> {
+    const data = await get(`/api/v1/chat/rooms/${roomId}/unread`, isUnread, signal);
+    return data.unreadCount;
   },
 
   async send(roomId: string, content: string): Promise<ChatMessage> {

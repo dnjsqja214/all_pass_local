@@ -9,6 +9,7 @@ import { authService } from "@/features/auth/services/authService";
 import { ModeSwitcher } from "@/features/auth/components/ModeSwitcher";
 import { ThemeToggle } from "@/features/theme/components/ThemeToggle/ThemeToggle";
 import { SocketProvider } from "@/features/socket/SocketProvider";
+import { MessengerWidget } from "@/features/chat/components/MessengerWidget/MessengerWidget";
 import { useExamPhase } from "@/features/exam/hooks/useExamPhase";
 import { ExamCountdown } from "@/features/exam/components/ExamCountdown";
 import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
@@ -77,13 +78,6 @@ export default function UserLayout({
         desktopTitle: "대시보드",
         desktopSub: "실시간 학습 현황",
         mobileTitle: "오늘의 학습",
-      };
-    }
-    if (path.startsWith("/chat")) {
-      return {
-        desktopTitle: "스터디 채팅",
-        desktopSub: "함께 공부하는 사람들",
-        mobileTitle: "채팅",
       };
     }
     if (path.startsWith("/learning-management")) {
@@ -227,6 +221,9 @@ export default function UserLayout({
               </div>
             </div>
           </div>
+
+          {/* 공개방과 초대받은 비공개방을 제공하는 메신저. 시험 대기·응시 중에는 감춘다. */}
+          <MessengerWidget currentUserId={user?.id ?? ""} roles={user?.roles ?? []} />
         </>
       )}
     </div>
