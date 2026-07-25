@@ -1,13 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarClock, Plus, Trash2, X } from "lucide-react";
-import {
+import type {
   ExamRegistration,
   ExamSlot,
-  examRegistrationService,
 } from "../../../features/exam/services/examRegistrationService";
-import { useExamPhaseRefresh } from "../../../features/exam/context/ExamPhaseRefreshContext";
+import {
+  useCancelRegistrationMutation,
+  useGetRegistrationsQuery,
+  useLazyGetOpenExamSlotsQuery,
+  useRegisterExamMutation,
+} from "../../../features/exam/api/examRegistrationApi";
+import { queryErrorMessage } from "../../../features/store/api/queryError";
 import styles from "./page.module.css";
 
 const dateTime = new Intl.DateTimeFormat("ko-KR", {
@@ -63,11 +68,22 @@ function findScheduleConflict(slot: ExamSlot, registrations: ExamRegistration[])
 }
 
 export default function ExamRegistrationPage() {
-  const { refreshRegistrations } = useExamPhaseRefresh();
-  const [registrations, setRegistrations] = useState<ExamRegistration[]>([]);
-  const [slots, setSlots] = useState<ExamSlot[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSlotsLoading, setIsSlotsLoading] = useState(false);
+  const registrationsQuery = useGetRegistrationsQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const registrations = useMemo(
+    () => sortByLatestActivity(
+      registrationsQuery.data?.registrations ?? [],
+    ),
+    [registrationsQuery.data],
+  );
+  const [getOpenSlots, openSlotsQuery] = useLazyGetOpenExamSlotsQuery();
+  const slots = openSlotsQuery.data ?? [];
+  const [registerExam] = useRegisterExamMutation();
+  const [cancelRegistration] = useCancelRegistrationMutation();
+  const isLoading = registrationsQuery.isLoading;
+  const isSlotsLoading = openSlotsQuery.isFetching;
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
@@ -82,47 +98,38 @@ export default function ExamRegistrationPage() {
   ]);
   const [now, setNow] = useState(() => Date.now());
 
-  const loadRegistrations = useCallback(async (signal?: AbortSignal) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const nextRegistrations = await examRegistrationService.getRegistrations(signal);
-      setRegistrations(sortByLatestActivity(nextRegistrations));
-    } catch (reason: unknown) {
-      if (!signal?.aborted) setError(reason instanceof Error ? reason.message : "시험 신청 내역을 불러오지 못했습니다.");
-    } finally {
-      if (!signal?.aborted) setIsLoading(false);
-    }
-  }, []);
-
-  const openRegistrationForm = useCallback(async (signal?: AbortSignal) => {
+  const openRegistrationForm = useCallback(async () => {
     setIsFormOpen(true);
-    setIsSlotsLoading(true);
     setSlotError(null);
     setSelectionNotice(null);
     setSelectedSlotId(null);
     try {
-      const nextSlots = await examRegistrationService.getOpenSlots(signal);
-      setSlots(nextSlots);
+      const nextSlots = await getOpenSlots().unwrap();
       setSelectedExamId(nextSlots[0]?.examId ?? null);
     } catch (reason: unknown) {
-      if (!signal?.aborted) setSlotError(reason instanceof Error ? reason.message : "신청 가능한 시험 회차를 불러오지 못했습니다.");
-    } finally {
-      if (!signal?.aborted) setIsSlotsLoading(false);
+      setSlotError(queryErrorMessage(
+        reason,
+        "신청 가능한 시험 회차를 불러오지 못했습니다.",
+      ));
     }
-  }, []);
+  }, [
+    getOpenSlots,
+    setIsFormOpen,
+    setSelectionNotice,
+    setSelectedExamId,
+    setSelectedSlotId,
+    setSlotError,
+  ]);
 
   useEffect(() => {
-    const controller = new AbortController();
     const timer = window.setTimeout(() => {
-      void loadRegistrations(controller.signal);
       if (new URLSearchParams(window.location.search).get("openForm") === "true") {
-        void openRegistrationForm(controller.signal);
+        void openRegistrationForm();
         window.history.replaceState({}, "", window.location.pathname);
       }
     }, 0);
-    return () => { controller.abort(); window.clearTimeout(timer); };
-  }, [loadRegistrations, openRegistrationForm]);
+    return () => window.clearTimeout(timer);
+  }, [openRegistrationForm]);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 60_000);
@@ -163,14 +170,12 @@ export default function ExamRegistrationPage() {
     }
     setPendingId(selectedSlotId);
     try {
-      const created = await examRegistrationService.registerExam(selectedSlot);
-      setRegistrations((current) => sortByLatestActivity([...current, created]));
+      await registerExam(selectedSlot).unwrap();
       setSelectedExamId(null);
       setSelectedSlotId(null);
       setIsFormOpen(false);
-      await refreshRegistrations();
     } catch (reason: unknown) {
-      setSelectionNotice(reason instanceof Error ? reason.message : "시험 신청에 실패했습니다.");
+      setSelectionNotice(queryErrorMessage(reason, "시험 신청에 실패했습니다."));
     } finally {
       setPendingId(null);
     }
@@ -180,13 +185,9 @@ export default function ExamRegistrationPage() {
     if (!window.confirm(`${registration.examTitle} 신청을 취소할까요?`)) return;
     setPendingId(registration.id);
     try {
-      await examRegistrationService.cancelRegistration(registration.id);
-      setRegistrations((current) => sortByLatestActivity(current.map((item) => item.id === registration.id
-        ? { ...item, status: "cancelled", updatedAt: new Date().toISOString() }
-        : item)));
-      await refreshRegistrations();
+      await cancelRegistration(registration.id).unwrap();
     } catch (reason: unknown) {
-      setError(reason instanceof Error ? reason.message : "시험 신청 취소에 실패했습니다.");
+      setError(queryErrorMessage(reason, "시험 신청 취소에 실패했습니다."));
     } finally {
       setPendingId(null);
     }
@@ -198,7 +199,15 @@ export default function ExamRegistrationPage() {
         <div><h1>시험 신청 목록</h1><p>관리자가 개설한 시험 회차 중 원하는 일정을 선택합니다.</p></div>
         <button type="button" onClick={() => void openRegistrationForm()}><Plus /> 신청 추가</button>
       </div>
-      {error ? <div className={styles.error}>{error}<button onClick={() => void loadRegistrations()}>다시 시도</button></div> : null}
+      {error || registrationsQuery.error ? (
+        <div className={styles.error}>
+          {error ?? queryErrorMessage(
+            registrationsQuery.error,
+            "시험 신청 내역을 불러오지 못했습니다.",
+          )}
+          <button onClick={() => void registrationsQuery.refetch()}>다시 시도</button>
+        </div>
+      ) : null}
       <div className={styles.filters}>
         <div className={styles.filterGroup}><strong>연도</strong><div className={styles.filterTabs}>{YEAR_OPTIONS.map((year) => (
           <button key={year} type="button" data-selected={selectedYear === year} onClick={() => setSelectedYear(year)}>{year}년</button>

@@ -1,108 +1,139 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { chatService, isChatMessage } from "../services/chatService";
-import { useSocket } from "../../socket/SocketProvider";
-import type { ChatMessage } from "../types/chat";
-
-function mergeById(a: ChatMessage[], b: ChatMessage[]): ChatMessage[] {
-  const merged = new Map<string, ChatMessage>();
-  for (const message of a) merged.set(message.id, message);
-  for (const message of b) merged.set(message.id, message);
-  return Array.from(merged.values()).sort((x, y) => Number(x.id) - Number(y.id));
-}
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "@/features/store/store";
+import { queryErrorMessage } from "@/features/store/api/queryError";
+import {
+  chatApi,
+  mergeChatMessages,
+  useGetChatMessagesQuery,
+  useLazyGetChatMessagesQuery,
+  useMarkChatRoomReadMutation,
+  useSendChatMessageMutation,
+} from "../api/chatApi";
+import { isChatMessage } from "../services/chatService";
+import { useSocket } from "../../socket/useSocket";
 
 export type ConnectionState = "connecting" | "live" | "offline";
 
 export function useChatRoom(roomId: string | null) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const [localError, setLocalError] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [renderedRoomId, setRenderedRoomId] = useState(roomId);
   const { state: connection, error: socketError, subscribe } = useSocket();
   const previousConnectionRef = useRef<ConnectionState>(connection);
 
-  const [renderedRoomId, setRenderedRoomId] = useState(roomId);
   if (roomId !== renderedRoomId) {
     setRenderedRoomId(roomId);
-    setMessages([]);
     setHasMore(true);
-    setError(null);
+    setLocalError(null);
   }
+
+  const queryArgument = { roomId: roomId ?? "" };
+  const messagesQuery = useGetChatMessagesQuery(queryArgument, {
+    skip: roomId === null,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const [loadMessages] = useLazyGetChatMessagesQuery();
+  const [sendMessage] = useSendChatMessageMutation();
+  const [markRoomRead] = useMarkChatRoomReadMutation();
+  const messages = useMemo(
+    () => messagesQuery.data ?? [],
+    [messagesQuery.data],
+  );
+  const refetchMessages = messagesQuery.refetch;
 
   const markRead = useCallback(async () => {
     if (!roomId) return;
-    await chatService.markRead(roomId);
-  }, [roomId]);
-
-  const loadLatest = useCallback(async (signal?: AbortSignal) => {
-    if (!roomId) return;
     try {
-      const past = await chatService.findMessages(roomId, undefined, signal);
-      if (signal?.aborted) return;
-      setMessages((previous) => mergeById(previous, past));
-      if (past.length === 0) setHasMore(false);
-      await markRead();
-    } catch (reason) {
-      if (signal?.aborted) return;
-      setError(reason instanceof Error ? reason.message : "대화를 불러오지 못했습니다.");
+      await markRoomRead(roomId).unwrap();
+    } catch (reason: unknown) {
+      setLocalError(queryErrorMessage(
+        reason,
+        "읽음 상태를 저장하지 못했습니다.",
+      ));
     }
-  }, [roomId, markRead]);
+  }, [markRoomRead, roomId]);
 
   useEffect(() => {
     if (!roomId) return;
-    const controller = new AbortController();
     const unsubscribe = subscribe(`/topic/chat.${roomId}`, (body) => {
       if (!isChatMessage(body)) return;
-      setMessages((previous) => mergeById(previous, [body]));
+      dispatch(chatApi.util.updateQueryData(
+        "getChatMessages",
+        { roomId },
+        (draft) => mergeChatMessages(draft, [body]),
+      ));
       void markRead();
     });
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadLatest(controller.signal);
+    return unsubscribe;
+  }, [dispatch, markRead, roomId, subscribe]);
 
-    return () => {
-      unsubscribe();
-      controller.abort();
-    };
-  }, [roomId, subscribe, loadLatest, markRead]);
+  useEffect(() => {
+    if (roomId && messagesQuery.isSuccess) {
+      void markRoomRead(roomId);
+    }
+  }, [markRoomRead, messagesQuery.isSuccess, roomId]);
 
   useEffect(() => {
     const previous = previousConnectionRef.current;
     previousConnectionRef.current = connection;
-    if (previous === "offline" && connection === "live") void loadLatest();
-  }, [connection, loadLatest]);
+    if (roomId && previous === "offline" && connection === "live") {
+      void refetchMessages();
+    }
+  }, [connection, refetchMessages, roomId]);
 
   const loadOlder = useCallback(async () => {
     if (!roomId || isLoadingMore || !hasMore || messages.length === 0) return;
     setIsLoadingMore(true);
+    const currentIds = new Set(messages.map((message) => message.id));
     try {
-      const older = await chatService.findMessages(roomId, messages[0].id);
-      if (older.length === 0) setHasMore(false);
-      else setMessages((previous) => mergeById(older, previous));
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "이전 대화를 불러오지 못했습니다.");
+      const result = await loadMessages({
+        roomId,
+        before: messages[0].id,
+      }, false).unwrap();
+      if (!result.some((message) => !currentIds.has(message.id))) {
+        setHasMore(false);
+      }
+      setLocalError(null);
+    } catch (reason: unknown) {
+      setLocalError(queryErrorMessage(
+        reason,
+        "이전 대화를 불러오지 못했습니다.",
+      ));
     } finally {
       setIsLoadingMore(false);
     }
-  }, [roomId, isLoadingMore, hasMore, messages]);
+  }, [hasMore, isLoadingMore, loadMessages, messages, roomId]);
 
   const send = useCallback(async (content: string) => {
     if (!roomId) return;
     const trimmed = content.trim();
     if (!trimmed) return;
     try {
-      const saved = await chatService.send(roomId, trimmed);
-      setMessages((previous) => mergeById(previous, [saved]));
-      setError(null);
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "메시지를 보내지 못했습니다.");
+      const saved = await sendMessage({ roomId, content: trimmed }).unwrap();
+      dispatch(chatApi.util.updateQueryData(
+        "getChatMessages",
+        { roomId },
+        (draft) => mergeChatMessages(draft, [saved]),
+      ));
+      setLocalError(null);
+    } catch (reason: unknown) {
+      setLocalError(queryErrorMessage(reason, "메시지를 보내지 못했습니다."));
     }
-  }, [roomId]);
+  }, [dispatch, roomId, sendMessage]);
 
   return {
     messages,
     connection,
-    error: error ?? socketError,
+    error: localError ??
+      (messagesQuery.error
+        ? queryErrorMessage(messagesQuery.error, "대화를 불러오지 못했습니다.")
+        : socketError),
     send,
     loadOlder,
     isLoadingMore,

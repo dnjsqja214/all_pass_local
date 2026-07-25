@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, LogOut, Send, UserPlus, Users } from "lucide-react";
-import { useSocket } from "../../../socket/SocketProvider";
-import type { ChatMessageType, ChatParticipant, ChatRoomSummary } from "../../types/chat";
-import { chatService } from "../../services/chatService";
+import { queryErrorMessage } from "@/features/store/api/queryError";
+import { useSocket } from "../../../socket/useSocket";
+import type { ChatMessageType, ChatRoomSummary } from "../../types/chat";
+import { useGetChatParticipantsQuery } from "../../api/chatApi";
 import { useChatRoom } from "../../hooks/useChatRoom";
 import { ParticipantList } from "../ParticipantList/ParticipantList";
 import styles from "./Conversation.module.css";
@@ -43,11 +44,6 @@ export function Conversation({
 }: ConversationProps) {
   const [draft, setDraft] = useState("");
   const [participantsOpen, setParticipantsOpen] = useState(false);
-  const [participants, setParticipants] = useState<ChatParticipant[]>([]);
-  const [participantsRoomId, setParticipantsRoomId] = useState<string | null>(null);
-  const [participantsLoading, setParticipantsLoading] = useState(false);
-  const [participantsError, setParticipantsError] = useState<string | null>(null);
-  const [participantsErrorRoomId, setParticipantsErrorRoomId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const previousCount = useRef(0);
   const handledMembershipMessageId = useRef<string | null>(null);
@@ -61,6 +57,14 @@ export function Conversation({
     isLoadingMore,
     hasMore,
   } = useChatRoom(room?.id ?? null);
+  const participantsQuery = useGetChatParticipantsQuery(room?.id ?? "", {
+    skip: room === null,
+    pollingInterval: PARTICIPANT_REFRESH_FALLBACK_MILLIS,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const participants = participantsQuery.data ?? [];
+  const refetchParticipants = participantsQuery.refetch;
 
   useEffect(() => {
     const element = listRef.current;
@@ -70,62 +74,25 @@ export function Conversation({
     if (appended > 0 && !isLoadingMore) element.scrollTop = element.scrollHeight;
   }, [messages, isLoadingMore]);
 
-  const refreshParticipants = useCallback(async (signal?: AbortSignal) => {
-    if (!room) return;
-    try {
-      const result = await chatService.findParticipants(room.id, signal);
-      if (signal?.aborted) return;
-      setParticipants(result);
-      setParticipantsRoomId(room.id);
-      setParticipantsError(null);
-      setParticipantsErrorRoomId(null);
-    } catch (reason) {
-      if (signal?.aborted) return;
-      setParticipantsError(
-        reason instanceof Error ? reason.message : "참가자 목록을 불러오지 못했습니다.",
-      );
-      setParticipantsErrorRoomId(room.id);
-    } finally {
-      if (!signal?.aborted) setParticipantsLoading(false);
-    }
-  }, [room]);
-
   useEffect(() => {
     if (!room) return;
-    const controller = new AbortController();
     const unsubscribePresence = subscribe(
       PRESENCE_CHANGED_DESTINATION,
-      () => void refreshParticipants(),
+      () => void refetchParticipants(),
     );
-    const initialTimer = window.setTimeout(
-      () => void refreshParticipants(controller.signal),
-      0,
-    );
-    const timer = window.setInterval(
-      () => void refreshParticipants(),
-      PARTICIPANT_REFRESH_FALLBACK_MILLIS,
-    );
-    const onVisible = () => {
-      if (document.visibilityState === "visible") void refreshParticipants();
-    };
-    document.addEventListener("visibilitychange", onVisible);
     return () => {
       unsubscribePresence();
-      controller.abort();
-      window.clearTimeout(initialTimer);
-      window.clearInterval(timer);
-      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [room, refreshParticipants, subscribe]);
+  }, [refetchParticipants, room, subscribe]);
 
   useEffect(() => {
     const latest = messages.at(-1);
     if (!latest || handledMembershipMessageId.current === latest.id) return;
     if (!isMembershipMessageType(latest.messageType)) return;
     handledMembershipMessageId.current = latest.id;
-    const timer = window.setTimeout(() => void refreshParticipants(), 0);
+    const timer = window.setTimeout(() => void refetchParticipants(), 0);
     return () => window.clearTimeout(timer);
-  }, [messages, refreshParticipants]);
+  }, [messages, refetchParticipants]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -136,15 +103,18 @@ export function Conversation({
   };
 
   const handleParticipantsToggle = () => {
-    const next = !participantsOpen;
-    setParticipantsOpen(next);
-    if (next && participantsRoomId !== room?.id) setParticipantsLoading(true);
+    setParticipantsOpen((current) => !current);
   };
 
-  const currentParticipants = room && participantsRoomId === room.id ? participants : [];
-  const participantCount = room && participantsRoomId === room.id ? participants.length : null;
-  const currentParticipantsError =
-    room && participantsErrorRoomId === room.id ? participantsError : null;
+  const participantCount = room && !participantsQuery.isLoading
+    ? participants.length
+    : null;
+  const participantsError = participantsQuery.error
+    ? queryErrorMessage(
+        participantsQuery.error,
+        "참가자 목록을 불러오지 못했습니다.",
+      )
+    : null;
 
   if (!room) {
     return (
@@ -194,9 +164,9 @@ export function Conversation({
 
       {participantsOpen && (
         <ParticipantList
-          participants={currentParticipants}
-          isLoading={participantsLoading}
-          error={currentParticipantsError}
+          participants={participants}
+          isLoading={participantsQuery.isLoading}
+          error={participantsError}
           onClose={() => setParticipantsOpen(false)}
         />
       )}

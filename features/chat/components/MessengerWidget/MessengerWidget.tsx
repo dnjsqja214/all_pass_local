@@ -1,14 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MessageCircle, Plus, X } from "lucide-react";
-import { useSocket } from "../../../socket/SocketProvider";
+import { queryErrorMessage } from "@/features/store/api/queryError";
+import { useSocket } from "../../../socket/useSocket";
 import type {
   ChatDirectoryUser,
   ChatRoom,
   ChatRoomDirectory,
 } from "../../types/chat";
-import { chatService } from "../../services/chatService";
+import {
+  useGetChatRoomsQuery,
+  useGetOnlineUsersQuery,
+  useJoinChatRoomMutation,
+  useLeaveChatRoomMutation,
+  useStartConversationMutation,
+} from "../../api/chatApi";
 import { Conversation } from "../Conversation/Conversation";
 import { OnlineUserList } from "../OnlineUserList/OnlineUserList";
 import { RoomActionDialog } from "../RoomActionDialog/RoomActionDialog";
@@ -44,104 +51,65 @@ export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetP
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<RoomTab>("private");
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [directory, setDirectory] = useState<ChatRoomDirectory>(EMPTY_DIRECTORY);
-  const [onlineUsers, setOnlineUsers] = useState<ChatDirectoryUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isOnlineLoading, setIsOnlineLoading] = useState(isAdmin);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [dialogMode, setDialogMode] = useState<DialogMode>(null);
-  const roomRefreshVersionRef = useRef(0);
-
-  const refreshRooms = useCallback(async (signal?: AbortSignal) => {
-    const version = ++roomRefreshVersionRef.current;
-    try {
-      const rooms = await chatService.findRooms(signal);
-      if (signal?.aborted || version !== roomRefreshVersionRef.current) return;
-      setDirectory(rooms);
-      setError(null);
-    } catch (reason) {
-      if (signal?.aborted || version !== roomRefreshVersionRef.current) return;
-      setError(reason instanceof Error ? reason.message : "채팅방 목록을 불러오지 못했습니다.");
-    } finally {
-      if (!signal?.aborted && version === roomRefreshVersionRef.current) setIsLoading(false);
-    }
-  }, []);
-
-  const refreshOnlineUsers = useCallback(async (signal?: AbortSignal) => {
-    try {
-      const users = await chatService.findOnlineUsers(signal);
-      if (signal?.aborted) return;
-      setOnlineUsers(users);
-      setError(null);
-    } catch (reason) {
-      if (signal?.aborted) return;
-      setError(reason instanceof Error ? reason.message : "접속자 목록을 불러오지 못했습니다.");
-    } finally {
-      if (!signal?.aborted) setIsOnlineLoading(false);
-    }
-  }, []);
+  const roomsQuery = useGetChatRoomsQuery(undefined, {
+    pollingInterval: STATE_REFRESH_FALLBACK_MILLIS,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const onlineUsersQuery = useGetOnlineUsersQuery(undefined, {
+    skip: !isAdmin,
+    pollingInterval: STATE_REFRESH_FALLBACK_MILLIS,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const [joinRoom] = useJoinChatRoomMutation();
+  const [leaveRoom] = useLeaveChatRoomMutation();
+  const [startConversation] = useStartConversationMutation();
+  const directory = roomsQuery.data ?? EMPTY_DIRECTORY;
+  const onlineUsers = onlineUsersQuery.data ?? [];
+  const refetchRooms = roomsQuery.refetch;
+  const refetchOnlineUsers = onlineUsersQuery.refetch;
+  const isLoading = roomsQuery.isLoading;
+  const isOnlineLoading = onlineUsersQuery.isLoading;
+  const queryError = roomsQuery.error
+    ? queryErrorMessage(roomsQuery.error, "채팅방 목록을 불러오지 못했습니다.")
+    : onlineUsersQuery.error
+      ? queryErrorMessage(
+          onlineUsersQuery.error,
+          "접속자 목록을 불러오지 못했습니다.",
+        )
+      : null;
+  const error = actionError ?? queryError;
 
   useEffect(() => {
-    const controller = new AbortController();
     const unsubscribePublic = subscribe(
       CHAT_DIRECTORY_CHANGED_DESTINATION,
-      () => void refreshRooms(),
+      () => void refetchRooms(),
     );
     const unsubscribeUser = subscribe(
       USER_CHAT_CHANGED_DESTINATION,
-      () => void refreshRooms(),
+      () => void refetchRooms(),
     );
-    const initialTimer = window.setTimeout(
-      () => void refreshRooms(controller.signal),
-      0,
-    );
-    const timer = window.setInterval(
-      () => void refreshRooms(),
-      STATE_REFRESH_FALLBACK_MILLIS,
-    );
-    const onVisible = () => {
-      if (document.visibilityState === "visible") void refreshRooms();
-    };
-    document.addEventListener("visibilitychange", onVisible);
     return () => {
       unsubscribePublic();
       unsubscribeUser();
-      controller.abort();
-      window.clearTimeout(initialTimer);
-      window.clearInterval(timer);
-      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [refreshRooms, subscribe]);
+  }, [refetchRooms, subscribe]);
 
   useEffect(() => {
     if (!isAdmin) return;
-    const controller = new AbortController();
     const unsubscribe = subscribe(
       PRESENCE_CHANGED_DESTINATION,
-      () => void refreshOnlineUsers(),
+      () => void refetchOnlineUsers(),
     );
-    const initialTimer = window.setTimeout(
-      () => void refreshOnlineUsers(controller.signal),
-      0,
-    );
-    const timer = window.setInterval(
-      () => void refreshOnlineUsers(),
-      STATE_REFRESH_FALLBACK_MILLIS,
-    );
-    const onVisible = () => {
-      if (document.visibilityState === "visible") void refreshOnlineUsers();
-    };
-    document.addEventListener("visibilitychange", onVisible);
     return () => {
       unsubscribe();
-      controller.abort();
-      window.clearTimeout(initialTimer);
-      window.clearInterval(timer);
-      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [isAdmin, refreshOnlineUsers, subscribe]);
+  }, [isAdmin, refetchOnlineUsers, subscribe]);
 
   const allRooms = useMemo(
     () => [...directory.publicRooms, ...directory.privateRooms],
@@ -158,15 +126,15 @@ export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetP
     const room = allRooms.find((candidate) => candidate.id === roomId);
     if (!room) return;
     setNotice(null);
-    setError(null);
+    setActionError(null);
     try {
       if (room.isPublic) {
-        await chatService.join(room.id);
-        await refreshRooms();
+        await joinRoom(room.id).unwrap();
+        await refetchRooms();
       }
       setSelectedRoomId(room.id);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "채팅방에 참여하지 못했습니다.");
+      setActionError(queryErrorMessage(reason, "채팅방에 참여하지 못했습니다."));
     }
   };
 
@@ -185,33 +153,33 @@ export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetP
     } else {
       setNotice("사용자를 초대했습니다.");
     }
-    await refreshRooms();
+    await refetchRooms();
   };
 
   const handleLeave = async () => {
     if (!selectedRoom) return;
     if (!window.confirm(`"${selectedRoom.name}" 채팅방에서 나가시겠습니까?`)) return;
     try {
-      await chatService.leave(selectedRoom.id);
+      await leaveRoom(selectedRoom.id).unwrap();
       setSelectedRoomId(null);
       setNotice("채팅방에서 퇴장하였습니다.");
-      await refreshRooms();
+      await refetchRooms();
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "채팅방에서 나가지 못했습니다.");
+      setActionError(queryErrorMessage(reason, "채팅방에서 나가지 못했습니다."));
     }
   };
 
   const handleStartConversation = async (user: ChatDirectoryUser) => {
     setBusyUserId(user.id);
-    setError(null);
+    setActionError(null);
     try {
-      const room = await chatService.startConversation(user.email);
-      await refreshRooms();
+      const room = await startConversation(user.email).unwrap();
+      await refetchRooms();
       setActiveTab("private");
       setSelectedRoomId(room.id);
       setNotice(`${user.name}님과의 비공개방을 만들었습니다.`);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "비공개방을 만들지 못했습니다.");
+      setActionError(queryErrorMessage(reason, "비공개방을 만들지 못했습니다."));
     } finally {
       setBusyUserId(null);
     }
@@ -219,7 +187,7 @@ export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetP
 
   const handleOpen = () => {
     setIsOpen(true);
-    void refreshRooms();
+    void refetchRooms();
   };
 
   return (
