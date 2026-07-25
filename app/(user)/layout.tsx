@@ -8,12 +8,8 @@ import { useAuth } from "@/features/auth/hooks/useAuth";
 import { authService } from "@/features/auth/services/authService";
 import { ModeSwitcher } from "@/features/auth/components/ModeSwitcher";
 import { ThemeToggle } from "@/features/theme/components/ThemeToggle/ThemeToggle";
-import { SocketProvider } from "@/features/socket/SocketProvider";
 import { MessengerWidget } from "@/features/chat/components/MessengerWidget/MessengerWidget";
 import { useExamPhase } from "@/features/exam/hooks/useExamPhase";
-import {
-  ExamPhaseRefreshProvider,
-} from "@/features/exam/context/ExamPhaseRefreshContext";
 import { ExamCountdown } from "@/features/exam/components/ExamCountdown";
 import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
 import { useVoiceReminders } from "@/features/exam/hooks/useVoiceReminder";
@@ -141,10 +137,6 @@ export default function UserLayout({
   const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (
-    <ExamPhaseRefreshProvider refreshRegistrations={refreshRegistrations}>
-    {/* SocketProvider는 화면 분기보다 바깥이어야 한다. 안쪽에 두면 나중에 시험 대기
-        화면으로 바뀌는 순간 언마운트되면서 연결이 끊긴다. */}
-    <SocketProvider>
     <div className={styles.shell}>
       {authStatus === "loading" || authStatus === "unauthenticated" ? (
         <div className={styles.state}>로그인 확인 중...</div>
@@ -247,7 +239,5 @@ export default function UserLayout({
         </>
       )}
     </div>
-    </SocketProvider>
-    </ExamPhaseRefreshProvider>
   );
 }

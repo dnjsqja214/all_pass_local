@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { useDashboardData } from "../../../features/dashboard/hooks/useDashboardData";
-import { examService } from "../../../features/exam/services/examService";
+import { useGetExamsQuery } from "../../../features/exam/api/examApi";
 import { ExamListItem } from "../../../features/exam/types/exam";
 import { WrongExamSelection } from "./_components/WrongExamSelection/WrongExamSelection";
 import { WrongNotesDetail } from "./_components/WrongNotesDetail/WrongNotesDetail";
@@ -62,10 +62,26 @@ const MOCK_COMPLETED_EXAMS: ExamListItem[] = [
 export default function WrongNotes() {
   const { wrongNotes } = useDashboardData("incorrect");
 
-  // 풀어본 시험 리스트 상태
-  const [exams, setExams] = useState<ExamListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const completedExamsQuery = useGetExamsQuery({
+    type: "all",
+    subject: "all",
+    round: "all",
+  });
+  const exams = useMemo(() => {
+    const combined = [...MOCK_COMPLETED_EXAMS];
+    completedExamsQuery.data
+      ?.filter((exam) => exam.status === "completed")
+      .forEach((exam) => {
+        if (!combined.some((item) => item.id === exam.id)) {
+          combined.push(exam);
+        }
+      });
+    return combined;
+  }, [completedExamsQuery.data]);
+  const isLoading = completedExamsQuery.isLoading;
+  const error = completedExamsQuery.isError && exams.length === 0
+    ? "시험 목록을 불러올 수 없습니다."
+    : null;
 
   // 선택된 시험
   const [selectedExam, setSelectedExam] = useState<ExamListItem | null>(null);
@@ -85,46 +101,6 @@ export default function WrongNotes() {
   // 검색 시점에 적용할 필터 상태 (검색하기 버튼 클릭 시 반영)
   const [appliedSubject, setAppliedSubject] = useState<string>("all");
   const [appliedRound, setAppliedRound] = useState<string>("all");
-
-  // 시험 목록 조회
-  useEffect(() => {
-    let active = true;
-    const fetchExams = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        let completedApiExams: ExamListItem[] = [];
-        try {
-          const res = await examService.findExams({ type: "all", subject: "all", round: "all" });
-          completedApiExams = res.filter((exam) => exam.status === "completed");
-        } catch (apiErr) {
-          console.warn("Backend fetch failed, using mock exams only:", apiErr);
-        }
-
-        if (!active) return;
-
-        // API 결과와 더미 리스트를 병합하여 중복 제거
-        const combined = [...MOCK_COMPLETED_EXAMS];
-        completedApiExams.forEach((apiExam) => {
-          if (!combined.some((item) => item.id === apiExam.id)) {
-            combined.push(apiExam);
-          }
-        });
-
-        setExams(combined);
-      } catch (err) {
-        if (active) {
-          setError(err instanceof Error ? err.message : "시험 목록을 불러올 수 없습니다.");
-        }
-      } finally {
-        if (active) setIsLoading(false);
-      }
-    };
-    fetchExams();
-    return () => {
-      active = false;
-    };
-  }, []);
 
   // 개별 카드의 오답 원인 변경 핸란러
   const handleCauseChange = (cardId: string, newCause: "unknown" | "confused" | "mistake") => {

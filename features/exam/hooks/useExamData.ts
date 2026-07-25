@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { examService } from "../services/examService";
+import { queryErrorMessage } from "@/features/store/api/queryError";
+import {
+  useLazyGetRegisteredExamQuery,
+  useStartExamSessionMutation,
+  useSubmitExamMutation,
+  useTempSaveExamMutation,
+} from "../api/examApi";
 import { AnswerMark, SubmittedExamSession } from "../types/exam";
 
 export interface Exam {
@@ -24,6 +30,10 @@ function toAnswerMarks(answers: Record<number, number>): AnswerMark[] {
 }
 
 export function useExamData(registrationId?: string) {
+  const [startSession] = useStartExamSessionMutation();
+  const [getRegisteredExam] = useLazyGetRegisteredExamQuery();
+  const [tempSave] = useTempSaveExamMutation();
+  const [submit] = useSubmitExamMutation();
   const [examInfo, setExamInfo] = useState<Exam | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -75,8 +85,8 @@ export function useExamData(registrationId?: string) {
         setSessionId(null);
         setAnswers({});
         answersRef.current = {};
-        const started = await examService.startSession(registrationId, controller.signal);
-        const detail = await examService.getRegisteredExam(registrationId, controller.signal);
+        const started = await startSession(registrationId).unwrap();
+        const detail = await getRegisteredExam(registrationId, false).unwrap();
         if (controller.signal.aborted) return;
 
         const restoredAnswers = Object.fromEntries(detail.savedAnswers.map((answer) => [
@@ -97,7 +107,7 @@ export function useExamData(registrationId?: string) {
         });
       } catch (reason: unknown) {
         if (!controller.signal.aborted) {
-          setError(reason instanceof Error ? reason.message : "시험 정보를 불러올 수 없습니다.");
+          setError(queryErrorMessage(reason, "시험 정보를 불러올 수 없습니다."));
         }
       } finally {
         if (!controller.signal.aborted) setIsLoading(false);
@@ -111,7 +121,7 @@ export function useExamData(registrationId?: string) {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
-  }, [registrationId]);
+  }, [getRegisteredExam, registrationId, startSession]);
 
   useEffect(() => {
     if (!sessionId || isSubmitted) return;
@@ -133,13 +143,20 @@ export function useExamData(registrationId?: string) {
     saveChainRef.current = saveChainRef.current
       .catch(() => undefined)
       .then(async () => {
-        await examService.tempSave(sessionId, answerMarks, remainingSecondsRef.current);
+        await tempSave({
+          sessionId,
+          answers: answerMarks,
+          remainingSeconds: remainingSecondsRef.current,
+        }).unwrap();
         if (mountedRef.current && version === saveVersionRef.current) setSaveStatus("saved");
       })
       .catch((reason: unknown) => {
         if (mountedRef.current && version === saveVersionRef.current) {
           setSaveStatus("error");
-          showErrorToast(reason instanceof Error ? reason.message : "답안을 자동 저장하지 못했습니다.");
+          showErrorToast(queryErrorMessage(
+            reason,
+            "답안을 자동 저장하지 못했습니다.",
+          ));
         }
       });
   };
@@ -165,7 +182,10 @@ export function useExamData(registrationId?: string) {
     setIsSubmitting(true);
     try {
       await saveChainRef.current.catch(() => undefined);
-      const result = await examService.submit(sessionId, toAnswerMarks(answersRef.current));
+      const result = await submit({
+        sessionId,
+        answers: toAnswerMarks(answersRef.current),
+      }).unwrap();
       if (mountedRef.current) {
         setSubmissionResult(result);
         setIsSubmitted(true);
@@ -173,7 +193,7 @@ export function useExamData(registrationId?: string) {
       }
       return result;
     } catch (reason: unknown) {
-      const message = reason instanceof Error ? reason.message : "시험을 제출하지 못했습니다.";
+      const message = queryErrorMessage(reason, "시험을 제출하지 못했습니다.");
       showErrorToast(message);
       throw reason;
     } finally {

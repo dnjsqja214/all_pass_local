@@ -1,57 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { examService, ExamSearchParams } from "../services/examService";
+import { useMemo, useState } from "react";
+import { queryErrorMessage } from "@/features/store/api/queryError";
+import { useGetExamsQuery } from "../api/examApi";
+import type { ExamSearchParams } from "../services/examService";
 import { ExamListItem } from "../types/exam";
 
 export function useExamSearch(initialExams?: ExamListItem[]) {
   const [selectedType, setSelectedType] = useState("all");
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [selectedRound, setSelectedRound] = useState("all");
-  const [apiExams, setApiExams] = useState<ExamListItem[]>([]);
-  const [isLoading, setIsLoading] = useState(initialExams === undefined);
-  const [error, setError] = useState<string | null>(null);
-  const requestControllerRef = useRef<AbortController | null>(null);
-
-  const loadExams = useCallback(async (params: ExamSearchParams) => {
-    if (initialExams) return;
-    requestControllerRef.current?.abort();
-    const controller = new AbortController();
-    requestControllerRef.current = controller;
-    await Promise.resolve();
-    if (controller.signal.aborted) return;
-    setIsLoading(true);
-    setError(null);
-    try {
-      const exams = await examService.findExams(params, controller.signal);
-      if (!controller.signal.aborted) setApiExams(exams);
-    } catch (reason: unknown) {
-      if (!controller.signal.aborted) {
-        setError(reason instanceof Error ? reason.message : "시험 목록을 불러올 수 없습니다.");
-      }
-    } finally {
-      if (!controller.signal.aborted) setIsLoading(false);
-    }
-  }, [initialExams]);
-
-  useEffect(() => {
-    if (initialExams) return;
-    const controller = new AbortController();
-    requestControllerRef.current = controller;
-    examService.findExams({ type: "all", subject: "all", round: "all" }, controller.signal)
-      .then((exams) => {
-        if (!controller.signal.aborted) setApiExams(exams);
-      })
-      .catch((reason: unknown) => {
-        if (!controller.signal.aborted) {
-          setError(reason instanceof Error ? reason.message : "시험 목록을 불러올 수 없습니다.");
-        }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
-      });
-    return () => controller.abort();
-  }, [initialExams]);
+  const [activeParams, setActiveParams] = useState<ExamSearchParams>({
+    type: "all",
+    subject: "all",
+    round: "all",
+  });
+  const {
+    data: apiExams = [],
+    isLoading,
+    isFetching,
+    error: queryError,
+  } = useGetExamsQuery(activeParams, {
+    skip: initialExams !== undefined,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
 
   const filteredStaticExams = useMemo(() => {
     if (!initialExams) return [];
@@ -71,14 +44,18 @@ export function useExamSearch(initialExams?: ExamListItem[]) {
   }, [initialExams, apiExams]);
 
   const handleSearch = () => {
-    void loadExams({ type: selectedType, subject: selectedSubject, round: selectedRound });
+    setActiveParams({
+      type: selectedType,
+      subject: selectedSubject,
+      round: selectedRound,
+    });
   };
 
   const handleReset = () => {
     setSelectedType("all");
     setSelectedSubject("all");
     setSelectedRound("all");
-    void loadExams({ type: "all", subject: "all", round: "all" });
+    setActiveParams({ type: "all", subject: "all", round: "all" });
   };
 
   return {
@@ -90,8 +67,10 @@ export function useExamSearch(initialExams?: ExamListItem[]) {
     setSelectedRound,
     subjectOptions,
     filteredExams: initialExams ? filteredStaticExams : apiExams,
-    isLoading,
-    error,
+    isLoading: initialExams === undefined && (isLoading || isFetching),
+    error: queryError
+      ? queryErrorMessage(queryError, "시험 목록을 불러올 수 없습니다.")
+      : null,
     handleSearch,
     handleReset,
   };

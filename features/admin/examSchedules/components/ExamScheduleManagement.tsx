@@ -1,12 +1,18 @@
 "use client";
 
-import { FormEvent, Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, Fragment, useState } from "react";
 import { CalendarClock, CalendarDays, Check, Clock, Pencil, Plus, Power, X } from "lucide-react";
-import { examService } from "../../../exam/services/examService";
-import { ExamListItem } from "../../../exam/types/exam";
+import { useGetExamsQuery } from "../../../exam/api/examApi";
+import { queryErrorMessage } from "../../../store/api/queryError";
 import {
-  examScheduleService,
-  ExamSchedulePolicy,
+  useActivateExamScheduleMutation,
+  useCreateExamScheduleMutation,
+  useDeactivateExamScheduleMutation,
+  useGetExamSchedulesQuery,
+  useUpdateExamScheduleMutation,
+} from "../api/examScheduleApi";
+import {
+  type ExamSchedulePolicy,
   type VoiceReminderSetting,
 } from "../services/examScheduleService";
 import styles from "./ExamScheduleManagement.module.css";
@@ -75,8 +81,21 @@ function createInitialForm(examIds: string[] = []) {
 };
 
 export function ExamScheduleManagement() {
-  const [policies, setPolicies] = useState<ExamSchedulePolicy[]>([]);
-  const [exams, setExams] = useState<ExamListItem[]>([]);
+  const policiesQuery = useGetExamSchedulesQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const examsQuery = useGetExamsQuery({
+    type: "all",
+    subject: "all",
+    round: "all",
+  });
+  const policies = policiesQuery.data ?? [];
+  const exams = examsQuery.data ?? [];
+  const [createPolicy] = useCreateExamScheduleMutation();
+  const [updatePolicy] = useUpdateExamScheduleMutation();
+  const [activatePolicy] = useActivateExamScheduleMutation();
+  const [deactivatePolicy] = useDeactivateExamScheduleMutation();
   const [form, setForm] = useState(() => createInitialForm());
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isExamPickerOpen, setIsExamPickerOpen] = useState(false);
@@ -85,31 +104,6 @@ export function ExamScheduleManagement() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey | null>("month");
   const [schedulePicker, setSchedulePicker] = useState<SchedulePickerKind | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const examDefaultsInitialized = useRef(false);
-
-  const load = useCallback(async (signal?: AbortSignal) => {
-    setError(null);
-    try {
-      const [nextPolicies, nextExams] = await Promise.all([
-        examScheduleService.findAll(signal),
-        examService.findExams({ type: "all", subject: "all", round: "all" }, signal),
-      ]);
-      setPolicies(nextPolicies);
-      setExams(nextExams);
-      if (!examDefaultsInitialized.current) {
-        examDefaultsInitialized.current = true;
-        setForm((current) => ({ ...current, examIds: nextExams.map((exam) => exam.id) }));
-      }
-    } catch (reason: unknown) {
-      if (!signal?.aborted) setError(reason instanceof Error ? reason.message : "일정을 불러오지 못했습니다.");
-    }
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const timer = window.setTimeout(() => void load(controller.signal), 0);
-    return () => { controller.abort(); window.clearTimeout(timer); };
-  }, [load]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -157,19 +151,18 @@ export function ExamScheduleManagement() {
     setError(null);
     try {
       const command = form;
-      const saved = editingId
-        ? await examScheduleService.update(editingId, command)
-        : await examScheduleService.create(command);
-      setPolicies((current) => editingId
-        ? current.map((item) => item.id === editingId ? saved : item)
-        : [saved, ...current]);
+      if (editingId) {
+        await updatePolicy({ id: editingId, command }).unwrap();
+      } else {
+        await createPolicy(command).unwrap();
+      }
       setForm(createInitialForm(exams.map((exam) => exam.id)));
       setEditingId(null);
       setSelectedPeriod("month");
       setIsFormOpen(false);
       setSchedulePicker(null);
     } catch (reason: unknown) {
-      setError(reason instanceof Error ? reason.message : "일정 생성에 실패했습니다.");
+      setError(queryErrorMessage(reason, "일정 생성에 실패했습니다."));
     } finally {
       setIsSaving(false);
     }
@@ -208,20 +201,18 @@ export function ExamScheduleManagement() {
   const deactivate = async (policy: ExamSchedulePolicy) => {
     if (!window.confirm(`'${policy.name}' 정책을 비활성화할까요? 신청된 회차는 유지됩니다.`)) return;
     try {
-      await examScheduleService.deactivate(policy.id);
-      setPolicies((current) => current.map((item) => item.id === policy.id ? { ...item, active: false } : item));
+      await deactivatePolicy(policy.id).unwrap();
     } catch (reason: unknown) {
-      setError(reason instanceof Error ? reason.message : "정책 비활성화에 실패했습니다.");
+      setError(queryErrorMessage(reason, "정책 비활성화에 실패했습니다."));
     }
   };
 
   const activate = async (policy: ExamSchedulePolicy) => {
     if (!window.confirm(`'${policy.name}' 정책을 다시 활성화할까요? 미래 시험 회차가 다시 생성됩니다.`)) return;
     try {
-      const activated = await examScheduleService.activate(policy.id);
-      setPolicies((current) => current.map((item) => item.id === policy.id ? activated : item));
+      await activatePolicy(policy.id).unwrap();
     } catch (reason: unknown) {
-      setError(reason instanceof Error ? reason.message : "정책 활성화에 실패했습니다.");
+      setError(queryErrorMessage(reason, "정책 활성화에 실패했습니다."));
     }
   };
 
@@ -294,6 +285,12 @@ export function ExamScheduleManagement() {
       [field]: current[field].filter((_, itemIndex) => itemIndex !== index),
     }));
   };
+
+  const loadError = policiesQuery.error
+    ? queryErrorMessage(policiesQuery.error, "시험 정책을 불러오지 못했습니다.")
+    : examsQuery.error
+      ? queryErrorMessage(examsQuery.error, "시험 목록을 불러오지 못했습니다.")
+      : null;
 
   const scheduleForm = isFormOpen ? (
     <form className={styles.form} onSubmit={submit}>
@@ -430,7 +427,9 @@ export function ExamScheduleManagement() {
         <button type="button" onClick={openCreate}><Plus /> 일정 정책 추가</button>
       </div>
 
-      {error && !isFormOpen ? <div className={styles.error}>{error}</div> : null}
+      {(error || loadError) && !isFormOpen
+        ? <div className={styles.error}>{error ?? loadError}</div>
+        : null}
 
       {!editingId ? scheduleForm : null}
 

@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { Globe2, Lock, X } from "lucide-react";
-import { chatService } from "../../services/chatService";
+import { queryErrorMessage } from "@/features/store/api/queryError";
+import {
+  useCreateChatRoomMutation,
+  useInviteChatParticipantMutation,
+} from "../../api/chatApi";
 import type { ChatDirectoryUser, ChatRoom } from "../../types/chat";
 import { UserPicker } from "../UserPicker/UserPicker";
 import styles from "./RoomActionDialog.module.css";
@@ -31,26 +35,28 @@ export function RoomActionDialog({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isPublic, setIsPublic] = useState(isAdmin && defaultPublic);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [createRoom, createState] = useCreateChatRoomMutation();
+  const [inviteParticipant, inviteState] = useInviteChatParticipantMutation();
+  const isSubmitting = createState.isLoading || inviteState.isLoading;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setIsSubmitting(true);
     setError(null);
     try {
       if (mode === "create") {
-        const created = await chatService.createRoom(name.trim(), isAdmin && isPublic);
+        const created = await createRoom({
+          name: name.trim(),
+          isPublic: isAdmin && isPublic,
+        }).unwrap();
         onComplete(created);
       } else {
         if (!roomId) throw new Error("초대할 채팅방이 선택되지 않았습니다.");
-        await chatService.invite(roomId, email.trim());
+        await inviteParticipant({ roomId, email: email.trim() }).unwrap();
         onComplete();
       }
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "요청을 처리하지 못했습니다.");
-    } finally {
-      setIsSubmitting(false);
+      setError(queryErrorMessage(reason, "요청을 처리하지 못했습니다."));
     }
   };
 

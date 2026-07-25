@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
-import { chatService } from "../../services/chatService";
+import { queryErrorMessage } from "@/features/store/api/queryError";
+import { useSearchChatUsersQuery } from "../../api/chatApi";
 import type { ChatDirectoryUser } from "../../types/chat";
 import styles from "./UserPicker.module.css";
 
@@ -13,32 +14,26 @@ interface UserPickerProps {
 
 export function UserPicker({ selectedEmail, onSelect }: UserPickerProps) {
   const [query, setQuery] = useState("");
-  const [users, setUsers] = useState<ChatDirectoryUser[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
   useEffect(() => {
-    const controller = new AbortController();
-    const timer = window.setTimeout(async () => {
-      try {
-        const result = await chatService.searchUsers(query, controller.signal);
-        if (!controller.signal.aborted) {
-          setUsers(result);
-          setError(null);
-          setIsLoading(false);
-        }
-      } catch (reason) {
-        if (!controller.signal.aborted) {
-          setError(reason instanceof Error ? reason.message : "사용자 목록을 불러오지 못했습니다.");
-          setIsLoading(false);
-        }
-      }
-    }, query ? 250 : 0);
-    return () => {
-      controller.abort();
-      window.clearTimeout(timer);
-    };
+    const timer = window.setTimeout(
+      () => setDebouncedQuery(query),
+      query ? 250 : 0,
+    );
+    return () => window.clearTimeout(timer);
   }, [query]);
+  const usersQuery = useSearchChatUsersQuery(debouncedQuery, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const users = usersQuery.data ?? [];
+  const isLoading = query !== debouncedQuery ||
+    usersQuery.isLoading ||
+    usersQuery.isFetching;
+  const error = usersQuery.error
+    ? queryErrorMessage(usersQuery.error, "사용자 목록을 불러오지 못했습니다.")
+    : null;
 
   return (
     <div className={styles.picker}>
@@ -48,10 +43,7 @@ export function UserPicker({ selectedEmail, onSelect }: UserPickerProps) {
           <Search aria-hidden />
           <input
             value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setIsLoading(true);
-            }}
+            onChange={(event) => setQuery(event.target.value)}
             placeholder="이름 또는 이메일 검색"
             autoComplete="off"
             autoFocus

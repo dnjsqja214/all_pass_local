@@ -1,30 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ActiveStudyCard } from "@/features/dashboard/components/ActiveStudyCard";
 import { ExamDDayCard } from "@/features/dashboard/components/ExamDDayCard";
 import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData";
 import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
-import { ExamRegistration, examRegistrationService } from "@/features/exam/services/examRegistrationService";
+import { useGetRegistrationsQuery } from "@/features/exam/api/examRegistrationApi";
+import type { ExamRegistration } from "@/features/exam/services/examRegistrationService";
 import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
   const { examDDayInfo } = useDashboardData();
-  const [closestRegistration, setClosestRegistration] = useState<ExamRegistration | null>(null);
   const [solving, setSolving] = useState<ExamRegistration | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void examRegistrationService.getRegistrations().then((registrations) => {
-      if (!active) return;
-      const next = registrations.filter((item) => item.status === "applied")
-        .sort((left, right) => left.startsAt.localeCompare(right.startsAt))[0] ?? null;
-      setClosestRegistration(next);
-    }).catch((reason: unknown) => console.error("시험 신청 내역 조회 실패", reason));
-    return () => { active = false; };
-  }, []);
+  const registrationsQuery = useGetRegistrationsQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const closestRegistration = useMemo(
+    () => registrationsQuery.data?.registrations
+      .filter((item) => item.status === "applied")
+      .sort((left, right) =>
+        left.startsAt.localeCompare(right.startsAt))[0] ?? null,
+    [registrationsQuery.data],
+  );
 
   return (
     <div className={styles.page}>
@@ -50,7 +50,7 @@ export default function Home() {
           endReminders={solving.endReminders}
           isOpen
           onClose={() => setSolving(null)}
-          onSubmitted={() => setClosestRegistration(null)}
+          onSubmitted={() => void registrationsQuery.refetch()}
         />
       ) : null}
     </div>
