@@ -44,3 +44,19 @@ spec:
   ports:
     - port: 80
       targetPort: 3000
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: allpass
+  namespace: allpass
+spec:
+  parentRefs:
+    - name: coder-han-gateway
+      namespace: gateway-system
+  hostnames:
+    - allpass.coder-han.com
+  rules:
+    - backendRefs:
+        - name: allpass-front
+          port: 80
