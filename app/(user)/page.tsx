@@ -44,7 +44,15 @@ export default function Home() {
           <ExamDDayCard {...examDDayInfo} />
         </div>
       </div>
-      {solving ? <ExamSolvingModal registrationId={solving.id} isOpen onClose={() => setSolving(null)} onSubmitted={() => setClosestRegistration(null)} /> : null}
+      {solving ? (
+        <ExamSolvingModal
+          registrationId={solving.id}
+          endReminders={solving.endReminders}
+          isOpen
+          onClose={() => setSolving(null)}
+          onSubmitted={() => setClosestRegistration(null)}
+        />
+      ) : null}
     </div>
   );
 }

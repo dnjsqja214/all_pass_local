@@ -7,6 +7,7 @@ import {
   ExamSlot,
   examRegistrationService,
 } from "../../../features/exam/services/examRegistrationService";
+import { useExamPhaseRefresh } from "../../../features/exam/context/ExamPhaseRefreshContext";
 import styles from "./page.module.css";
 
 const dateTime = new Intl.DateTimeFormat("ko-KR", {
@@ -62,6 +63,7 @@ function findScheduleConflict(slot: ExamSlot, registrations: ExamRegistration[])
 }
 
 export default function ExamRegistrationPage() {
+  const { refreshRegistrations } = useExamPhaseRefresh();
   const [registrations, setRegistrations] = useState<ExamRegistration[]>([]);
   const [slots, setSlots] = useState<ExamSlot[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -166,6 +168,7 @@ export default function ExamRegistrationPage() {
       setSelectedExamId(null);
       setSelectedSlotId(null);
       setIsFormOpen(false);
+      await refreshRegistrations();
     } catch (reason: unknown) {
       setSelectionNotice(reason instanceof Error ? reason.message : "시험 신청에 실패했습니다.");
     } finally {
@@ -181,6 +184,7 @@ export default function ExamRegistrationPage() {
       setRegistrations((current) => sortByLatestActivity(current.map((item) => item.id === registration.id
         ? { ...item, status: "cancelled", updatedAt: new Date().toISOString() }
         : item)));
+      await refreshRegistrations();
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : "시험 신청 취소에 실패했습니다.");
     } finally {
@@ -220,7 +224,18 @@ export default function ExamRegistrationPage() {
               <p>{dateTime.format(new Date(registration.startsAt))} · {registration.subject}</p>
               <p className={styles.entry}>입장 마감 {dateTime.format(new Date(registration.entryClosesAt))}</p>
             </div>
-            {displayStatus(registration, now) === "applied" ? <button className={styles.cancel} disabled={pendingId === registration.id} onClick={() => void cancel(registration)}><Trash2 /> {pendingId === registration.id ? "취소 중" : "신청 취소"}</button> : null}
+            {displayStatus(registration, now) === "applied" ? (
+              <button className={styles.cancel} disabled={pendingId === registration.id} onClick={() => void cancel(registration)}>
+                <Trash2 /> {pendingId === registration.id ? "취소 중" : "신청 취소"}
+              </button>
+            ) : displayStatus(registration, now) === "completed" ? (
+              <div className={styles.score} data-pending={registration.gradingStatus === "pending"}>
+                <span>점수</span>
+                <strong>{registration.gradingStatus === "graded" && registration.score !== null
+                  ? `${registration.score}점`
+                  : "채점 대기"}</strong>
+              </div>
+            ) : null}
           </article>
         ))}</div>
       ) : <div className={styles.empty}>선택한 연도·월·상태에 해당하는 신청 내역이 없습니다.</div>}

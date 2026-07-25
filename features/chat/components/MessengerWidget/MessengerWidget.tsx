@@ -1,71 +1,147 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageCircle, Plus, X } from "lucide-react";
-import type { ChatRoom, ChatRoomDirectory } from "../../types/chat";
+import { useSocket } from "../../../socket/SocketProvider";
+import type {
+  ChatDirectoryUser,
+  ChatRoom,
+  ChatRoomDirectory,
+} from "../../types/chat";
 import { chatService } from "../../services/chatService";
 import { Conversation } from "../Conversation/Conversation";
+import { OnlineUserList } from "../OnlineUserList/OnlineUserList";
 import { RoomActionDialog } from "../RoomActionDialog/RoomActionDialog";
 import { RoomList } from "../RoomList/RoomList";
 import styles from "./MessengerWidget.module.css";
 
-const ROOM_POLL_MILLIS = 15_000;
+const STATE_REFRESH_FALLBACK_MILLIS = 5 * 60_000;
+const CHAT_DIRECTORY_CHANGED_DESTINATION = "/topic/chat-directory.changed";
+const USER_CHAT_CHANGED_DESTINATION = "/user/queue/chat.changed";
+const PRESENCE_CHANGED_DESTINATION = "/topic/presence.changed";
 const EMPTY_DIRECTORY: ChatRoomDirectory = {
   publicRooms: [],
   privateRooms: [],
   totalUnread: 0,
 };
 
-type RoomTab = "public" | "private";
+type RoomTab = "public" | "private" | "online";
 type DialogMode = "create" | "invite" | null;
 
 interface MessengerWidgetProps {
   currentUserId: string;
   roles: string[];
+  mode: "user" | "admin";
 }
 
 function badgeText(count: number): string {
   return count > 99 ? "99+" : String(count);
 }
 
-export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) {
+export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetProps) {
+  const isAdmin = mode === "admin" && roles.includes("ADMIN");
+  const { subscribe } = useSocket();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<RoomTab>("private");
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [directory, setDirectory] = useState<ChatRoomDirectory>(EMPTY_DIRECTORY);
+  const [onlineUsers, setOnlineUsers] = useState<ChatDirectoryUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isOnlineLoading, setIsOnlineLoading] = useState(isAdmin);
+  const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [dialogMode, setDialogMode] = useState<DialogMode>(null);
-  const isAdmin = roles.includes("ADMIN");
+  const roomRefreshVersionRef = useRef(0);
 
   const refreshRooms = useCallback(async (signal?: AbortSignal) => {
+    const version = ++roomRefreshVersionRef.current;
     try {
       const rooms = await chatService.findRooms(signal);
-      if (signal?.aborted) return;
+      if (signal?.aborted || version !== roomRefreshVersionRef.current) return;
       setDirectory(rooms);
       setError(null);
     } catch (reason) {
-      if (signal?.aborted) return;
+      if (signal?.aborted || version !== roomRefreshVersionRef.current) return;
       setError(reason instanceof Error ? reason.message : "채팅방 목록을 불러오지 못했습니다.");
     } finally {
-      if (!signal?.aborted) setIsLoading(false);
+      if (!signal?.aborted && version === roomRefreshVersionRef.current) setIsLoading(false);
+    }
+  }, []);
+
+  const refreshOnlineUsers = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const users = await chatService.findOnlineUsers(signal);
+      if (signal?.aborted) return;
+      setOnlineUsers(users);
+      setError(null);
+    } catch (reason) {
+      if (signal?.aborted) return;
+      setError(reason instanceof Error ? reason.message : "접속자 목록을 불러오지 못했습니다.");
+    } finally {
+      if (!signal?.aborted) setIsOnlineLoading(false);
     }
   }, []);
 
   useEffect(() => {
     const controller = new AbortController();
+    const unsubscribePublic = subscribe(
+      CHAT_DIRECTORY_CHANGED_DESTINATION,
+      () => void refreshRooms(),
+    );
+    const unsubscribeUser = subscribe(
+      USER_CHAT_CHANGED_DESTINATION,
+      () => void refreshRooms(),
+    );
     const initialTimer = window.setTimeout(
       () => void refreshRooms(controller.signal),
       0,
     );
-    const timer = window.setInterval(() => void refreshRooms(), ROOM_POLL_MILLIS);
+    const timer = window.setInterval(
+      () => void refreshRooms(),
+      STATE_REFRESH_FALLBACK_MILLIS,
+    );
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshRooms();
+    };
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
+      unsubscribePublic();
+      unsubscribeUser();
       controller.abort();
       window.clearTimeout(initialTimer);
       window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [refreshRooms]);
+  }, [refreshRooms, subscribe]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const controller = new AbortController();
+    const unsubscribe = subscribe(
+      PRESENCE_CHANGED_DESTINATION,
+      () => void refreshOnlineUsers(),
+    );
+    const initialTimer = window.setTimeout(
+      () => void refreshOnlineUsers(controller.signal),
+      0,
+    );
+    const timer = window.setInterval(
+      () => void refreshOnlineUsers(),
+      STATE_REFRESH_FALLBACK_MILLIS,
+    );
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshOnlineUsers();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      unsubscribe();
+      controller.abort();
+      window.clearTimeout(initialTimer);
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [isAdmin, refreshOnlineUsers, subscribe]);
 
   const allRooms = useMemo(
     () => [...directory.publicRooms, ...directory.privateRooms],
@@ -73,15 +149,31 @@ export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) 
   );
   const selectedRoom = allRooms.find((room) => room.id === selectedRoomId) ?? null;
   const visibleRooms = activeTab === "public" ? directory.publicRooms : directory.privateRooms;
+  const publicUnread = directory.publicRooms
+    .reduce((total, room) => total + room.unreadCount, 0);
+  const privateUnread = directory.privateRooms
+    .reduce((total, room) => total + room.unreadCount, 0);
 
-  const handleSelect = (roomId: string) => {
-    setSelectedRoomId(roomId);
+  const handleSelect = async (roomId: string) => {
+    const room = allRooms.find((candidate) => candidate.id === roomId);
+    if (!room) return;
     setNotice(null);
+    setError(null);
+    try {
+      if (room.isPublic) {
+        await chatService.join(room.id);
+        await refreshRooms();
+      }
+      setSelectedRoomId(room.id);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "채팅방에 참여하지 못했습니다.");
+    }
   };
 
   const handleTabChange = (tab: RoomTab) => {
     setActiveTab(tab);
     setSelectedRoomId(null);
+    setNotice(null);
   };
 
   const handleDialogComplete = async (createdRoom?: ChatRoom) => {
@@ -97,15 +189,31 @@ export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) 
   };
 
   const handleLeave = async () => {
-    if (!selectedRoom || selectedRoom.isPublic) return;
+    if (!selectedRoom) return;
     if (!window.confirm(`"${selectedRoom.name}" 채팅방에서 나가시겠습니까?`)) return;
     try {
       await chatService.leave(selectedRoom.id);
       setSelectedRoomId(null);
-      setNotice("채팅방에서 나갔습니다.");
+      setNotice("채팅방에서 퇴장하였습니다.");
       await refreshRooms();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "채팅방에서 나가지 못했습니다.");
+    }
+  };
+
+  const handleStartConversation = async (user: ChatDirectoryUser) => {
+    setBusyUserId(user.id);
+    setError(null);
+    try {
+      const room = await chatService.startConversation(user.email);
+      await refreshRooms();
+      setActiveTab("private");
+      setSelectedRoomId(room.id);
+      setNotice(`${user.name}님과의 비공개방을 만들었습니다.`);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "비공개방을 만들지 못했습니다.");
+    } finally {
+      setBusyUserId(null);
     }
   };
 
@@ -150,7 +258,11 @@ export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) 
                   onClick={() => handleTabChange("public")}
                 >
                   공개방
-                  <span>{directory.publicRooms.length}</span>
+                  {publicUnread > 0 && (
+                    <span className={styles.tabBadge} aria-label={`안 읽은 메시지 ${publicUnread}개`}>
+                      {badgeText(publicUnread)}
+                    </span>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -160,8 +272,24 @@ export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) 
                   onClick={() => handleTabChange("private")}
                 >
                   비공개방
-                  <span>{directory.privateRooms.length}</span>
+                  {privateUnread > 0 && (
+                    <span className={styles.tabBadge} aria-label={`안 읽은 메시지 ${privateUnread}개`}>
+                      {badgeText(privateUnread)}
+                    </span>
+                  )}
                 </button>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "online"}
+                    data-selected={activeTab === "online"}
+                    onClick={() => handleTabChange("online")}
+                  >
+                    접속자
+                    <span className={styles.tabCount}>{onlineUsers.length}</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   className={styles.create}
@@ -172,7 +300,14 @@ export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) 
                 </button>
               </div>
 
-              {isLoading ? (
+              {activeTab === "online" ? (
+                <OnlineUserList
+                  users={onlineUsers}
+                  isLoading={isOnlineLoading}
+                  busyUserId={busyUserId}
+                  onStartConversation={(user) => void handleStartConversation(user)}
+                />
+              ) : isLoading ? (
                 <p className={styles.loading}>채팅방을 불러오는 중...</p>
               ) : (
                 <RoomList
@@ -183,7 +318,7 @@ export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) 
                       ? "아직 활성 공개방이 없습니다."
                       : "초대받았거나 직접 만든 비공개방이 없습니다."
                   }
-                  onSelect={handleSelect}
+                  onSelect={(roomId) => void handleSelect(roomId)}
                 />
               )}
             </aside>
@@ -191,7 +326,6 @@ export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) 
             <Conversation
               room={selectedRoom}
               currentUserId={currentUserId}
-              onActivity={refreshRooms}
               onBack={() => setSelectedRoomId(null)}
               onInvite={() => setDialogMode("invite")}
               onLeave={() => void handleLeave()}
@@ -218,6 +352,7 @@ export function MessengerWidget({ currentUserId, roles }: MessengerWidgetProps) 
           roomId={selectedRoom?.id}
           roomName={selectedRoom?.name}
           isAdmin={isAdmin}
+          defaultPublic={activeTab === "public"}
           onClose={() => setDialogMode(null)}
           onComplete={(createdRoom) => void handleDialogComplete(createdRoom)}
         />

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Globe2, Lock, X } from "lucide-react";
 import { chatService } from "../../services/chatService";
-import type { ChatRoom } from "../../types/chat";
+import type { ChatDirectoryUser, ChatRoom } from "../../types/chat";
+import { UserPicker } from "../UserPicker/UserPicker";
 import styles from "./RoomActionDialog.module.css";
 
 type DialogMode = "create" | "invite";
@@ -13,6 +14,7 @@ interface RoomActionDialogProps {
   roomId?: string;
   roomName?: string;
   isAdmin: boolean;
+  defaultPublic?: boolean;
   onClose: () => void;
   onComplete: (createdRoom?: ChatRoom) => void;
 }
@@ -22,12 +24,13 @@ export function RoomActionDialog({
   roomId,
   roomName,
   isAdmin,
+  defaultPublic = false,
   onClose,
   onComplete,
 }: RoomActionDialogProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(isAdmin && defaultPublic);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +54,11 @@ export function RoomActionDialog({
     }
   };
 
+  const handleAdminSelect = (user: ChatDirectoryUser) => {
+    setEmail(user.email);
+    setError(null);
+  };
+
   const invalid =
     isSubmitting ||
     (mode === "create" ? name.trim().length === 0 : email.trim().length === 0);
@@ -70,7 +78,9 @@ export function RoomActionDialog({
             <p>
               {mode === "create"
                 ? "비공개방은 초대된 사용자만 대화를 볼 수 있습니다."
-                : `${roomName ?? "비공개방"}에 정확한 이메일로 초대합니다.`}
+                : isAdmin
+                  ? `${roomName ?? "비공개방"}에 초대할 활성 사용자를 선택합니다.`
+                  : `${roomName ?? "비공개방"}에 정확한 이메일로 초대합니다.`}
             </p>
           </div>
           <button type="button" className={styles.close} onClick={onClose} aria-label="닫기">
@@ -120,6 +130,8 @@ export function RoomActionDialog({
                 </fieldset>
               )}
             </>
+          ) : isAdmin ? (
+            <UserPicker selectedEmail={email} onSelect={handleAdminSelect} />
           ) : (
             <label className={styles.field}>
               <span>초대할 사용자 이메일</span>
@@ -131,7 +143,7 @@ export function RoomActionDialog({
                 autoComplete="off"
                 autoFocus
               />
-              <small>사용자 명단은 노출하지 않으며 정확히 일치하는 활성 계정만 초대합니다.</small>
+              <small>정확히 일치하는 활성 계정만 초대할 수 있습니다.</small>
             </label>
           )}
 

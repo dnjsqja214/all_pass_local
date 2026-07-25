@@ -14,10 +14,7 @@ function mergeById(a: ChatMessage[], b: ChatMessage[]): ChatMessage[] {
 
 export type ConnectionState = "connecting" | "live" | "offline";
 
-export function useChatRoom(
-  roomId: string | null,
-  onActivity?: () => void,
-) {
+export function useChatRoom(roomId: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -36,8 +33,7 @@ export function useChatRoom(
   const markRead = useCallback(async () => {
     if (!roomId) return;
     await chatService.markRead(roomId);
-    onActivity?.();
-  }, [roomId, onActivity]);
+  }, [roomId]);
 
   const loadLatest = useCallback(async (signal?: AbortSignal) => {
     if (!roomId) return;
@@ -98,11 +94,10 @@ export function useChatRoom(
       const saved = await chatService.send(roomId, trimmed);
       setMessages((previous) => mergeById(previous, [saved]));
       setError(null);
-      onActivity?.();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "메시지를 보내지 못했습니다.");
     }
-  }, [roomId, onActivity]);
+  }, [roomId]);
 
   return {
     messages,

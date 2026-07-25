@@ -67,7 +67,7 @@
 }
 
 .select:hover {
-  background-color: #eae8e2;
+  background-color: color-mix(in srgb, var(--color-text-primary) 5%, var(--color-main-background));
 }
 
 .selectIcon {
@@ -103,7 +103,7 @@
   gap: 6px;
   padding: 12px 20px;
   border: 1px solid var(--color-border, #e4e0d9);
-  background-color: #ffffff;
+  background-color: var(--color-card-background, #ffffff);
   color: var(--color-text-secondary, #817d76);
   font-weight: 700;
   font-size: 14px;
@@ -167,7 +167,7 @@
 }
 
 .infoState {
-  background-color: #ffffff;
+  background-color: var(--color-card-background, #ffffff);
   border: 1px solid var(--color-border, #e4e0d9);
   border-radius: 16px;
   padding: 48px;
@@ -178,7 +178,7 @@
 }
 
 .errorState {
-  background-color: #ffffff;
+  background-color: var(--color-card-background, #ffffff);
   border: 1px solid var(--color-border, #e4e0d9);
   border-radius: 16px;
   padding: 32px;
@@ -214,7 +214,7 @@
 }
 
 .examCard {
-  background-color: #ffffff;
+  background-color: var(--color-card-background, #ffffff);
   border: 1px solid var(--color-border, #e4e0d9);
   border-radius: 16px;
   padding: 20px;
