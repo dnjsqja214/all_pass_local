@@ -363,6 +363,164 @@
   }
 }
 
+/* 제출 성공 결과 모달 */
+.resultBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  padding: 20px;
+  place-items: center;
+  background: rgb(0 0 0 / 0.64);
+  backdrop-filter: blur(4px);
+  animation: confirmBackdropIn 180ms ease-out;
+}
+
+.resultCard {
+  display: flex;
+  width: min(430px, 100%);
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-card-background);
+  color: var(--color-text-primary);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 0.32);
+  text-align: center;
+}
+
+.resultIcon {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--color-success) 13%, transparent);
+  color: var(--color-success);
+}
+
+.resultIcon[data-pending="true"] {
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+}
+
+.resultIcon svg {
+  width: 30px;
+  height: 30px;
+}
+
+.resultHeading span {
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .08em;
+}
+
+.resultHeading h3 {
+  margin: 5px 0 7px;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
+
+.resultHeading p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.resultScore {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 17px 20px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--color-primary) 9%, var(--color-page-background));
+}
+
+.resultScore span, .resultStats span, .pendingResult span {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.resultScore strong {
+  color: var(--color-primary);
+  font-size: 28px;
+  font-weight: 950;
+}
+
+.resultStats {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.resultStats div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-page-background);
+}
+
+.resultStats strong {
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.pendingResult {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border));
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--color-primary) 7%, var(--color-page-background));
+  text-align: left;
+}
+
+.pendingResult svg {
+  width: 24px;
+  height: 24px;
+  color: var(--color-primary);
+}
+
+.pendingResult div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pendingResult strong {
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.resultConfirm {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 13px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.resultConfirm:hover {
+  background: var(--color-primary-hover);
+}
+
 /* 저장 실패 등 안내 토스트 */
 .toastWrapper {
   position: fixed;

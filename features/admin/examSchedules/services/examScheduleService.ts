@@ -2,6 +2,12 @@ import { getCsrfToken } from "../../../shared/api/csrf";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
+export interface VoiceReminderSetting {
+  enabled: boolean;
+  minutesBefore: number;
+  message: string;
+}
+
 export interface ExamSchedulePolicy {
   id: string;
   name: string;
@@ -12,6 +18,8 @@ export interface ExamSchedulePolicy {
   validUntil: string;
   durationMinutes: number;
   entryWindowMinutes: number;
+  startReminders: VoiceReminderSetting[];
+  endReminders: VoiceReminderSetting[];
   timezone: string;
   excludedDates: string[];
   active: boolean;
@@ -28,11 +36,18 @@ export interface CreateExamSchedulePolicy {
   validUntil: string;
   durationMinutes: number;
   entryWindowMinutes: number;
+  startReminders: VoiceReminderSetting[];
+  endReminders: VoiceReminderSetting[];
   excludedDates: string[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
+}
+
+function isVoiceReminder(value: unknown): value is VoiceReminderSetting {
+  return isRecord(value) && typeof value.enabled === "boolean" &&
+    typeof value.minutesBefore === "number" && typeof value.message === "string";
 }
 
 function isPolicy(value: unknown): value is ExamSchedulePolicy {
@@ -42,9 +57,23 @@ function isPolicy(value: unknown): value is ExamSchedulePolicy {
     Array.isArray(value.startTimes) && value.startTimes.every((item) => typeof item === "string") &&
     typeof value.validFrom === "string" && typeof value.validUntil === "string" &&
     typeof value.durationMinutes === "number" && typeof value.entryWindowMinutes === "number" &&
+    Array.isArray(value.startReminders) && value.startReminders.every(isVoiceReminder) &&
+    Array.isArray(value.endReminders) && value.endReminders.every(isVoiceReminder) &&
     typeof value.timezone === "string" && Array.isArray(value.excludedDates) &&
     value.excludedDates.every((item) => typeof item === "string") && typeof value.active === "boolean" &&
     typeof value.slotCount === "number" && typeof value.createdAt === "string";
+}
+
+function normalizeTime(time: string): string {
+  const [hour = "00", minute = "00"] = time.split(":");
+  return `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
+}
+
+function normalizePolicy(policy: ExamSchedulePolicy): ExamSchedulePolicy {
+  return {
+    ...policy,
+    startTimes: policy.startTimes.map(normalizeTime),
+  };
 }
 
 async function parse(response: Response): Promise<unknown> {
@@ -67,7 +96,7 @@ export const examScheduleService = {
     if (!isRecord(body) || body.success !== true || !Array.isArray(body.data) || !body.data.every(isPolicy)) {
       throw new Error("시험 일정 API 응답 형식이 올바르지 않습니다.");
     }
-    return body.data;
+    return body.data.map(normalizePolicy);
   },
 
   async create(command: CreateExamSchedulePolicy): Promise<ExamSchedulePolicy> {
@@ -84,7 +113,7 @@ export const examScheduleService = {
     if (!isRecord(body) || body.success !== true || !isPolicy(body.data)) {
       throw new Error("시험 일정 생성 응답 형식이 올바르지 않습니다.");
     }
-    return body.data;
+    return normalizePolicy(body.data);
   },
 
   async update(id: string, command: CreateExamSchedulePolicy): Promise<ExamSchedulePolicy> {
@@ -101,7 +130,7 @@ export const examScheduleService = {
     if (!isRecord(body) || body.success !== true || !isPolicy(body.data)) {
       throw new Error("시험 일정 수정 응답 형식이 올바르지 않습니다.");
     }
-    return body.data;
+    return normalizePolicy(body.data);
   },
 
   async activate(id: string): Promise<ExamSchedulePolicy> {
@@ -117,7 +146,7 @@ export const examScheduleService = {
     if (!isRecord(body) || body.success !== true || !isPolicy(body.data)) {
       throw new Error("시험 일정 활성화 응답 형식이 올바르지 않습니다.");
     }
-    return body.data;
+    return normalizePolicy(body.data);
   },
 
   async deactivate(id: string): Promise<void> {

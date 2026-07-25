@@ -1,11 +1,15 @@
 import { getCsrfToken } from "../../shared/api/csrf";
 import type {
+  ChatDirectoryUser,
   ChatMessage,
+  ChatMessageType,
+  ChatParticipant,
   ChatRoom,
   ChatRoomDirectory,
   ChatRoomSummary,
   InvitedUser,
 } from "../types/chat";
+import { CHAT_MESSAGE_TYPES } from "../types/chat";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -19,6 +23,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+function isChatMessageType(value: unknown): value is ChatMessageType {
+  return typeof value === "string" &&
+    CHAT_MESSAGE_TYPES.some((messageType) => messageType === value);
+}
+
 export function isChatMessage(value: unknown): value is ChatMessage {
   return isRecord(value) &&
     typeof value.id === "string" &&
@@ -26,6 +35,7 @@ export function isChatMessage(value: unknown): value is ChatMessage {
     typeof value.senderId === "string" &&
     typeof value.senderName === "string" &&
     typeof value.content === "string" &&
+    isChatMessageType(value.messageType) &&
     typeof value.deleted === "boolean" &&
     typeof value.createdAt === "string";
 }
@@ -61,12 +71,39 @@ function isInvitedUser(value: unknown): value is InvitedUser {
     typeof value.name === "string";
 }
 
+function isChatParticipant(value: unknown): value is ChatParticipant {
+  return isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    (value.email === null || typeof value.email === "string") &&
+    typeof value.self === "boolean" &&
+    typeof value.online === "boolean";
+}
+
+function isChatDirectoryUser(value: unknown): value is ChatDirectoryUser {
+  return isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.name === "string" &&
+    typeof value.email === "string" &&
+    typeof value.online === "boolean" &&
+    typeof value.self === "boolean" &&
+    (value.connectedAt === null || typeof value.connectedAt === "string");
+}
+
 function isUnread(value: unknown): value is { unreadCount: number } {
   return isRecord(value) && typeof value.unreadCount === "number";
 }
 
 function isChatMessageList(value: unknown): value is ChatMessage[] {
   return Array.isArray(value) && value.every(isChatMessage);
+}
+
+function isChatParticipantList(value: unknown): value is ChatParticipant[] {
+  return Array.isArray(value) && value.every(isChatParticipant);
+}
+
+function isChatDirectoryUserList(value: unknown): value is ChatDirectoryUser[] {
+  return Array.isArray(value) && value.every(isChatDirectoryUser);
 }
 
 async function parseBody(response: Response): Promise<unknown> {
@@ -124,10 +161,40 @@ export const chatService = {
     return data;
   },
 
+  async startConversation(email: string): Promise<ChatRoom> {
+    const data = await post("/api/v1/chat/conversations", { email });
+    if (!isChatRoom(data)) throw new Error("채팅방 생성 응답 형식이 올바르지 않습니다.");
+    return data;
+  },
+
+  async join(roomId: string): Promise<void> {
+    await post(`/api/v1/chat/rooms/${roomId}/join`);
+  },
+
+  async findParticipants(roomId: string, signal?: AbortSignal): Promise<ChatParticipant[]> {
+    return get(
+      `/api/v1/chat/rooms/${roomId}/participants`,
+      isChatParticipantList,
+      signal,
+    );
+  },
+
   async invite(roomId: string, email: string): Promise<InvitedUser> {
     const data = await post(`/api/v1/chat/rooms/${roomId}/participants`, { email });
     if (!isInvitedUser(data)) throw new Error("초대 응답 형식이 올바르지 않습니다.");
     return data;
+  },
+
+  async searchUsers(query: string, signal?: AbortSignal): Promise<ChatDirectoryUser[]> {
+    return get(
+      `/api/v1/chat/users?query=${encodeURIComponent(query)}&limit=30`,
+      isChatDirectoryUserList,
+      signal,
+    );
+  },
+
+  async findOnlineUsers(signal?: AbortSignal): Promise<ChatDirectoryUser[]> {
+    return get("/api/v1/chat/online-users", isChatDirectoryUserList, signal);
   },
 
   async leave(roomId: string): Promise<void> {

@@ -6,6 +6,8 @@ import { AdminSidebar } from "../../features/admin/components/AdminSidebar";
 import { AdminHeader } from "../../features/admin/components/AdminHeader";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { authService } from "../../features/auth/services/authService";
+import { SocketProvider } from "../../features/socket/SocketProvider";
+import { MessengerWidget } from "../../features/chat/components/MessengerWidget/MessengerWidget";
 import styles from "./layout.module.css";
 
 export default function AdminLayout({
@@ -57,6 +59,7 @@ export default function AdminLayout({
   };
 
   return (
+    <SocketProvider>
     <div className={styles.shell}>
       {authStatus === "loading" || authStatus === "unauthenticated" ? (
         <div className={styles.state}>로그인 확인 중...</div>
@@ -88,8 +91,15 @@ export default function AdminLayout({
             />
             <main className={styles.content}>{children}</main>
           </div>
+
+          <MessengerWidget
+            currentUserId={user?.id ?? ""}
+            roles={user?.roles ?? []}
+            mode="admin"
+          />
         </>
       )}
     </div>
+    </SocketProvider>
   );
 }

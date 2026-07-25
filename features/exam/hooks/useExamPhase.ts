@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { examRegistrationService, type ExamRegistration } from "../services/examRegistrationService";
 
 /**
@@ -28,10 +28,14 @@ interface ExamPhaseValue {
   phase: ExamPhase;
   /** 대기 중이면 시작까지 남은 초, 응시 중이면 종료까지 남은 초. */
   remainingSeconds: number;
+  /** 대기 화면 노출 여부와 관계없이 가장 가까운 시험 시작까지 남은 초. */
+  secondsUntilStart: number;
   registration: ExamRegistration | null;
   error: string | null;
   /** 제출 성공한 신청을 로컬에서 완료 처리해 카운트 대상에서 즉시 제외한다. */
   markRegistrationSubmitted: (registrationId: string) => void;
+  /** 신청·취소·제출 직후 서버 신청 목록을 즉시 다시 읽는다. */
+  refreshRegistrations: () => Promise<void>;
 }
 
 /** 조회 결과와 그때 잰 서버·브라우저 시각 차이. 둘은 항상 같이 움직인다. */
@@ -71,6 +75,7 @@ function decide(registration: ExamRegistration | null, now: number): { phase: Ex
 export function useExamPhase(): ExamPhaseValue {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const requestVersionRef = useRef(0);
   /**
    * 브라우저 현재 시각. 렌더 중에 {@code Date.now()} 를 부르면 렌더가 순수하지 않게 되므로
    * 시계는 효과에서 읽어 상태로 들여온다. 0 은 "아직 안 읽음".
@@ -78,16 +83,19 @@ export function useExamPhase(): ExamPhaseValue {
   const [browserNow, setBrowserNow] = useState(0);
 
   const load = useCallback(async (signal?: AbortSignal) => {
+    const requestVersion = ++requestVersionRef.current;
     try {
       const { registrations, serverNow } = await examRegistrationService.getRegistrationsWithServerTime(signal);
-      if (signal?.aborted) return;
+      if (signal?.aborted || requestVersion !== requestVersionRef.current) return;
       setSnapshot({ registrations, offsetMillis: serverNow - Date.now() });
       setError(null);
     } catch (reason) {
-      if (signal?.aborted) return;
+      if (signal?.aborted || requestVersion !== requestVersionRef.current) return;
       setError(reason instanceof Error ? reason.message : "시험 일정을 확인하지 못했습니다.");
     }
   }, []);
+
+  const refreshRegistrations = useCallback(() => load(), [load]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -110,6 +118,9 @@ export function useExamPhase(): ExamPhaseValue {
   const ready = browserNow > 0 && snapshot !== null;
   const registration = ready ? pickCurrent(snapshot.registrations, now) : null;
   const { phase, remainingSeconds } = decide(registration, now);
+  const secondsUntilStart = registration
+    ? Math.max(0, Math.ceil((Date.parse(registration.startsAt) - now) / 1000))
+    : 0;
 
   // 시험이 가까울수록 자주 다시 확인한다. 없으면 느리게.
   const startsAt = registration ? Date.parse(registration.startsAt) : null;
@@ -142,5 +153,13 @@ export function useExamPhase(): ExamPhaseValue {
         });
   }, []);
 
-  return { phase, remainingSeconds, registration, error, markRegistrationSubmitted };
+  return {
+    phase,
+    remainingSeconds,
+    secondsUntilStart,
+    registration,
+    error,
+    markRegistrationSubmitted,
+    refreshRegistrations,
+  };
 }

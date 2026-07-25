@@ -37,6 +37,7 @@
 .main {
   display: flex;
   flex: 1 1 0;
+  min-width: 0;
   flex-direction: column;
   min-height: 100vh;
   overflow: hidden;
@@ -227,6 +228,10 @@
 }
 
 @media (min-width: 768px) {
+  .shell {
+    flex-direction: row;
+  }
+
   .viewport .contentBox {
     max-width: 42rem;
   }
@@ -239,10 +244,6 @@
 }
 
 @media (min-width: 1280px) {
-  .shell {
-    flex-direction: row;
-  }
-
   .desktopHeader {
     display: flex;
   }

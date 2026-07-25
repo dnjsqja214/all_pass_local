@@ -1,11 +1,16 @@
 "use client";
 
 import { FormEvent, Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { CalendarClock, Check, Pencil, Plus, Power, X } from "lucide-react";
+import { CalendarClock, CalendarDays, Check, Clock, Pencil, Plus, Power, X } from "lucide-react";
 import { examService } from "../../../exam/services/examService";
 import { ExamListItem } from "../../../exam/types/exam";
-import { examScheduleService, ExamSchedulePolicy } from "../services/examScheduleService";
+import {
+  examScheduleService,
+  ExamSchedulePolicy,
+  type VoiceReminderSetting,
+} from "../services/examScheduleService";
 import styles from "./ExamScheduleManagement.module.css";
+import { ScheduleValuePickerModal } from "./ScheduleValuePickerModal";
 
 const WEEKDAYS = [
   { value: 1, label: "월" }, { value: 2, label: "화" }, { value: 3, label: "수" },
@@ -22,12 +27,18 @@ const PERIODS = [
   { key: "year", label: "1년" },
 ] as const;
 type PeriodKey = typeof PERIODS[number]["key"];
+type SchedulePickerKind = "time" | "date";
 
 function formatDate(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function formatTime(time: string): string {
+  const [hour = "00", minute = "00"] = time.split(":");
+  return `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
 }
 
 function addPeriod(dateValue: string, period: PeriodKey): string {
@@ -50,6 +61,16 @@ function createInitialForm(examIds: string[] = []) {
     name: "", examIds, weekdays: [1, 2, 3, 4, 5] as number[],
     startTimes: ["10:00"], validFrom, validUntil: addPeriod(validFrom, "month"),
     durationMinutes: 40, entryWindowMinutes: 10, excludedDates: [] as string[],
+    startReminders: [{
+      enabled: false,
+      minutesBefore: 10,
+      message: "시험 시작 10분 전입니다.",
+    }],
+    endReminders: [{
+      enabled: false,
+      minutesBefore: 5,
+      message: "시험 종료 5분 전입니다.",
+    }],
   };
 };
 
@@ -62,8 +83,7 @@ export function ExamScheduleManagement() {
   const [isSaving, setIsSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey | null>("month");
-  const [customStartTime, setCustomStartTime] = useState("");
-  const [excludedDate, setExcludedDate] = useState("");
+  const [schedulePicker, setSchedulePicker] = useState<SchedulePickerKind | null>(null);
   const [error, setError] = useState<string | null>(null);
   const examDefaultsInitialized = useRef(false);
 
@@ -113,6 +133,26 @@ export function ExamScheduleManagement() {
       setError("적용 종료일은 시작일보다 빠를 수 없습니다.");
       return;
     }
+    const allReminders = [
+      { label: "시험 시작 전", items: form.startReminders },
+      { label: "시험 종료 전", items: form.endReminders },
+    ];
+    for (const group of allReminders) {
+      if (group.items.some((item) => item.minutesBefore < 0 || !item.message.trim())) {
+        setError(`${group.label} 음성 알림의 분과 멘트를 모두 입력해 주세요.`);
+        return;
+      }
+      if (new Set(group.items.map((item) => item.minutesBefore)).size !== group.items.length) {
+        setError(`${group.label} 음성 알림에 같은 분을 중복해서 설정할 수 없습니다.`);
+        return;
+      }
+    }
+    if (form.endReminders.some(
+      (item) => item.enabled && item.minutesBefore >= form.durationMinutes,
+    )) {
+      setError("시험 종료 전 음성 알림은 시험 시간보다 짧게 설정해 주세요.");
+      return;
+    }
     setIsSaving(true);
     setError(null);
     try {
@@ -127,6 +167,7 @@ export function ExamScheduleManagement() {
       setEditingId(null);
       setSelectedPeriod("month");
       setIsFormOpen(false);
+      setSchedulePicker(null);
     } catch (reason: unknown) {
       setError(reason instanceof Error ? reason.message : "일정 생성에 실패했습니다.");
     } finally {
@@ -138,6 +179,7 @@ export function ExamScheduleManagement() {
     setEditingId(null);
     setForm(createInitialForm(exams.map((exam) => exam.id)));
     setSelectedPeriod("month");
+    setSchedulePicker(null);
     setError(null);
     setIsFormOpen(true);
   };
@@ -154,8 +196,11 @@ export function ExamScheduleManagement() {
       durationMinutes: policy.durationMinutes,
       entryWindowMinutes: policy.entryWindowMinutes,
       excludedDates: [...policy.excludedDates],
+      startReminders: policy.startReminders.map((item) => ({ ...item })),
+      endReminders: policy.endReminders.map((item) => ({ ...item })),
     });
     setSelectedPeriod(null);
+    setSchedulePicker(null);
     setError(null);
     setIsFormOpen(true);
   };
@@ -189,21 +234,65 @@ export function ExamScheduleManagement() {
     }));
   };
 
-  const addCustomStartTime = () => {
-    if (!customStartTime || form.startTimes.includes(customStartTime)) return;
-    setForm((current) => ({ ...current, startTimes: [...current.startTimes, customStartTime].sort() }));
-    setCustomStartTime("");
+  const addCustomStartTime = (time: string) => {
+    if (form.startTimes.includes(time)) return;
+    setForm((current) => ({ ...current, startTimes: [...current.startTimes, time].sort() }));
+    setSchedulePicker(null);
   };
 
-  const addExcludedDate = () => {
-    if (!excludedDate || form.excludedDates.includes(excludedDate)) return;
-    setForm((current) => ({ ...current, excludedDates: [...current.excludedDates, excludedDate].sort() }));
-    setExcludedDate("");
+  const addExcludedDate = (date: string) => {
+    if (form.excludedDates.includes(date)) return;
+    setForm((current) => ({ ...current, excludedDates: [...current.excludedDates, date].sort() }));
+    setSchedulePicker(null);
   };
 
   const applyPeriod = (period: PeriodKey) => {
     setSelectedPeriod(period);
     setForm((current) => ({ ...current, validUntil: addPeriod(current.validFrom, period) }));
+  };
+
+  type ReminderField = "startReminders" | "endReminders";
+
+  const addReminder = (field: ReminderField) => {
+    setForm((current) => {
+      const currentItems = current[field];
+      const candidates = field === "startReminders" ? [10, 5, 3, 1] : [5, 3, 1];
+      const minutesBefore = candidates.find(
+        (candidate) => !currentItems.some((item) => item.minutesBefore === candidate),
+      ) ?? Math.max(0, ...currentItems.map((item) => item.minutesBefore)) + 1;
+      const point = field === "startReminders" ? "시작" : "종료";
+      return {
+        ...current,
+        [field]: [
+          ...currentItems,
+          {
+            enabled: true,
+            minutesBefore,
+            message: `시험 ${point} ${minutesBefore}분 전입니다.`,
+          },
+        ].sort((left, right) => right.minutesBefore - left.minutesBefore),
+      };
+    });
+  };
+
+  const updateReminder = (
+    field: ReminderField,
+    index: number,
+    patch: Partial<VoiceReminderSetting>,
+  ) => {
+    setForm((current) => ({
+      ...current,
+      [field]: current[field].map((item, itemIndex) => (
+        itemIndex === index ? { ...item, ...patch } : item
+      )),
+    }));
+  };
+
+  const removeReminder = (field: ReminderField, index: number) => {
+    setForm((current) => ({
+      ...current,
+      [field]: current[field].filter((_, itemIndex) => itemIndex !== index),
+    }));
   };
 
   const scheduleForm = isFormOpen ? (
@@ -224,8 +313,10 @@ export function ExamScheduleManagement() {
         <div className={styles.optionTabs}>{TIME_OPTIONS.map((time) => (
           <button key={time} type="button" data-selected={form.startTimes.includes(time)} onClick={() => toggleStartTime(time)}>{time}</button>
         ))}</div>
-        <div className={styles.inlineInput}><input type="time" value={customStartTime} onChange={(e) => setCustomStartTime(e.target.value)} /><button type="button" onClick={addCustomStartTime}>시간 추가</button></div>
-        <div className={styles.selectedTabs}>{form.startTimes.map((time) => <button key={time} type="button" onClick={() => toggleStartTime(time)}>{time}<X /></button>)}</div>
+        <button type="button" className={styles.pickerIconButton} onClick={() => setSchedulePicker("time")} aria-label="시간 추가" title="시간 추가">
+          <Clock /> 시간 추가
+        </button>
+        <div className={styles.selectedTabs}>{form.startTimes.map((time) => <button key={time} type="button" onClick={() => toggleStartTime(time)}>{formatTime(time)}<X /></button>)}</div>
       </fieldset>
       <fieldset><legend>적용 기간</legend>
         <div className={styles.optionTabs}>{PERIODS.map((period) => <button key={period.key} type="button" data-selected={selectedPeriod === period.key} onClick={() => applyPeriod(period.key)}>{period.label}</button>)}</div>
@@ -239,11 +330,96 @@ export function ExamScheduleManagement() {
         <label>시험 시간 (분)<input required type="number" min="1" value={form.durationMinutes} onChange={(e) => setForm({ ...form, durationMinutes: Number(e.target.value) })} /></label>
         <label>입장 허용 (분)<input required type="number" min="1" value={form.entryWindowMinutes} onChange={(e) => setForm({ ...form, entryWindowMinutes: Number(e.target.value) })} /></label>
       </div>
+      <fieldset><legend>음성 알림</legend>
+        <span className={styles.fieldHint}>각 구분에 여러 알림을 추가할 수 있으며, 활성화된 항목만 설정한 시점에 한 번 안내합니다.</span>
+        <div className={styles.reminderGrid}>
+          {([
+            { field: "startReminders", label: "시험 시작 전" },
+            { field: "endReminders", label: "시험 종료 전" },
+          ] as const).map(({ field, label }) => (
+            <section className={styles.reminderCard} key={field}>
+              <div className={styles.reminderHeader}>
+                <strong>{label}</strong>
+                <button type="button" onClick={() => addReminder(field)}>
+                  <Plus /> 알림 추가
+                </button>
+              </div>
+              {form[field].length ? (
+                <div className={styles.reminderList}>
+                  {form[field].map((reminder, index) => (
+                    <div
+                      className={styles.reminderItem}
+                      data-enabled={reminder.enabled}
+                      key={`${field}-${index}`}
+                    >
+                      <label className={styles.reminderToggle}>
+                        <input
+                          type="checkbox"
+                          checked={reminder.enabled}
+                          onChange={(event) => updateReminder(
+                            field,
+                            index,
+                            { enabled: event.target.checked },
+                          )}
+                        />
+                        사용
+                      </label>
+                      <label className={styles.reminderMinute}>
+                        <span>분</span>
+                        <input
+                          required
+                          type="number"
+                          min="0"
+                          max={field === "endReminders"
+                            ? Math.max(0, form.durationMinutes - 1)
+                            : undefined}
+                          value={reminder.minutesBefore}
+                          onChange={(event) => updateReminder(
+                            field,
+                            index,
+                            { minutesBefore: Number(event.target.value) },
+                          )}
+                        />
+                      </label>
+                      <label className={styles.reminderMessage}>
+                        <span>멘트</span>
+                        <input
+                          required
+                          maxLength={200}
+                          value={reminder.message}
+                          onChange={(event) => updateReminder(
+                            field,
+                            index,
+                            { message: event.target.value },
+                          )}
+                          placeholder={`예: ${label} 5분입니다.`}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className={styles.removeReminder}
+                        onClick={() => removeReminder(field, index)}
+                        aria-label={`${label} 알림 삭제`}
+                      >
+                        <X />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className={styles.noReminders}>등록된 알림이 없습니다.</p>
+              )}
+            </section>
+          ))}
+        </div>
+      </fieldset>
       <fieldset><legend>제외 일자</legend>
-        <div className={styles.inlineInput}><input type="date" value={excludedDate} onChange={(e) => setExcludedDate(e.target.value)} /><button type="button" onClick={addExcludedDate}>일자 추가</button></div>
+        <button type="button" className={styles.pickerIconButton} onClick={() => setSchedulePicker("date")} aria-label="일자 추가" title="일자 추가">
+          <CalendarDays /> 일자 추가
+        </button>
         <div className={styles.selectedTabs}>{form.excludedDates.map((date) => <button key={date} type="button" onClick={() => setForm({ ...form, excludedDates: form.excludedDates.filter((value) => value !== date) })}>{date}<X /></button>)}</div>
       </fieldset>
-      <div className={styles.actions}><button type="button" className={styles.secondary} onClick={() => { setIsFormOpen(false); setEditingId(null); setForm(createInitialForm(exams.map((exam) => exam.id))); setSelectedPeriod("month"); }}>취소</button><button type="submit" disabled={isSaving}>{isSaving ? "저장 중" : editingId ? "변경 저장" : "정책 생성"}</button></div>
+      <div className={styles.actions}><button type="button" className={styles.secondary} onClick={() => { setIsFormOpen(false); setEditingId(null); setForm(createInitialForm(exams.map((exam) => exam.id))); setSelectedPeriod("month"); setSchedulePicker(null); }}>취소</button><button type="submit" disabled={isSaving}>{isSaving ? "저장 중" : editingId ? "변경 저장" : "정책 생성"}</button></div>
     </form>
   ) : null;
 
@@ -257,6 +433,15 @@ export function ExamScheduleManagement() {
       {error && !isFormOpen ? <div className={styles.error}>{error}</div> : null}
 
       {!editingId ? scheduleForm : null}
+
+      {schedulePicker ? (
+        <ScheduleValuePickerModal
+          kind={schedulePicker}
+          existingValues={schedulePicker === "time" ? form.startTimes : form.excludedDates}
+          onConfirm={schedulePicker === "time" ? addCustomStartTime : addExcludedDate}
+          onClose={() => setSchedulePicker(null)}
+        />
+      ) : null}
 
       {isExamPickerOpen ? (
         <div className={styles.modalBackdrop} role="presentation" onMouseDown={() => setIsExamPickerOpen(false)}>
@@ -277,8 +462,20 @@ export function ExamScheduleManagement() {
             <article className={styles.card} data-editing={editingId === policy.id}>
               <div className={styles.cardIcon}><CalendarClock /></div>
               <div className={styles.cardBody}><div className={styles.cardTitle}><h2>{policy.name}</h2><span data-active={policy.active}>{policy.active ? "운영 중" : "비활성"}</span></div>
-                <p>{policy.validFrom} ~ {policy.validUntil} · {policy.startTimes.join(", ")} · {policy.durationMinutes}분</p>
+                <p>
+                  {policy.validFrom} ~ {policy.validUntil} ·{" "}
+                  <span className={styles.scheduleTimes}>
+                    {policy.startTimes.map(formatTime).join(", ")}
+                  </span>
+                  {" · "}{policy.durationMinutes}분
+                </p>
                 <p>{policy.weekdays.map((value) => WEEKDAYS.find((day) => day.value === value)?.label).join("·")}요일 · 시험 {policy.examIds.length}개 · 실제 신청 일정 {policy.slotCount}개</p>
+                <p className={styles.reminderSummary}>
+                  음성 알림 · 시작 {policy.startReminders.filter((item) => item.enabled)
+                    .map((item) => `${item.minutesBefore}분 전`).join("·") || "사용 안 함"}
+                  {" · "}종료 {policy.endReminders.filter((item) => item.enabled)
+                    .map((item) => `${item.minutesBefore}분 전`).join("·") || "사용 안 함"}
+                </p>
               </div>
               <div className={styles.cardActions}>
                 <button type="button" className={styles.edit} onClick={() => openEdit(policy)}><Pencil /> 수정</button>

@@ -2,6 +2,12 @@ import { getCsrfToken } from "../../shared/api/csrf";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
+export interface VoiceReminderSetting {
+  enabled: boolean;
+  minutesBefore: number;
+  message: string;
+}
+
 export interface ExamSlot {
   id: string;
   examId: string;
@@ -26,6 +32,10 @@ export interface ExamRegistration {
   startsAt: string;
   entryClosesAt: string;
   durationMinutes: number;
+  startReminders: VoiceReminderSetting[];
+  endReminders: VoiceReminderSetting[];
+  score: number | null;
+  gradingStatus: "graded" | "pending" | null;
   status: "applied" | "cancelled" | "completed";
   appliedAt: string;
   updatedAt?: string;
@@ -33,6 +43,10 @@ export interface ExamRegistration {
 
 function buildApiUrl(path: string): string { return `${API_BASE_URL}${path}`; }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null; }
+function isVoiceReminder(value: unknown): value is VoiceReminderSetting {
+  return isRecord(value) && typeof value.enabled === "boolean" &&
+    typeof value.minutesBefore === "number" && typeof value.message === "string";
+}
 function isSlot(value: unknown): value is ExamSlot {
   return isRecord(value) && typeof value.id === "string" && typeof value.examId === "string" &&
     typeof value.examTitle === "string" && typeof value.year === "number" && typeof value.round === "number" &&
@@ -44,6 +58,10 @@ function isRegistration(value: unknown): value is ExamRegistration {
     typeof value.examId === "string" && typeof value.examTitle === "string" && typeof value.year === "number" &&
     typeof value.round === "number" && typeof value.subject === "string" && typeof value.startsAt === "string" &&
     typeof value.entryClosesAt === "string" && typeof value.durationMinutes === "number" &&
+    Array.isArray(value.startReminders) && value.startReminders.every(isVoiceReminder) &&
+    Array.isArray(value.endReminders) && value.endReminders.every(isVoiceReminder) &&
+    (value.score === null || typeof value.score === "number") &&
+    (value.gradingStatus === null || value.gradingStatus === "graded" || value.gradingStatus === "pending") &&
     (value.status === "applied" || value.status === "cancelled" || value.status === "completed") &&
     typeof value.appliedAt === "string" &&
     (value.updatedAt === undefined || typeof value.updatedAt === "string");

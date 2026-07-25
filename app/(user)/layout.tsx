@@ -11,8 +11,12 @@ import { ThemeToggle } from "@/features/theme/components/ThemeToggle/ThemeToggle
 import { SocketProvider } from "@/features/socket/SocketProvider";
 import { MessengerWidget } from "@/features/chat/components/MessengerWidget/MessengerWidget";
 import { useExamPhase } from "@/features/exam/hooks/useExamPhase";
+import {
+  ExamPhaseRefreshProvider,
+} from "@/features/exam/context/ExamPhaseRefreshContext";
 import { ExamCountdown } from "@/features/exam/components/ExamCountdown";
 import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
+import { useVoiceReminders } from "@/features/exam/hooks/useVoiceReminder";
 import styles from "./layout.module.css";
 
 export default function UserLayout({
@@ -28,9 +32,11 @@ export default function UserLayout({
   const {
     phase: examPhase,
     remainingSeconds,
+    secondsUntilStart,
     registration,
     error: examError,
     markRegistrationSubmitted,
+    refreshRegistrations,
   } = useExamPhase();
   /** 시작 버튼을 누른 신청 건. 누르기 전까지는 대기 화면에 머문다. */
   const [startedRegistrationId, setStartedRegistrationId] = useState<string | null>(null);
@@ -38,6 +44,13 @@ export default function UserLayout({
   const isExamGateOpen =
     (examPhase === "waiting" || examPhase === "running") && registration !== null;
   const [isUserSidebarCollapsed, setIsUserSidebarCollapsed] = useState(false);
+
+  useVoiceReminders({
+    notificationKey: registration ? `${registration.id}:start` : null,
+    reminders: registration?.startReminders ?? [],
+    remainingSeconds: secondsUntilStart,
+    active: registration !== null,
+  });
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -69,6 +82,7 @@ export default function UserLayout({
       markRegistrationSubmitted(startedRegistrationId);
     }
     setStartedRegistrationId(null);
+    void refreshRegistrations();
   };
 
   // 현재 경로에 맞는 헤더 제목 및 D-Day 매핑
@@ -127,8 +141,9 @@ export default function UserLayout({
   const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (
-    // SocketProvider 는 화면 분기보다 바깥이어야 한다. 안쪽에 두면 나중에 시험 대기
-    // 화면으로 바뀌는 순간 언마운트되면서 연결이 끊긴다.
+    <ExamPhaseRefreshProvider refreshRegistrations={refreshRegistrations}>
+    {/* SocketProvider는 화면 분기보다 바깥이어야 한다. 안쪽에 두면 나중에 시험 대기
+        화면으로 바뀌는 순간 언마운트되면서 연결이 끊긴다. */}
     <SocketProvider>
     <div className={styles.shell}>
       {authStatus === "loading" || authStatus === "unauthenticated" ? (
@@ -142,6 +157,7 @@ export default function UserLayout({
         <ExamSolvingModal
           registrationId={startedRegistrationId}
           isOpen
+          endReminders={registration?.id === startedRegistrationId ? registration.endReminders : undefined}
           onClose={() => setStartedRegistrationId(null)}
           onSubmitted={handleExamSubmitted}
         />
@@ -223,10 +239,15 @@ export default function UserLayout({
           </div>
 
           {/* 공개방과 초대받은 비공개방을 제공하는 메신저. 시험 대기·응시 중에는 감춘다. */}
-          <MessengerWidget currentUserId={user?.id ?? ""} roles={user?.roles ?? []} />
+          <MessengerWidget
+            currentUserId={user?.id ?? ""}
+            roles={user?.roles ?? []}
+            mode="user"
+          />
         </>
       )}
     </div>
     </SocketProvider>
+    </ExamPhaseRefreshProvider>
   );
 }
