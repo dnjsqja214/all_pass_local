@@ -52,10 +52,8 @@ export function useChatRoom(roomId: string | null) {
     try {
       await markRoomRead(roomId).unwrap();
     } catch (reason: unknown) {
-      setLocalError(queryErrorMessage(
-        reason,
-        "읽음 상태를 저장하지 못했습니다.",
-      ));
+      const detail = queryErrorMessage(reason, "읽음 상태를 저장하지 못했습니다.");
+      setLocalError(`메시지는 정상 처리되었지만 읽음 상태를 저장하지 못했습니다. ${detail}`);
     }
   }, [markRoomRead, roomId]);
 

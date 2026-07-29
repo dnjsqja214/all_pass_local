@@ -5,11 +5,14 @@ export interface CsrfToken {
   token: string;
 }
 
+let cachedToken: CsrfToken | null = null;
+let tokenRequest: Promise<CsrfToken> | null = null;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-export async function getCsrfToken(signal?: AbortSignal): Promise<CsrfToken> {
+async function requestCsrfToken(signal?: AbortSignal): Promise<CsrfToken> {
   const response = await fetch(`${API_BASE_URL}/auth/csrf`, {
     credentials: "include",
     cache: "no-store",
@@ -21,4 +24,26 @@ export async function getCsrfToken(signal?: AbortSignal): Promise<CsrfToken> {
     throw new Error("CSRF 토큰 응답 형식이 올바르지 않습니다.");
   }
   return { headerName: body.headerName, token: body.token };
+}
+
+export async function getCsrfToken(signal?: AbortSignal): Promise<CsrfToken> {
+  if (cachedToken) return cachedToken;
+
+  tokenRequest ??= requestCsrfToken(signal)
+    .then((token) => {
+      cachedToken = token;
+      return token;
+    })
+    .finally(() => {
+      tokenRequest = null;
+    });
+
+  return tokenRequest;
+}
+
+/** 쿠키가 다른 탭이나 요청에서 갱신된 경우 캐시를 폐기한다. */
+export function invalidateCsrfToken(token?: CsrfToken): void {
+  if (!token || cachedToken?.token === token.token) {
+    cachedToken = null;
+  }
 }
