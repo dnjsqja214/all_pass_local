@@ -1,6 +1,7 @@
 import {
   getCsrfToken,
   invalidateCsrfToken,
+  withCsrfMutationLock,
   type CsrfToken,
 } from "../../shared/api/csrf";
 import type {
@@ -139,27 +140,31 @@ async function get<T>(
 }
 
 async function post(path: string, payload?: unknown): Promise<unknown> {
-  const execute = (csrf: CsrfToken) => fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      [csrf.headerName]: csrf.token,
-    },
-    body: payload === undefined ? undefined : JSON.stringify(payload),
-  });
+  return withCsrfMutationLock(async () => {
+    const execute = (csrf: CsrfToken) => fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        [csrf.headerName]: csrf.token,
+      },
+      body: payload === undefined ? undefined : JSON.stringify(payload),
+    });
 
-  let csrf = await getCsrfToken();
-  let response = await execute(csrf);
-  if (response.status === 403) {
-    invalidateCsrfToken(csrf);
-    csrf = await getCsrfToken();
-    response = await execute(csrf);
-  }
-  const body = (await parseBody(response)) as ApiResponse<unknown> | null;
-  if (!response.ok) throw new Error(errorMessage(body, response.status));
-  return isRecord(body) ? body.data : null;
+    let csrf = await getCsrfToken();
+    let response = await execute(csrf);
+    if (response.status === 403) {
+      invalidateCsrfToken(csrf);
+      csrf = await getCsrfToken();
+      response = await execute(csrf);
+    }
+    const body = (await parseBody(response)) as ApiResponse<unknown> | null;
+    if (!response.ok) throw new Error(errorMessage(body, response.status));
+    return isRecord(body) ? body.data : null;
+  });
 }
+
+const pendingRoomJoins = new Map<string, Promise<void>>();
 
 export const chatService = {
   async findRooms(signal?: AbortSignal): Promise<ChatRoomDirectory> {
@@ -179,7 +184,18 @@ export const chatService = {
   },
 
   async join(roomId: string): Promise<void> {
-    await post(`/api/v1/chat/rooms/${roomId}/join`);
+    const pending = pendingRoomJoins.get(roomId);
+    if (pending) return pending;
+
+    const request = post(`/api/v1/chat/rooms/${roomId}/join`).then(() => undefined);
+    pendingRoomJoins.set(roomId, request);
+    try {
+      await request;
+    } finally {
+      if (pendingRoomJoins.get(roomId) === request) {
+        pendingRoomJoins.delete(roomId);
+      }
+    }
   },
 
   async findParticipants(roomId: string, signal?: AbortSignal): Promise<ChatParticipant[]> {

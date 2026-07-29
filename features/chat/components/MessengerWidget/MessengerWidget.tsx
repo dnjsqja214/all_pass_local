@@ -51,6 +51,7 @@ export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetP
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<RoomTab>("private");
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [joiningRoomId, setJoiningRoomId] = useState<string | null>(null);
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -123,18 +124,22 @@ export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetP
     .reduce((total, room) => total + room.unreadCount, 0);
 
   const handleSelect = async (roomId: string) => {
+    if (joiningRoomId === roomId) return;
     const room = allRooms.find((candidate) => candidate.id === roomId);
     if (!room) return;
     setNotice(null);
     setActionError(null);
     try {
       if (room.isPublic) {
+        setJoiningRoomId(room.id);
         await joinRoom(room.id).unwrap();
         await refetchRooms();
       }
       setSelectedRoomId(room.id);
     } catch (reason) {
       setActionError(queryErrorMessage(reason, "채팅방에 참여하지 못했습니다."));
+    } finally {
+      setJoiningRoomId(null);
     }
   };
 

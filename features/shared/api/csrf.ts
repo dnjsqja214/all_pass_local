@@ -7,6 +7,7 @@ export interface CsrfToken {
 
 let cachedToken: CsrfToken | null = null;
 let tokenRequest: Promise<CsrfToken> | null = null;
+let mutationQueue: Promise<void> = Promise.resolve();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -46,4 +47,18 @@ export function invalidateCsrfToken(token?: CsrfToken): void {
   if (!token || cachedToken?.token === token.token) {
     cachedToken = null;
   }
+}
+
+/**
+ * CSRF 쿠키는 브라우저에 하나만 존재하므로 토큰을 사용하는 변경 요청도 순서대로
+ * 실행해야 한다. 병렬 요청 중 하나가 토큰을 다시 발급받으면 다른 요청의 헤더와
+ * 쿠키가 달라져 403이 발생할 수 있다.
+ */
+export function withCsrfMutationLock<T>(operation: () => Promise<T>): Promise<T> {
+  const result = mutationQueue.then(operation, operation);
+  mutationQueue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
 }
