@@ -6,10 +6,12 @@ import { MemberSearchForm } from "./components/MemberSearchForm";
 import { MemberTable } from "./components/MemberTable";
 import { MemberMobileCardList } from "./components/MemberMobileCardList";
 import { memberService } from "./services/memberService";
+import { useAuth } from "../../auth/hooks/useAuth";
 import type { Member } from "./types/member";
 import styles from "./AdminMembersPage.module.css";
 
 export function AdminMembersPage() {
+  const { user } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,10 @@ export function AdminMembersPage() {
     return () => controller.abort();
   }, []);
 
+  const handleMemberUpdated = (updated: Member) => {
+    setMembers((current) => current.map((member) => member.id === updated.id ? updated : member));
+  };
+
   return (
     <div className={styles.page}>
       {/* 1. 헤더 영역 */}
@@ -43,7 +49,7 @@ export function AdminMembersPage() {
         <div className={styles.headerText}>
           <h1 className={styles.title}>회원 관리</h1>
           <p className={styles.description}>
-            실제 사용자 테이블에 등록된 회원 정보를 확인할 수 있습니다.
+            모든 회원은 USER 권한을 기본으로 보유하며, 관리자 권한을 설정할 수 있습니다.
           </p>
         </div>
         <div className={styles.countBadge}>전체 회원 {members.length}명</div>
@@ -63,8 +69,16 @@ export function AdminMembersPage() {
         <p className={styles.state} data-error>{error}</p>
       ) : (
         <>
-          <MemberTable members={filteredMembers} />
-          <MemberMobileCardList members={filteredMembers} />
+          <MemberTable
+            members={filteredMembers}
+            currentUserId={user?.id ?? ""}
+            onMemberUpdated={handleMemberUpdated}
+          />
+          <MemberMobileCardList
+            members={filteredMembers}
+            currentUserId={user?.id ?? ""}
+            onMemberUpdated={handleMemberUpdated}
+          />
         </>
       )}
     </div>

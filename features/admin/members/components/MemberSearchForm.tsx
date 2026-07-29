@@ -30,7 +30,7 @@ export function MemberSearchForm({
           <input
             id="search-name"
             type="text"
-            placeholder="이름, 이메일, 전화번호 또는 인증 UUID"
+            placeholder="이름, 이메일 또는 전화번호"
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
             className={styles.input}

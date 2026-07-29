@@ -47,22 +47,27 @@
   }
 
   .name {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     font-weight: 700;
     color: var(--color-text-primary);
+  }
+
+  .selfBadge {
+    display: inline-flex;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card-background));
+    color: var(--color-primary);
+    font-size: 10px;
+    font-weight: 850;
   }
 
   .email {
     color: var(--color-text-secondary);
     font-weight: 500;
     word-break: break-all;
-  }
-
-  .identifier {
-    max-width: 220px;
-    color: var(--color-text-secondary);
-    font-family: monospace;
-    font-size: 12px;
-    overflow-wrap: anywhere;
   }
 
   .date {
@@ -89,7 +94,6 @@
   }
 
   .email,
-  .identifier,
   .date {
     color: color-mix(in srgb, var(--color-text-primary) 70%, var(--color-text-secondary));
     font-weight: 650;

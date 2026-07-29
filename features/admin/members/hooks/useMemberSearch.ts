@@ -12,7 +12,6 @@ export function useMemberSearch(initialMembers: Member[]) {
       member.name,
       member.email,
       member.phoneNumber ?? "",
-      member.authUuid,
     ].some((value) => value.toLowerCase().includes(trimmed)));
   }, [activeSearchName, initialMembers]);
 

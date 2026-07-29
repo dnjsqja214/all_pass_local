@@ -1,4 +1,6 @@
 export type MemberStatus = "ACTIVE" | "INACTIVE" | "DORMANT" | "DELETED";
+export const MEMBER_ROLES = ["USER", "ADMIN", "MANAGER", "DEVELOPER"] as const;
+export type MemberRole = (typeof MEMBER_ROLES)[number];
 
 export interface Member {
   id: string;
@@ -9,4 +11,5 @@ export interface Member {
   status: MemberStatus;
   createdAt: string;
   provider: string | null;
+  roles: MemberRole[];
 }
