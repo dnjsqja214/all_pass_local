@@ -7,9 +7,10 @@ interface MemberStatusBadgeProps {
 }
 
 const STATUS_LABELS: Record<MemberStatus, string> = {
-  active: "정상",
-  inactive: "비활성",
-  risk: "위험군",
+  ACTIVE: "활성",
+  INACTIVE: "비활성",
+  DORMANT: "휴면",
+  DELETED: "탈퇴",
 };
 
 export function MemberStatusBadge({ status }: MemberStatusBadgeProps) {

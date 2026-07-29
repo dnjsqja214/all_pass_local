@@ -8,9 +8,12 @@ export function useMemberSearch(initialMembers: Member[]) {
   const filteredMembers = useMemo(() => {
     const trimmed = activeSearchName.trim().toLowerCase();
     if (!trimmed) return initialMembers;
-    return initialMembers.filter((member) =>
-      member.name.toLowerCase().includes(trimmed)
-    );
+    return initialMembers.filter((member) => [
+      member.name,
+      member.email,
+      member.phoneNumber ?? "",
+      member.authUuid,
+    ].some((value) => value.toLowerCase().includes(trimmed)));
   }, [activeSearchName, initialMembers]);
 
   const handleSearch = (nameKeyword: string) => {

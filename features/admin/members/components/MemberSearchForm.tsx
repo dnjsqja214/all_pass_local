@@ -24,13 +24,13 @@ export function MemberSearchForm({
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.field}>
         <label htmlFor="search-name" className={styles.label}>
-          회원 이름 검색
+          회원 검색
         </label>
         <div className={styles.inputWrapper}>
           <input
             id="search-name"
             type="text"
-            placeholder="이름을 입력하세요 (예: 김서연)"
+            placeholder="이름, 이메일, 전화번호 또는 인증 UUID"
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
             className={styles.input}

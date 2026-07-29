@@ -1,53 +1,41 @@
 import React from "react";
 import { Member } from "../types/member";
 import { MemberStatusBadge } from "./MemberStatusBadge";
-import { formatStudyTime } from "../../../learning/utils";
 import styles from "./MemberMobileCardList.module.css";
 
 interface MemberMobileCardListProps {
   members: Member[];
-  onSelectMember: (memberId: string) => void;
 }
 
-// 점수 구간만 판정한다. 색은 CSS 가 정한다.
-function scoreGrade(score: number) {
-  if (score >= 180) return "high";
-  if (score < 120) return "low";
-  return "normal";
+function display(value: string | null): string {
+  return value?.trim() || "-";
 }
 
-export function MemberMobileCardList({
-  members,
-  onSelectMember,
-}: MemberMobileCardListProps) {
+function formatDate(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString("ko-KR");
+}
+
+export function MemberMobileCardList({ members }: MemberMobileCardListProps) {
   return (
     <div className={styles.list}>
       {members.map((member) => (
         <div key={member.id} className={styles.card}>
           <div className={styles.cardHead}>
             <div>
-              <h4 className={styles.name}>{member.name}</h4>
-              <p className={styles.email}>{member.email}</p>
+              <h4 className={styles.name}>{display(member.name)}</h4>
+              <p className={styles.email}>{display(member.email)}</p>
             </div>
             <MemberStatusBadge status={member.status} />
           </div>
 
-          <div className={styles.stats}>
-            <div>
-              <span className={styles.statLabel}>최근 점수</span>
-              <strong className={styles.statValue} data-grade={scoreGrade(member.recentScore)}>
-                {member.recentScore}점
-              </strong>
-            </div>
-            <div>
-              <span className={styles.statLabel}>공부 시간</span>
-              <strong className={styles.statValue}>{formatStudyTime(member.studyMinutes)}</strong>
-            </div>
-          </div>
-
-          <button onClick={() => onSelectMember(member.id)} className={styles.detailButton}>
-            상세보기
-          </button>
+          <dl className={styles.stats}>
+            <div><dt className={styles.statLabel}>ID</dt><dd className={styles.statValue}>{member.id}</dd></div>
+            <div><dt className={styles.statLabel}>인증 UUID</dt><dd className={styles.statValue}>{member.authUuid}</dd></div>
+            <div><dt className={styles.statLabel}>전화번호</dt><dd className={styles.statValue}>{display(member.phoneNumber)}</dd></div>
+            <div><dt className={styles.statLabel}>가입 경로</dt><dd className={styles.statValue}>{display(member.provider)}</dd></div>
+            <div><dt className={styles.statLabel}>가입일</dt><dd className={styles.statValue}>{formatDate(member.createdAt)}</dd></div>
+          </dl>
         </div>
       ))}
       {members.length === 0 && (

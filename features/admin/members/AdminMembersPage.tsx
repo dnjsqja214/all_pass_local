@@ -1,30 +1,40 @@
 "use client";
 
-import React, { useState } from "react";
-import { mockMembers } from "./data/mockMembers";
+import React, { useEffect, useState } from "react";
 import { useMemberSearch } from "./hooks/useMemberSearch";
 import { MemberSearchForm } from "./components/MemberSearchForm";
 import { MemberTable } from "./components/MemberTable";
 import { MemberMobileCardList } from "./components/MemberMobileCardList";
-import { MemberDetailDialog } from "./components/MemberDetailDialog";
-import { Member } from "./types/member";
+import { memberService } from "./services/memberService";
+import type { Member } from "./types/member";
 import styles from "./AdminMembersPage.module.css";
 
 export function AdminMembersPage() {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const {
     searchName,
     setSearchName,
     filteredMembers,
     handleSearch,
     handleReset,
-  } = useMemberSearch(mockMembers);
+  } = useMemberSearch(members);
 
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-
-  const handleSelectMember = (memberId: string) => {
-    const found = mockMembers.find((m) => m.id === memberId) || null;
-    setSelectedMember(found);
-  };
+  useEffect(() => {
+    const controller = new AbortController();
+    memberService.findAll(controller.signal)
+      .then(setMembers)
+      .catch((reason: unknown) => {
+        if (!controller.signal.aborted) {
+          setError(reason instanceof Error ? reason.message : "회원 목록을 불러오지 못했습니다.");
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+    return () => controller.abort();
+  }, []);
 
   return (
     <div className={styles.page}>
@@ -33,10 +43,10 @@ export function AdminMembersPage() {
         <div className={styles.headerText}>
           <h1 className={styles.title}>회원 관리</h1>
           <p className={styles.description}>
-            등록된 사용자를 검색하고 학습 현황을 확인할 수 있습니다.
+            실제 사용자 테이블에 등록된 회원 정보를 확인할 수 있습니다.
           </p>
         </div>
-        <div className={styles.countBadge}>전체 회원 {filteredMembers.length}명</div>
+        <div className={styles.countBadge}>전체 회원 {members.length}명</div>
       </div>
 
       {/* 2. 검색 필터 */}
@@ -47,23 +57,16 @@ export function AdminMembersPage() {
         onReset={handleReset}
       />
 
-      {/* 3. 회원 목록 - 데스크톱용 테이블 */}
-      <MemberTable
-        members={filteredMembers}
-        onSelectMember={handleSelectMember}
-      />
-
-      {/* 4. 회원 목록 - 모바일용 카드 리스트 */}
-      <MemberMobileCardList
-        members={filteredMembers}
-        onSelectMember={handleSelectMember}
-      />
-
-      {/* 5. 회원 상세 다이얼로그 팝업 */}
-      <MemberDetailDialog
-        member={selectedMember}
-        onClose={() => setSelectedMember(null)}
-      />
+      {isLoading ? (
+        <p className={styles.state}>회원 목록을 불러오는 중입니다.</p>
+      ) : error ? (
+        <p className={styles.state} data-error>{error}</p>
+      ) : (
+        <>
+          <MemberTable members={filteredMembers} />
+          <MemberMobileCardList members={filteredMembers} />
+        </>
+      )}
     </div>
   );
 }

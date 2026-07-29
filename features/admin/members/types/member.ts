@@ -1,13 +1,12 @@
-export type MemberStatus = "active" | "inactive" | "risk";
+export type MemberStatus = "ACTIVE" | "INACTIVE" | "DORMANT" | "DELETED";
 
 export interface Member {
   id: string;
+  authUuid: string;
   name: string;
   email: string;
-  joinedAt: string;
-  lastLoginAt: string;
+  phoneNumber: string | null;
   status: MemberStatus;
-  studyMinutes: number;
-  recentScore: number;
-  wrongAnswerCount: number;
+  createdAt: string;
+  provider: string | null;
 }
