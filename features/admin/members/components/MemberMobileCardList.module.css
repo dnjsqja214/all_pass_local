@@ -73,6 +73,18 @@
   }
 }
 
+:global(:root[data-theme="light"]) .list {
+  .email,
+  .statLabel {
+    color: color-mix(in srgb, var(--color-text-primary) 68%, var(--color-text-secondary));
+    font-weight: 700;
+  }
+
+  .statValue {
+    font-weight: 750;
+  }
+}
+
 @media (min-width: 768px) {
   .list {
     display: none;

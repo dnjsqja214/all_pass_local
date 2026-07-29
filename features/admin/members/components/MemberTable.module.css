@@ -79,6 +79,23 @@
   }
 }
 
+:global(:root[data-theme="light"]) .wrapper {
+  thead tr {
+    font-weight: 850;
+  }
+
+  tbody {
+    font-weight: 650;
+  }
+
+  .email,
+  .identifier,
+  .date {
+    color: color-mix(in srgb, var(--color-text-primary) 70%, var(--color-text-secondary));
+    font-weight: 650;
+  }
+}
+
 @media (min-width: 768px) {
   .wrapper {
     display: block;
