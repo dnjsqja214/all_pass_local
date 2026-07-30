@@ -64,35 +64,37 @@ export function MemberRoleEditor({ member, currentUserId, onUpdated }: MemberRol
 
   return (
     <div className={styles.editor}>
-      <div className={styles.roles}>
-        {MEMBER_ROLES.map((role) => {
-          const locked = isLocked(role);
-          return (
-            <label key={role} className={styles.role} data-locked={locked}>
-              <input
-                type="checkbox"
-                checked={roles.includes(role)}
-                disabled={locked || isSaving}
-                onChange={() => toggle(role)}
-                aria-label={`${member.email} ${role} 권한`}
-              />
-              <span>{role}</span>
-            </label>
-          );
-        })}
+      <div className={styles.controls}>
+        <div className={styles.roles}>
+          {MEMBER_ROLES.map((role) => {
+            const locked = isLocked(role);
+            return (
+              <label key={role} className={styles.role} data-locked={locked}>
+                <input
+                  type="checkbox"
+                  checked={roles.includes(role)}
+                  disabled={locked || isSaving}
+                  onChange={() => toggle(role)}
+                  aria-label={`${member.email} ${role} 권한`}
+                />
+                <span>{role}</span>
+              </label>
+            );
+          })}
+        </div>
+        <div className={styles.actions}>
+          {isDirty && (
+            <button type="button" className={styles.reset} disabled={isSaving} onClick={reset}>
+              취소
+            </button>
+          )}
+          <button type="button" className={styles.save} disabled={!isDirty || isSaving} onClick={save}>
+            {isSaving ? "저장 중" : "저장"}
+          </button>
+        </div>
       </div>
       {isSelf && <p className={styles.hint}>본인의 ADMIN 권한은 해제할 수 없습니다.</p>}
       {error && <p className={styles.error}>{error}</p>}
-      <div className={styles.actions}>
-        <button type="button" className={styles.save} disabled={!isDirty || isSaving} onClick={save}>
-          {isSaving ? "저장 중" : "저장"}
-        </button>
-        {isDirty && (
-          <button type="button" className={styles.reset} disabled={isSaving} onClick={reset}>
-            취소
-          </button>
-        )}
-      </div>
     </div>
   );
 }

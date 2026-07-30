@@ -39,18 +39,6 @@
     gap: 24px;
   }
 
-  .detailGrid {
-    display: grid;
-    grid-template-columns: 1fr;
-    align-items: start;
-    gap: 24px;
-  }
-
-  .leftColumn {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-  }
 }
 
 @keyframes livePulse {
@@ -71,16 +59,5 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .detailGrid {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-    }
-
-    .leftColumn {
-      grid-column: span 5 / span 5;
-    }
-
-    .rightColumn {
-      grid-column: span 7 / span 7;
-    }
   }
 }

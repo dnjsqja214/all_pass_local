@@ -4,10 +4,7 @@ import Link from "next/link";
 import {
   LayoutDashboard,
   Users,
-  Calendar,
   CalendarClock,
-  AlertTriangle,
-  BarChart3,
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
@@ -34,9 +31,6 @@ export function AdminSidebar({
     { id: "today", label: "오늘 현황" },
     { id: "members", label: "회원 관리" },
     { id: "exam-schedules", label: "시험 관리" },
-    { id: "attendance", label: "출석 관리" },
-    { id: "incorrect", label: "오답·위험군" },
-    { id: "report", label: "리포트" },
   ];
 
   // 메뉴 아이콘 반환 함수
@@ -47,14 +41,8 @@ export function AdminSidebar({
         return <LayoutDashboard className={iconClass} />;
       case "members":
         return <Users className={iconClass} />;
-      case "attendance":
-        return <Calendar className={iconClass} />;
       case "exam-schedules":
         return <CalendarClock className={iconClass} />;
-      case "incorrect":
-        return <AlertTriangle className={iconClass} />;
-      case "report":
-        return <BarChart3 className={iconClass} />;
       default:
         return null;
     }
@@ -106,7 +94,7 @@ export function AdminSidebar({
             {menuItems.map((item) => {
               const path = item.id === "members"
                 ? "/admin/members"
-                : item.id === "exam-schedules" ? "/admin/exam-schedules" : item.id === "today" ? "/admin" : "#";
+                : item.id === "exam-schedules" ? "/admin/exam-schedules" : "/admin";
               return (
                 <Link
                   key={item.id}
