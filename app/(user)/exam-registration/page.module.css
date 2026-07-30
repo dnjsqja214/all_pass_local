@@ -29,6 +29,11 @@
 .card p { margin: 0; color: var(--color-text-secondary); font-size: 12px; font-weight: 650; }
 .card .entry { margin-top: 3px; font-size: 11px; }
 .cancel { display: inline-flex; align-items: center; gap: 6px; padding: 9px 12px; border: 1px solid var(--color-border); border-radius: 10px; background: transparent; color: var(--color-danger); font-weight: 800; cursor: pointer; }
+.completedActions { display: flex; align-items: center; gap: 10px; }
+.wrongNotesButton { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 7px; padding: 0 13px; border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border)); border-radius: 11px; background: color-mix(in srgb, var(--color-primary) 9%, var(--color-card-background)); color: var(--color-primary); font-size: 12px; font-weight: 850; text-decoration: none; cursor: pointer; }
+.wrongNotesButton svg { width: 16px; height: 16px; }
+.wrongNotesButton:hover { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 15%, var(--color-card-background)); }
+.wrongNotesButton:disabled { opacity: .45; cursor: not-allowed; }
 .score { display: flex; min-width: 96px; flex-direction: column; align-items: flex-end; gap: 3px; padding: 10px 13px; border: 1px solid color-mix(in srgb, var(--color-success) 30%, var(--color-border)); border-radius: 12px; background: color-mix(in srgb, var(--color-success) 8%, var(--color-card-background)); }
 .score span { color: var(--color-text-secondary); font-size: 10px; font-weight: 750; }
 .score strong { color: var(--color-success); font-size: 20px; font-weight: 950; letter-spacing: -.03em; }
@@ -67,4 +72,4 @@
 .modalActions { display: flex; justify-content: flex-end; gap: 10px; }
 .modalActions .secondary { border: 1px solid var(--color-border); background: transparent; color: var(--color-text-primary); }
 .modalActions button:disabled { opacity: .45; cursor: not-allowed; }
-@media (max-width: 767px) { .page { padding: 24px 16px 90px; } .heading { align-items: flex-start; flex-direction: column; } .heading button { width: 100%; } .filterGroup { grid-template-columns: 1fr; gap: 7px; } .filterGroup > strong { padding-top: 0; } .statusChecks > span { width: 100%; margin-left: 0; } .card { align-items: flex-start; flex-wrap: wrap; } .cancel { margin-left: 60px; } .slotPicker { min-height: 0; grid-template-columns: 1fr; overflow-y: auto; } .examOptions { max-height: 220px; } .slotList { max-height: 320px; overflow: visible; } }
+@media (max-width: 767px) { .page { padding: 24px 16px 90px; } .heading { align-items: flex-start; flex-direction: column; } .heading button { width: 100%; } .filterGroup { grid-template-columns: 1fr; gap: 7px; } .filterGroup > strong { padding-top: 0; } .statusChecks > span { width: 100%; margin-left: 0; } .card { align-items: flex-start; flex-wrap: wrap; } .cancel { margin-left: 60px; } .completedActions { width: 100%; margin-left: 60px; justify-content: space-between; } .slotPicker { min-height: 0; grid-template-columns: 1fr; overflow-y: auto; } .examOptions { max-height: 220px; } .slotList { max-height: 320px; overflow: visible; } }

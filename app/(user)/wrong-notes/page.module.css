@@ -1,3 +1,42 @@
-.page {
-  composes: shellFixed from "../../../features/shared/styles/pageShell.module.css";
-}
+.page { display: flex; flex: 1; flex-direction: column; gap: 18px; padding: 28px 32px 80px; color: var(--color-text-primary); }
+.header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 20px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); }
+.header > div > span { color: var(--color-primary); font-size: 11px; font-weight: 850; }
+.header h1 { margin: 4px 0 0; font-size: 22px; font-weight: 950; }
+.backButton { display: inline-flex; min-height: 40px; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid var(--color-border); border-radius: 11px; background: var(--color-page-background); color: var(--color-text-primary); font-size: 12px; font-weight: 800; cursor: pointer; }
+.backButton svg { width: 16px; }
+.summary { display: flex; gap: 8px; }
+.summary div { display: flex; min-width: 72px; flex-direction: column; align-items: center; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--color-page-background); }
+.summary span { color: var(--color-text-secondary); font-size: 10px; font-weight: 750; }
+.summary strong { font-size: 16px; font-weight: 950; }
+.reviewGrid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .75fr); gap: 16px; }
+.questionCard, .explanationCard { padding: 22px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); }
+.questionMeta { display: flex; align-items: center; gap: 7px; }
+.questionMeta span, .questionMeta em, .questionMeta small { padding: 4px 8px; border-radius: 999px; background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary); font-size: 10px; font-style: normal; font-weight: 850; }
+.questionMeta small { margin-left: auto; background: var(--color-page-background); color: var(--color-text-secondary); }
+.questionCard h2 { margin: 18px 0; font-size: 17px; line-height: 1.7; }
+.options { display: flex; flex-direction: column; gap: 9px; }
+.options > div { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-page-background); }
+.options > div > strong { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: var(--color-card-background); font-size: 12px; }
+.options > div > span { font-size: 13px; line-height: 1.55; }
+.options > div > em { display: inline-flex; align-items: center; gap: 4px; color: var(--color-text-secondary); font-size: 10px; font-style: normal; font-weight: 850; }
+.options > div > em svg { width: 14px; height: 14px; }
+.options > div[data-correct="true"] { border-color: color-mix(in srgb, var(--color-success) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-success) 9%, var(--color-card-background)); }
+.options > div[data-correct="true"] > strong, .options > div[data-correct="true"] > em { color: var(--color-success); }
+.options > div[data-selected="true"][data-correct="false"] { border-color: color-mix(in srgb, var(--color-danger) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-danger) 8%, var(--color-card-background)); }
+.options > div[data-selected="true"][data-correct="false"] > strong, .options > div[data-selected="true"][data-correct="false"] > em { color: var(--color-danger); }
+.answerSummary { display: flex; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 12px; }
+.answerSummary strong { margin-left: 5px; color: var(--color-text-primary); }
+.explanationCard > span { color: var(--color-primary); font-size: 11px; font-weight: 900; }
+.explanationCard p { margin: 14px 0 0; color: var(--color-text-primary); font-size: 13px; font-weight: 650; line-height: 1.75; white-space: pre-wrap; }
+.pagination { display: flex; grid-column: 1 / -1; align-items: center; justify-content: center; gap: 18px; }
+.pagination button, .state button, .perfect button { display: inline-flex; min-height: 40px; align-items: center; gap: 5px; padding: 0 13px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-card-background); color: var(--color-text-primary); font-weight: 800; cursor: pointer; }
+.pagination button:disabled { opacity: .35; cursor: not-allowed; }
+.pagination svg { width: 15px; }
+.pagination span { color: var(--color-text-secondary); font-size: 12px; font-weight: 850; }
+.state, .perfect { display: flex; min-height: 320px; align-items: center; justify-content: center; flex-direction: column; gap: 10px; margin: 28px 32px; padding: 30px; border: 1px dashed var(--color-border); border-radius: 18px; background: var(--color-card-background); color: var(--color-text-secondary); text-align: center; }
+.state[data-error="true"] strong { color: var(--color-danger); }
+.state p, .perfect p { margin: 0 0 8px; }
+.perfect svg { width: 48px; height: 48px; color: var(--color-success); }
+.perfect h2 { margin: 4px 0 0; color: var(--color-text-primary); }
+@media (max-width: 900px) { .header { grid-template-columns: 1fr; } .summary { flex-wrap: wrap; } .reviewGrid { grid-template-columns: 1fr; } .pagination { grid-column: 1; } }
+@media (max-width: 767px) { .page { padding: 20px 16px 90px; } .header, .questionCard, .explanationCard { padding: 16px; } .summary div { flex: 1; } .options > div { grid-template-columns: 28px minmax(0, 1fr); } .options > div > em { grid-column: 2; } .state, .perfect { margin: 20px 16px 90px; } }

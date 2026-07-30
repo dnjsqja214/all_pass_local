@@ -62,23 +62,6 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
             />
           </svg>
         );
-      case "incorrect":
-        return (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className={styles.navIcon}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-            />
-          </svg>
-        );
       case "apply-exam":
         return (
           <svg
@@ -140,12 +123,17 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
       <div className={styles.top}>
         {/* 로고 영역 (접힘 상태에 따라 수직 정렬로 변환) */}
         <div className={styles.logoArea}>
-          <div className={styles.logoGroup}>
+          <button
+            type="button"
+            className={styles.logoGroup}
+            onClick={() => window.location.reload()}
+            aria-label="ALL PASS 새로고침"
+          >
             <div className={styles.logoBadge}>A</div>
             <span className={styles.collapsible}>
               <span className={styles.logoBrand}>All Pass</span>
             </span>
-          </div>
+          </button>
 
           {/* 사이드바 접기/펼치기 버튼 (데스크톱 전용) */}
           <button

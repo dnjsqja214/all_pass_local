@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarClock, Plus, Trash2, X } from "lucide-react";
+import Link from "next/link";
+import { BookOpenCheck, CalendarClock, Plus, Trash2, X } from "lucide-react";
 import type {
   ExamRegistration,
   ExamSlot,
@@ -238,11 +239,22 @@ export default function ExamRegistrationPage() {
                 <Trash2 /> {pendingId === registration.id ? "취소 중" : "신청 취소"}
               </button>
             ) : displayStatus(registration, now) === "completed" ? (
-              <div className={styles.score} data-pending={registration.gradingStatus === "pending"}>
-                <span>점수</span>
-                <strong>{registration.gradingStatus === "graded" && registration.score !== null
-                  ? `${registration.score}점`
-                  : "채점 대기"}</strong>
+              <div className={styles.completedActions}>
+                {registration.gradingStatus === "graded" ? (
+                  <Link className={styles.wrongNotesButton} href={`/wrong-notes/${registration.id}`}>
+                    <BookOpenCheck /> 오답 노트
+                  </Link>
+                ) : (
+                  <button className={styles.wrongNotesButton} type="button" disabled title="채점 완료 후 확인할 수 있습니다.">
+                    <BookOpenCheck /> 오답 노트
+                  </button>
+                )}
+                <div className={styles.score} data-pending={registration.gradingStatus === "pending"}>
+                  <span>점수</span>
+                  <strong>{registration.gradingStatus === "graded" && registration.score !== null
+                    ? `${registration.score}점`
+                    : "채점 대기"}</strong>
+                </div>
               </div>
             ) : null}
           </article>
