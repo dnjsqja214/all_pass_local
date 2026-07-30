@@ -17,6 +17,8 @@ export const baseApi = createApi({
     "ExamSlot",
     "ExamSchedule",
     "DashboardContent",
+    "Operations",
+    "Learning",
     "ChatRoom",
     "ChatMessage",
     "ChatParticipant",

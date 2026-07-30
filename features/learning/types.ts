@@ -1,50 +1,55 @@
+export type PassingAssessmentStatus = "NO_DATA" | "PENDING" | "PASSED" | "FAILED";
+export type WeakTopicBasis = "CHAPTER" | "SUBJECT";
+
 export interface SubjectScore {
-  name: string;
+  subject: string;
   score: number;
 }
 
-export interface ExamAttempt {
-  id: string;
-  roundTitle: string;
-  attemptTitle: string;
-  date: string;
-  subjectScores: SubjectScore[];
+export interface LearningSummary {
+  elapsedExamMinutes: number;
+  completedAttemptCount: number;
+  averageScore: number;
+  wrongAnswerCount: number;
+}
+
+export interface PassingAssessment {
+  status: PassingAssessmentStatus;
+  year: number | null;
+  round: number | null;
   totalScore: number;
+  averageScore: number;
+  subjectScores: SubjectScore[];
+  missingSubjects: string[];
 }
 
 export interface ScoreTrendPoint {
+  attemptId: string;
   label: string;
   score: number;
+  submittedAt: string;
+}
+
+export interface ExamHistoryItem {
+  id: string;
+  registrationId: string | null;
+  examTitle: string;
+  attemptTitle: string;
+  submittedAt: string;
+  score: number;
+  subjectScores: SubjectScore[];
 }
 
 export interface WeakTopic {
   topic: string;
   wrongCount: number;
+  basis: WeakTopicBasis;
 }
 
-export interface LearningDetail {
-  memberId: string;
-  totalStudyMinutes: number;
-  examCount: number;
-  averageScore: number;
-  wrongAnswerCount: number;
+export interface LearningDashboard {
+  summary: LearningSummary;
+  assessment: PassingAssessment;
   scoreTrend: ScoreTrendPoint[];
-  subjectScores: {
-    subject: string;
-    score: number;
-  }[];
-  examHistory: {
-    id: string;
-    examTitle: string;
-    attemptTitle: string;
-    date: string;
-    totalScore: number;
-    isPassed: boolean;
-    subjects: {
-      name: string;
-      score: number;
-      isFailed: boolean;
-    }[];
-  }[];
+  examHistory: ExamHistoryItem[];
   weakTopics: WeakTopic[];
 }

@@ -7,9 +7,11 @@ interface WeakTopicListProps {
 }
 
 export function WeakTopicList({ weakTopics }: WeakTopicListProps) {
+  const hasChapterData = weakTopics.some((topic) => topic.basis === "CHAPTER");
+  const title = hasChapterData ? "취약 단원 TOP 3" : "취약 과목 TOP 3";
   return (
     <div className={styles.card}>
-      <h4 className={styles.title}>취약 단원 TOP 3</h4>
+      <h4 className={styles.title}>{title}</h4>
       <div className={styles.list}>
         {weakTopics.slice(0, 3).map((item, idx) => (
           <div key={idx} className={styles.row}>
@@ -25,7 +27,7 @@ export function WeakTopicList({ weakTopics }: WeakTopicListProps) {
       </div>
       {weakTopics.length > 0 && (
         <div className={styles.tip}>
-          💡 상위 취약 단원에 대한 개념 오답 노트를 적극 활용하여 이론을 보강하세요.
+          실제 오답이 많이 누적된 영역부터 오답 노트를 확인해 보세요.
         </div>
       )}
     </div>

@@ -8,6 +8,7 @@ interface ExamSearchFormProps {
   subject: string;
   setSubject: (val: string) => void;
   subjectOptions: string[];
+  roundOptions: Array<{ round: number; year: number }>;
   round: string;
   setRound: (val: string) => void;
   onSearch: () => void;
@@ -20,6 +21,7 @@ export function ExamSearchForm({
   subject,
   setSubject,
   subjectOptions,
+  roundOptions,
   round,
   setRound,
   onSearch,
@@ -88,10 +90,11 @@ export function ExamSearchForm({
             className={styles.select}
           >
             <option value="all">전체 회차</option>
-            <option value="35">35회/2026</option>
-            <option value="34">34회/2025</option>
-            <option value="33">33회/2024</option>
-            <option value="32">32회/2023</option>
+            {roundOptions.map((option) => (
+              <option key={`${option.year}-${option.round}`} value={option.round}>
+                {option.round}회/{option.year}
+              </option>
+            ))}
           </select>
           <ChevronDown className={styles.chevron} />
         </div>

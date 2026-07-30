@@ -82,8 +82,12 @@ export default function UserLayout({
     localStorage.setItem("allpass-user-sidebar-collapsed", String(newVal));
   };
 
-  const handleLogout = () => {
-    authService.redirectToLogout(`${window.location.origin}/login`);
+  const handleLogout = async () => {
+    try {
+      await authService.recordLogout();
+    } finally {
+      authService.redirectToLogout(`${window.location.origin}/login`);
+    }
   };
 
   const handleExamSubmitted = () => {

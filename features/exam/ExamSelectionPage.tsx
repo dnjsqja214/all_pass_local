@@ -13,14 +13,12 @@ interface ExamSelectionPageProps {
   onSelectExam?: (exam: ExamListItem) => void;
   isModal?: boolean;
   onClose?: () => void;
-  initialExams?: ExamListItem[];
 }
 
 export function ExamSelectionPage({
   onSelectExam,
   isModal = false,
   onClose,
-  initialExams,
 }: ExamSelectionPageProps) {
   const {
     selectedType,
@@ -35,7 +33,8 @@ export function ExamSelectionPage({
     handleSearch,
     handleReset,
     subjectOptions,
-  } = useExamSearch(initialExams);
+    roundOptions,
+  } = useExamSearch();
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +65,7 @@ export function ExamSelectionPage({
           subject={selectedSubject}
           setSubject={setSelectedSubject}
           subjectOptions={subjectOptions}
+          roundOptions={roundOptions}
           round={selectedRound}
           setRound={setSelectedRound}
           onSearch={handleSearch}

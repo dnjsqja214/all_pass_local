@@ -1,63 +1,75 @@
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-
-  .header {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .title {
-    font-size: 24px;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    color: var(--color-text-primary);
-  }
-
-  .sessionStatus {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-  }
-
-  .liveDot {
-    width: 8px;
-    height: 8px;
-    border-radius: 9999px;
-    background: var(--color-success);
-    animation: livePulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  .metricGrid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
+.page { display: flex; flex-direction: column; gap: 20px; color: var(--color-text-primary); }
+.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.header h1 { margin: 2px 0 5px; font-size: clamp(26px, 3vw, 34px); font-weight: 900; letter-spacing: -.04em; }
+.header p { margin: 0; color: var(--color-text-secondary); font-size: 14px; font-weight: 600; }
+.eyebrow { color: var(--color-primary) !important; font-size: 11px !important; font-weight: 900 !important; letter-spacing: .16em; }
+.dateToolbar { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.dateToolbar button, .dateToolbar label { min-height: 42px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-card-background); color: var(--color-text-primary); }
+.dateToolbar button { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; padding: 0 12px; cursor: pointer; font-weight: 800; }
+.dateToolbar button:disabled { opacity: .38; cursor: default; }
+.dateToolbar label { display: flex; align-items: center; gap: 8px; padding: 0 12px; }
+.dateToolbar input { border: 0; outline: 0; background: transparent; color: var(--color-text-primary); font: inherit; font-weight: 750; color-scheme: light dark; }
+.todayButton { border-color: color-mix(in srgb, var(--color-primary) 38%, var(--color-border)) !important; color: var(--color-primary) !important; }
+.dateSummary { display: flex; align-items: center; justify-content: space-between; color: var(--color-text-secondary); font-size: 13px; font-weight: 750; }
+.live { display: inline-flex; align-items: center; gap: 7px; }
+.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--color-success); box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-success) 14%, transparent); }
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.metric { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 19px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); box-shadow: 0 10px 28px color-mix(in srgb, #000 5%, transparent); }
+.metricIcon { display: grid; width: 42px; height: 42px; place-items: center; flex: 0 0 auto; border-radius: 13px; background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card-background)); color: var(--color-primary); }
+.metricIcon svg { width: 20px; height: 20px; }
+.metric[data-tone="live"] .metricIcon { background: color-mix(in srgb, var(--color-success) 13%, var(--color-card-background)); color: var(--color-success); }
+.metric div { min-width: 0; display: grid; gap: 2px; }
+.metric p, .metric span { margin: 0; color: var(--color-text-secondary); font-size: 12px; font-weight: 700; }
+.metric strong { font-size: 25px; font-weight: 900; letter-spacing: -.04em; }
+.panel { overflow: hidden; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-card-background); }
+.panelHeader { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 22px; border-bottom: 1px solid var(--color-border); }
+.panelHeader h2 { margin: 0 0 4px; font-size: 17px; font-weight: 900; }
+.panelHeader p { margin: 0; color: var(--color-text-secondary); font-size: 12px; font-weight: 650; }
+.panelHeader > span { padding: 6px 10px; border-radius: 999px; background: var(--color-page-background); color: var(--color-text-secondary); font-size: 12px; font-weight: 850; }
+.tableScroll { overflow-x: auto; }
+.tableScroll table { width: 100%; border-collapse: collapse; min-width: 760px; }
+.tableScroll th { padding: 12px 18px; background: color-mix(in srgb, var(--color-page-background) 75%, transparent); color: var(--color-text-secondary); text-align: left; font-size: 11px; font-weight: 850; }
+.tableScroll td { padding: 15px 18px; border-top: 1px solid var(--color-border); color: var(--color-text-primary); font-size: 13px; font-weight: 700; }
+.tableScroll tbody tr:first-child td { border-top: 0; }
+.tableScroll td:first-child { display: grid; gap: 3px; min-width: 200px; }
+.tableScroll td:first-child strong { font-size: 13px; }
+.tableScroll td:first-child span { color: var(--color-text-secondary); font-size: 11px; font-weight: 600; }
+.status { display: inline-flex; width: max-content; padding: 6px 9px; border-radius: 999px; background: var(--color-page-background); color: var(--color-text-secondary); font-size: 11px; font-weight: 850; }
+.status[data-status="ONLINE"] { background: color-mix(in srgb, var(--color-success) 13%, var(--color-card-background)); color: var(--color-success); }
+.status[data-status="LOGOUT"] { color: var(--color-text-primary); }
+.status[data-status="SESSION_TIMEOUT"] { background: color-mix(in srgb, var(--color-primary) 9%, var(--color-card-background)); color: var(--color-primary); }
+.examGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 18px; }
+.examCard { padding: 18px; border: 1px solid var(--color-border); border-radius: 16px; background: color-mix(in srgb, var(--color-page-background) 45%, var(--color-card-background)); }
+.examHeading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.examHeading span { color: var(--color-primary); font-size: 10px; font-weight: 900; letter-spacing: .08em; }
+.examHeading h3 { margin: 5px 0 4px; font-size: 15px; font-weight: 900; }
+.examHeading p { margin: 0; color: var(--color-text-secondary); font-size: 11px; font-weight: 650; }
+.examHeading > strong { color: var(--color-primary); font-size: 24px; font-weight: 900; }
+.progress { height: 7px; margin: 16px 0; overflow: hidden; border-radius: 99px; background: color-mix(in srgb, var(--color-border) 70%, transparent); }
+.progress i { display: block; height: 100%; border-radius: inherit; background: var(--color-primary); }
+.examCard dl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0; }
+.examCard dl div { display: grid; gap: 4px; }
+.examCard dt { color: var(--color-text-secondary); font-size: 10px; font-weight: 700; }
+.examCard dd { margin: 0; font-size: 14px; font-weight: 900; }
+.empty, .state, .errorState { display: flex; min-height: 180px; align-items: center; justify-content: center; gap: 10px; padding: 30px; color: var(--color-text-secondary); font-size: 13px; font-weight: 700; text-align: center; }
+.state, .errorState { min-height: 260px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-card-background); }
+.errorState { flex-direction: column; color: var(--color-danger); }
+.errorState span { color: var(--color-text-secondary); }
+.errorState button { margin-top: 6px; padding: 10px 15px; border: 0; border-radius: 10px; background: var(--color-primary); color: #fff; font-weight: 850; cursor: pointer; }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (max-width: 1080px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) {
+  .header { align-items: stretch; flex-direction: column; }
+  .dateToolbar { width: 100%; }
+  .dateToolbar label { min-width: 0; flex: 1; }
+  .dateToolbar input { min-width: 0; width: 100%; }
+  .metrics, .examGrid { grid-template-columns: 1fr; }
 }
-
-@keyframes livePulse {
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@media (min-width: 640px) {
-  .page .metricGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .page {
-    .metricGrid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-  }
+@media (max-width: 470px) {
+  .page { gap: 14px; }
+  .metrics { grid-template-columns: 1fr; gap: 10px; }
+  .todayButton { display: none !important; }
+  .panelHeader { padding: 17px; }
+  .examGrid { padding: 12px; }
 }

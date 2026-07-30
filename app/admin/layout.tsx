@@ -54,8 +54,12 @@ export default function AdminLayout({
     localStorage.setItem("allpass-admin-sidebar-collapsed", String(newVal));
   };
 
-  const handleLogout = () => {
-    authService.redirectToLogout(`${window.location.origin}/login`);
+  const handleLogout = async () => {
+    try {
+      await authService.recordLogout();
+    } finally {
+      authService.redirectToLogout(`${window.location.origin}/login`);
+    }
   };
 
   return (

@@ -3,22 +3,22 @@ import { formatStudyTime } from "../utils";
 import styles from "./LearningSummaryCards.module.css";
 
 interface LearningSummaryCardsProps {
-  studyMinutes: number;
+  elapsedExamMinutes: number;
   examCount: number;
   averageScore: number;
   wrongAnswerCount: number;
 }
 
 export function LearningSummaryCards({
-  studyMinutes,
+  elapsedExamMinutes,
   examCount,
   averageScore,
   wrongAnswerCount,
 }: LearningSummaryCardsProps) {
   const cards = [
     {
-      label: "누적 공부 시간",
-      value: formatStudyTime(studyMinutes),
+      label: "누적 응시 시간",
+      value: formatStudyTime(elapsedExamMinutes),
       tone: "default",
     },
     {
@@ -29,7 +29,7 @@ export function LearningSummaryCards({
     {
       label: "평균 점수",
       value: `${averageScore.toFixed(1)}점`,
-      tone: averageScore >= 180 ? "success" : "default",
+      tone: averageScore >= 60 ? "success" : "default",
     },
     {
       label: "누적 오답 수",

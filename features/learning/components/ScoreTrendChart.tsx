@@ -1,6 +1,10 @@
 import React from "react";
-import { ScoreTrendPoint } from "../types";
 import styles from "./ScoreTrendChart.module.css";
+
+interface ScoreTrendPoint {
+  label: string;
+  score: number;
+}
 
 interface ScoreTrendChartProps {
   trendData: ScoreTrendPoint[];
@@ -11,12 +15,12 @@ interface ScoreTrendChartProps {
 export function ScoreTrendChart({
   trendData,
   title = "반복 응시 - 점수 추이",
-  subtitle = "최근 회차별 총점 변동 내역",
+  subtitle = "최근 8회 응시 점수 변동 내역",
 }: ScoreTrendChartProps) {
-  // Y 좌표 변환 함수: 점수 범위 [100, 200] -> [150, 0]
+  // 실제 저장 점수 범위 [0, 100]을 차트 높이 [150, 0]으로 변환한다.
   const getY = (score: number) => {
-    const clamped = Math.max(100, Math.min(200, score));
-    return 150 - (clamped - 100) * 1.5;
+    const clamped = Math.max(0, Math.min(100, score));
+    return 150 - clamped * 1.5;
   };
 
   // X 좌표 구하는 함수
@@ -42,7 +46,7 @@ export function ScoreTrendChart({
   const getEncouragementText = () => {
     if (pointsCount === 0) return "응시 이력이 없습니다.";
     const latest = trendData[pointsCount - 1];
-    const passed = latest.score >= 180;
+    const passed = latest.score >= 60;
     return (
       <span className={styles.summary}>
         최근 회차 결과 —{" "}
@@ -51,7 +55,7 @@ export function ScoreTrendChart({
         </strong>
         ,{" "}
         <strong className={styles.verdict} data-passed={passed}>
-          {passed ? "합격선 통과" : "합격선 미달"}
+          {passed ? "평균 기준 이상" : "평균 기준 미달"}
         </strong>
       </span>
     );
@@ -70,17 +74,17 @@ export function ScoreTrendChart({
           <svg viewBox="0 0 400 180" className={styles.chart}>
             {/* 가로 그리드선 및 점수 라벨 */}
             <line x1="40" y1="150" x2="380" y2="150" stroke="#E4E0D9" strokeDasharray="3 3" />
-            <text x="30" y="154" fill="#817D76" fontSize="10" textAnchor="end">100</text>
+            <text x="30" y="154" fill="#817D76" fontSize="10" textAnchor="end">0</text>
             
             <line x1="40" y1="75" x2="380" y2="75" stroke="#E4E0D9" strokeDasharray="3 3" />
-            <text x="30" y="79" fill="#817D76" fontSize="10" textAnchor="end">150</text>
+            <text x="30" y="79" fill="#817D76" fontSize="10" textAnchor="end">50</text>
             
             <line x1="40" y1="0" x2="380" y2="0" stroke="#E4E0D9" strokeDasharray="3 3" />
-            <text x="30" y="4" fill="#817D76" fontSize="10" textAnchor="end">200</text>
+            <text x="30" y="4" fill="#817D76" fontSize="10" textAnchor="end">100</text>
 
-            {/* 초록색 합격선 기준 (180점: y=30) */}
-            <line x1="40" y1="30" x2="380" y2="30" stroke="#3F7D4E" strokeWidth="1.5" strokeDasharray="4 4" />
-            <text x="385" y="34" fill="#3F7D4E" fontSize="9" fontWeight="bold" textAnchor="start">합격선 (180점)</text>
+            {/* 과목 평균 기준 (60점: y=60) */}
+            <line x1="40" y1="60" x2="380" y2="60" stroke="#3F7D4E" strokeWidth="1.5" strokeDasharray="4 4" />
+            <text x="385" y="64" fill="#3F7D4E" fontSize="9" fontWeight="bold" textAnchor="start">평균 기준 (60점)</text>
 
             {/* 차트 꺾은선 */}
             {pointsCount > 1 && (
@@ -98,7 +102,7 @@ export function ScoreTrendChart({
             {trendData.map((pt, idx) => {
               const cx = getX(idx, pointsCount);
               const cy = getY(pt.score);
-              const isPass = pt.score >= 180;
+              const isPass = pt.score >= 60;
               return (
                 <g key={idx}>
                   <circle

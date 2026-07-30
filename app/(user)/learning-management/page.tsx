@@ -1,114 +1,89 @@
 "use client";
 
 import React from "react";
-import { useDashboardData } from "../../../features/dashboard/hooks/useDashboardData";
 import { LearningSummaryCards } from "../../../features/learning/components/LearningSummaryCards";
 import { ScoreTrendChart } from "../../../features/learning/components/ScoreTrendChart";
 import { SubjectScoreList } from "../../../features/learning/components/SubjectScoreList";
 import { PassingRuleCard } from "../../../features/learning/components/PassingRuleCard";
 import { ExamHistoryList } from "../../../features/learning/components/ExamHistoryList";
 import { WeakTopicList } from "../../../features/learning/components/WeakTopicList";
+import { useGetLearningManagementQuery } from "../../../features/learning/api/learningApi";
+import { queryErrorMessage } from "../../../features/store/api/queryError";
 import styles from "./page.module.css";
 
+const dateFormatter = new Intl.DateTimeFormat("ko-KR", {
+  month: "2-digit",
+  day: "2-digit",
+});
+
 export default function LearningManagement() {
-  const { examAttempts, scoreTrend, wrongNotes } = useDashboardData("profile");
+  const { data, error, isLoading, refetch } = useGetLearningManagementQuery();
 
-  const latestAttempt = examAttempts[0];
+  if (isLoading) {
+    return <div className={styles.state}>실제 학습 기록을 불러오는 중입니다.</div>;
+  }
 
-  // 과목명 맵핑
-  const mapSubjectName = (name: string) => {
-    if (name === "중개") return "중개사법령 및 실무";
-    if (name === "공법") return "부동산공법";
-    if (name === "세법") return "부동산세법";
-    return name;
-  };
+  if (!data) {
+    return (
+      <div className={styles.state}>
+        <p>{queryErrorMessage(error, "학습 기록을 불러오지 못했습니다.")}</p>
+        <button type="button" onClick={() => refetch()}>다시 시도</button>
+      </div>
+    );
+  }
 
-  // 과목별 점수 데이터 구성
-  const subjectScoresMapped = latestAttempt
-    ? latestAttempt.subjectScores.map((sub) => ({
-        subject: mapSubjectName(sub.name),
-        score: sub.score,
-      }))
-    : [];
-
-  // 총 누적 계산
-  const studyMinutes = 870; // 주당 14.5시간 기준 누적 공부시간
-  const examCount = examAttempts.length;
-  const averageScore = examAttempts.reduce((acc, a) => acc + a.totalScore, 0) / (examAttempts.length || 1);
-  const wrongAnswerCount = wrongNotes.reduce((acc, n) => acc + n.frequency, 0);
-
-  // 차트 트렌드 데이터 변환
-  const trendData = scoreTrend.map((pt) => ({
-    label: pt.round,
-    score: pt.score,
+  const trendData = data.scoreTrend.map((point) => ({
+    label: point.label,
+    score: point.score,
   }));
-
-  // 시험 이력 데이터 변환
-  const examHistoryMapped = examAttempts.map((attempt) => {
-    const hasFail = attempt.subjectScores.some((s) => s.score < 40);
-    const passed = attempt.totalScore >= 180 && !hasFail;
-    return {
-      id: attempt.id,
-      examTitle: attempt.roundTitle,
-      attemptTitle: attempt.attemptTitle,
-      date: attempt.date,
-      totalScore: attempt.totalScore,
-      isPassed: passed,
-      subjects: attempt.subjectScores.map((s) => ({
-        name: mapSubjectName(s.name),
-        score: s.score,
-        isFailed: s.score < 40,
-      })),
-    };
-  });
-
-  // 취약 단원 데이터 변환
-  const weakTopicsMapped = wrongNotes.map((note) => ({
-    topic: note.topic,
-    wrongCount: note.frequency,
+  const examHistory = data.examHistory.map((attempt) => ({
+    id: attempt.id,
+    examTitle: attempt.examTitle,
+    attemptTitle: attempt.attemptTitle,
+    date: dateFormatter.format(new Date(attempt.submittedAt)),
+    totalScore: attempt.score,
+    result: attempt.score >= 60
+      ? "ABOVE_AVERAGE" as const
+      : attempt.score < 40 ? "CUTOFF_RISK" as const : "BELOW_AVERAGE" as const,
+    subjects: attempt.subjectScores.map((subject) => ({
+      name: subject.subject,
+      score: subject.score,
+      isFailed: subject.score < 40,
+    })),
   }));
 
   return (
     <div className={styles.page}>
-      {/* 학습관리 타이틀 (데스크톱용) */}
       <div className={styles.pageTitle}>
         <h1 className={styles.title}>학습관리 대시보드</h1>
         <p className={styles.description}>
-          회차별 시험 성적 추이와 합격 기준 부합 여부를 한눈에 진단합니다.
+          실제 응시 기록을 기준으로 점수 추이와 합격 기준 충족 여부를 진단합니다.
         </p>
       </div>
 
-      {/* 1. 학습 요약 카드 (4열) */}
       <LearningSummaryCards
-        studyMinutes={studyMinutes}
-        examCount={examCount}
-        averageScore={averageScore}
-        wrongAnswerCount={wrongAnswerCount}
+        elapsedExamMinutes={data.summary.elapsedExamMinutes}
+        examCount={data.summary.completedAttemptCount}
+        averageScore={data.summary.averageScore}
+        wrongAnswerCount={data.summary.wrongAnswerCount}
       />
 
-      {/* 2. 상세 지표 그리드 */}
       <div className={styles.metrics}>
-        {/* 좌측: 차트 */}
         <div className={styles.mainColumn}>
           <ScoreTrendChart trendData={trendData} />
         </div>
 
-        {/* 우측: 합격 판정 & 과목 점수 */}
         <div className={styles.sideColumn}>
-          <PassingRuleCard
-            totalScore={latestAttempt ? latestAttempt.totalScore : 0}
-            subjectScores={subjectScoresMapped}
-          />
-          <SubjectScoreList subjectScores={subjectScoresMapped} />
+          <PassingRuleCard assessment={data.assessment} />
+          <SubjectScoreList subjectScores={data.assessment.subjectScores} />
         </div>
 
-        {/* 하단: 취약 단원 & 시험 이력 */}
         <div className={styles.sideColumn}>
-          <WeakTopicList weakTopics={weakTopicsMapped} />
+          <WeakTopicList weakTopics={data.weakTopics} />
         </div>
 
         <div className={styles.mainColumn}>
-          <ExamHistoryList history={examHistoryMapped} />
+          <ExamHistoryList history={examHistory} />
         </div>
       </div>
     </div>

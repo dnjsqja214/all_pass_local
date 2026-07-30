@@ -13,7 +13,7 @@ interface ExamHistoryItem {
   attemptTitle: string;
   date: string;
   totalScore: number;
-  isPassed: boolean;
+  result: "ABOVE_AVERAGE" | "BELOW_AVERAGE" | "CUTOFF_RISK";
   subjects: ExamSubjectScore[];
 }
 
@@ -43,10 +43,10 @@ export function ExamHistoryList({ history }: ExamHistoryListProps) {
     </div>
   );
 
-  const hasCutoffFail = (subjects: ExamSubjectScore[]) => subjects.some((sub) => sub.isFailed);
-
   const resultLabel = (attempt: ExamHistoryItem) =>
-    attempt.isPassed ? "합격" : hasCutoffFail(attempt.subjects) ? "불합격 (과락)" : "불합격";
+    attempt.result === "ABOVE_AVERAGE"
+      ? "60점 이상"
+      : attempt.result === "CUTOFF_RISK" ? "40점 미만" : "40~59점";
 
   return (
     <div className={styles.section}>
@@ -72,7 +72,7 @@ export function ExamHistoryList({ history }: ExamHistoryListProps) {
                 <span className={styles.totalScore}>
                   총점 <strong>{attempt.totalScore}</strong>
                 </span>
-                <span className={styles.resultBadge} data-passed={attempt.isPassed}>
+                <span className={styles.resultBadge} data-passed={attempt.result === "ABOVE_AVERAGE"}>
                   {resultLabel(attempt)}
                 </span>
               </div>
@@ -94,7 +94,7 @@ export function ExamHistoryList({ history }: ExamHistoryListProps) {
               <th>응시 날짜</th>
               <th>과목별 점수</th>
               <th className={styles.center}>총점</th>
-              <th className={styles.center}>합격 여부</th>
+              <th className={styles.center}>점수 상태</th>
             </tr>
           </thead>
           <tbody>
@@ -106,7 +106,7 @@ export function ExamHistoryList({ history }: ExamHistoryListProps) {
                 <td>{renderSubjectScores(attempt.subjects)}</td>
                 <td className={styles.cellTotal}>{attempt.totalScore}</td>
                 <td className={styles.center}>
-                  <span className={styles.resultBadge} data-passed={attempt.isPassed}>
+                  <span className={styles.resultBadge} data-passed={attempt.result === "ABOVE_AVERAGE"}>
                     {resultLabel(attempt)}
                   </span>
                 </td>
