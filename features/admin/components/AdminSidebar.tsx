@@ -1,6 +1,7 @@
 import React from "react";
 import styles from "./AdminSidebar.module.css";
 import Link from "next/link";
+import { BrandRefreshButton } from "@/features/shared/components/BrandRefreshButton/BrandRefreshButton";
 import {
   LayoutDashboard,
   Users,
@@ -70,13 +71,15 @@ export function AdminSidebar({
         <div className={styles.top}>
           {/* 로고 영역 (접힘 상태에 따라 수직 정렬로 변환) */}
           <div className={styles.logoArea}>
-            <div className={styles.logoGroup}>
-              <div className={styles.logoBadge}>A</div>
-              <div className={`${styles.logoText} ${styles.collapsible}`}>
-                <span className={styles.logoBrand}>ALLPASS</span>
-                <span className={styles.logoSub}>Study OS Admin</span>
-              </div>
-            </div>
+            <BrandRefreshButton
+              className={styles.logoGroup}
+              badgeClassName={styles.logoBadge}
+              textClassName={`${styles.logoText} ${styles.collapsible}`}
+              brandClassName={styles.logoBrand}
+              subtitleClassName={styles.logoSub}
+              brand="ALLPASS"
+              subtitle="Study OS Admin"
+            />
 
             {/* 사이드바 접기/펼치기 버튼 (데스크톱 전용) */}
             <button

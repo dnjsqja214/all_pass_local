@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { USER_MENU_ITEMS } from "../constants/navigation";
+import { BrandRefreshButton } from "@/features/shared/components/BrandRefreshButton/BrandRefreshButton";
 import styles from "./UserSidebar.module.css";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 
@@ -123,17 +124,13 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
       <div className={styles.top}>
         {/* 로고 영역 (접힘 상태에 따라 수직 정렬로 변환) */}
         <div className={styles.logoArea}>
-          <button
-            type="button"
+          <BrandRefreshButton
             className={styles.logoGroup}
-            onClick={() => window.location.reload()}
-            aria-label="ALL PASS 새로고침"
-          >
-            <div className={styles.logoBadge}>A</div>
-            <span className={styles.collapsible}>
-              <span className={styles.logoBrand}>All Pass</span>
-            </span>
-          </button>
+            badgeClassName={styles.logoBadge}
+            textClassName={styles.collapsible}
+            brandClassName={styles.logoBrand}
+            brand="All Pass"
+          />
 
           {/* 사이드바 접기/펼치기 버튼 (데스크톱 전용) */}
           <button
