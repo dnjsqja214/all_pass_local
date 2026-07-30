@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { BookOpenCheck, CalendarClock, Plus, Trash2, X } from "lucide-react";
 import type {
   ExamRegistration,
@@ -14,6 +13,7 @@ import {
   useRegisterExamMutation,
 } from "../../../features/exam/api/examRegistrationApi";
 import { queryErrorMessage } from "../../../features/store/api/queryError";
+import { WrongNoteModal } from "../../../features/exam/components/WrongNoteModal/WrongNoteModal";
 import styles from "./page.module.css";
 
 const dateTime = new Intl.DateTimeFormat("ko-KR", {
@@ -98,6 +98,7 @@ export default function ExamRegistrationPage() {
     "applied", "cancelled", "completed", "missed",
   ]);
   const [now, setNow] = useState(() => Date.now());
+  const [wrongNoteRegistrationId, setWrongNoteRegistrationId] = useState<string | null>(null);
 
   const openRegistrationForm = useCallback(async () => {
     setIsFormOpen(true);
@@ -241,9 +242,13 @@ export default function ExamRegistrationPage() {
             ) : displayStatus(registration, now) === "completed" ? (
               <div className={styles.completedActions}>
                 {registration.gradingStatus === "graded" ? (
-                  <Link className={styles.wrongNotesButton} href={`/wrong-notes/${registration.id}`}>
+                  <button
+                    className={styles.wrongNotesButton}
+                    type="button"
+                    onClick={() => setWrongNoteRegistrationId(registration.id)}
+                  >
                     <BookOpenCheck /> 오답 노트
-                  </Link>
+                  </button>
                 ) : (
                   <button className={styles.wrongNotesButton} type="button" disabled title="채점 완료 후 확인할 수 있습니다.">
                     <BookOpenCheck /> 오답 노트
@@ -293,6 +298,12 @@ export default function ExamRegistrationPage() {
           <div className={styles.modalActions}><button className={styles.secondary} onClick={() => setIsFormOpen(false)}>닫기</button><button disabled={isSlotsLoading || !selectedSlotId || pendingId !== null} onClick={() => void register()}>{pendingId ? "신청 중" : "선택한 회차 신청"}</button></div>
         </div>
       </div> : null}
+      {wrongNoteRegistrationId ? (
+        <WrongNoteModal
+          registrationId={wrongNoteRegistrationId}
+          onClose={() => setWrongNoteRegistrationId(null)}
+        />
+      ) : null}
     </section>
   );
 }

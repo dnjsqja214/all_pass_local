@@ -1,0 +1,116 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #000a;
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  display: flex;
+  width: min(1120px, 100%);
+  max-height: min(820px, calc(100dvh - 48px));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  background: var(--color-card-background);
+  color: var(--color-text-primary);
+  box-shadow: 0 24px 80px #0006;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header > div:first-child > span {
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.header h2 {
+  margin: 4px 0 0;
+  font-size: 21px;
+  font-weight: 950;
+}
+
+.closeButton {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  background: var(--color-page-background);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.closeButton svg { width: 19px; height: 19px; }
+.summary { display: flex; gap: 8px; }
+.summary div { display: flex; min-width: 72px; flex-direction: column; align-items: center; gap: 2px; padding: 9px 11px; border-radius: 12px; background: var(--color-page-background); }
+.summary span { color: var(--color-text-secondary); font-size: 10px; font-weight: 750; }
+.summary strong { font-size: 15px; font-weight: 950; }
+.content { min-height: 0; flex: 1; overflow-y: auto; padding: 20px 22px 24px; }
+.reviewGrid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(280px, .75fr); gap: 16px; }
+.questionCard, .explanationCard { padding: 22px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); }
+.questionMeta { display: flex; align-items: center; gap: 7px; }
+.questionMeta span, .questionMeta em, .questionMeta small { padding: 4px 8px; border-radius: 999px; background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary); font-size: 10px; font-style: normal; font-weight: 850; }
+.questionMeta small { margin-left: auto; background: var(--color-page-background); color: var(--color-text-secondary); }
+.questionCard h3 { margin: 18px 0; font-size: 17px; line-height: 1.7; }
+.options { display: flex; flex-direction: column; gap: 9px; }
+.options > div { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-page-background); }
+.options > div > strong { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: var(--color-card-background); font-size: 12px; }
+.options > div > span { font-size: 13px; line-height: 1.55; }
+.options > div > em { display: inline-flex; align-items: center; gap: 4px; color: var(--color-text-secondary); font-size: 10px; font-style: normal; font-weight: 850; }
+.options > div > em svg { width: 14px; height: 14px; }
+.options > div[data-correct="true"] { border-color: color-mix(in srgb, var(--color-success) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-success) 9%, var(--color-card-background)); }
+.options > div[data-correct="true"] > strong, .options > div[data-correct="true"] > em { color: var(--color-success); }
+.options > div[data-selected="true"][data-correct="false"] { border-color: color-mix(in srgb, var(--color-danger) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-danger) 8%, var(--color-card-background)); }
+.options > div[data-selected="true"][data-correct="false"] > strong, .options > div[data-selected="true"][data-correct="false"] > em { color: var(--color-danger); }
+.answerSummary { display: flex; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--color-border); color: var(--color-text-secondary); font-size: 12px; }
+.answerSummary strong { margin-left: 5px; color: var(--color-text-primary); }
+.explanationCard > span { color: var(--color-primary); font-size: 11px; font-weight: 900; }
+.explanationCard p { margin: 14px 0 0; color: var(--color-text-primary); font-size: 13px; font-weight: 650; line-height: 1.75; white-space: pre-wrap; }
+.pagination { display: flex; grid-column: 1 / -1; align-items: center; justify-content: center; gap: 18px; }
+.pagination button, .state button { display: inline-flex; min-height: 40px; align-items: center; gap: 5px; padding: 0 13px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-card-background); color: var(--color-text-primary); font-weight: 800; cursor: pointer; }
+.pagination button:disabled { opacity: .35; cursor: not-allowed; }
+.pagination svg { width: 15px; }
+.pagination span { color: var(--color-text-secondary); font-size: 12px; font-weight: 850; }
+.state, .perfect { display: flex; min-height: 360px; align-items: center; justify-content: center; flex-direction: column; gap: 10px; padding: 30px; border: 1px dashed var(--color-border); border-radius: 18px; background: var(--color-page-background); color: var(--color-text-secondary); text-align: center; }
+.state[data-error="true"] strong { color: var(--color-danger); }
+.state p, .perfect p { margin: 0 0 8px; }
+.perfect > svg { width: 48px; height: 48px; color: var(--color-success); }
+.perfect h3 { margin: 4px 0 0; color: var(--color-text-primary); }
+
+@media (max-width: 900px) {
+  .header { grid-template-columns: minmax(0, 1fr) auto; }
+  .summary { grid-column: 1 / -1; grid-row: 2; }
+  .reviewGrid { grid-template-columns: 1fr; }
+  .pagination { grid-column: 1; }
+}
+
+@media (max-width: 767px) {
+  .backdrop { align-items: end; padding: 0; }
+  .modal { width: 100%; max-height: 94dvh; border-right: 0; border-bottom: 0; border-left: 0; border-radius: 20px 20px 0 0; }
+  .header { gap: 12px; padding: 16px; }
+  .header h2 { font-size: 18px; }
+  .summary { width: 100%; }
+  .summary div { min-width: 0; flex: 1; }
+  .content { padding: 14px 16px calc(24px + env(safe-area-inset-bottom)); }
+  .questionCard, .explanationCard { padding: 16px; }
+  .options > div { grid-template-columns: 28px minmax(0, 1fr); }
+  .options > div > em { grid-column: 2; }
+  .pagination { gap: 10px; }
+  .pagination button { padding: 0 10px; font-size: 12px; }
+  .state, .perfect { min-height: 300px; }
+}

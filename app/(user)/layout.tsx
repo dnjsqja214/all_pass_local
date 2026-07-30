@@ -104,13 +104,6 @@ export default function UserLayout({
         mobileTitle: "시험 신청",
       };
     }
-    if (path.startsWith("/wrong-notes")) {
-      return {
-        desktopTitle: "오답노트",
-        desktopSub: "과목 및 원인별 통계",
-        mobileTitle: "오답노트",
-      };
-    }
     if (path.startsWith("/exams")) {
       if (path.endsWith("/solve")) {
         return {
