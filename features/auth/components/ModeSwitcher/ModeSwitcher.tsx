@@ -19,9 +19,7 @@ export function ModeSwitcher({
   roles,
   compact = false,
 }: ModeSwitcherProps) {
-  const roleCount = new Set(roles.filter(Boolean)).size;
-
-  if (roleCount < 2) {
+  if (!roles.includes("ADMIN")) {
     return null;
   }
 
