@@ -139,9 +139,9 @@ export default function UserLayout({
   };
 
   const headerInfo = getHeaderInfo(pathname);
-  const examDDay = dashboardQuery.data?.type === "EXAM"
-    ? getExamDDay(dashboardQuery.data.examDate)
-    : null;
+  const examDDay = getExamDDay(
+    dashboardQuery.data?.find((content) => content.type === "EXAM")?.examDate,
+  );
   const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (

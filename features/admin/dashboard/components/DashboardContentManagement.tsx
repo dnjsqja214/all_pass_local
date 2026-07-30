@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { BellRing, CalendarRange, Pencil, Plus, Power } from "lucide-react";
+import { BellRing, CalendarRange, Pencil, Plus, Power, X } from "lucide-react";
 import { queryErrorMessage } from "../../../store/api/queryError";
 import {
   useActivateDashboardContentMutation,
@@ -187,21 +187,24 @@ export function DashboardContentManagement() {
         <button type="button" onClick={openCreate}><Plus /> 콘텐츠 추가</button>
       </header>
 
-      {error || loadError ? <div className={styles.error}>{error ?? loadError}</div> : null}
+      {loadError || (!formOpen && error) ? <div className={styles.error}>{loadError ?? error}</div> : null}
 
       {formOpen ? (
+        <div className={styles.modalBackdrop} onMouseDown={closeForm}>
+          <div className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="dashboard-content-form-title" onMouseDown={(event) => event.stopPropagation()}>
         <form className={styles.form} onSubmit={submit}>
           <div className={styles.formHeading}>
-            <div><h2>{editingId ? "콘텐츠 수정" : "새 콘텐츠"}</h2><p>노출 기간이 겹치면 가장 최근에 시작한 콘텐츠가 표시됩니다.</p></div>
-            <div className={styles.typeTabs}>
+            <div><h2 id="dashboard-content-form-title">{editingId ? "콘텐츠 수정" : "새 콘텐츠"}</h2><p>시험 안내와 일반 공지는 각각 가장 최근에 시작한 콘텐츠가 표시됩니다.</p></div>
+            <div className={styles.formTools}><div className={styles.typeTabs}>
               {(["EXAM", "NOTICE"] as const).map((type) => (
                 <button key={type} type="button" data-active={form.type === type}
                   onClick={() => setForm((current) => ({ ...current, type }))}>
                   {type === "EXAM" ? "시험 안내" : "일반 공지"}
                 </button>
               ))}
-            </div>
+            </div><button type="button" className={styles.modalClose} onClick={closeForm} aria-label="모달 닫기"><X /></button></div>
           </div>
+          {error ? <div className={styles.error}>{error}</div> : null}
           <div className={styles.grid}>
             <label>상단 문구<input value={form.eyebrow} maxLength={100} onChange={(event) => setForm({ ...form, eyebrow: event.target.value })} placeholder="예: 37TH LICENSE EXAM" /></label>
             <label>제목<input required value={form.title} maxLength={160} onChange={(event) => setForm({ ...form, title: event.target.value })} /></label>
@@ -224,7 +227,7 @@ export function DashboardContentManagement() {
             <legend>노출 예약</legend>
             <div className={styles.grid}>
               <label>노출 시작<input required type="datetime-local" value={form.visibleFrom} onChange={(event) => setForm({ ...form, visibleFrom: event.target.value })} /></label>
-              <label>노출 종료 <small>비우면 계속 노출</small><input type="datetime-local" value={form.visibleUntil} onChange={(event) => setForm({ ...form, visibleUntil: event.target.value })} /></label>
+              <label>노출 종료 (비우면 계속 노출)<input type="datetime-local" value={form.visibleUntil} onChange={(event) => setForm({ ...form, visibleUntil: event.target.value })} /></label>
             </div>
           </fieldset>
           <div className={styles.actions}>
@@ -232,6 +235,8 @@ export function DashboardContentManagement() {
             <button type="submit" disabled={saving}>{saving ? "저장 중..." : editingId ? "변경 저장" : "콘텐츠 생성"}</button>
           </div>
         </form>
+          </div>
+        </div>
       ) : null}
 
       <div className={styles.list}>

@@ -2,7 +2,7 @@ import type { DashboardContent } from "../../services/dashboardContentService";
 import styles from "./DashboardContentCard.module.css";
 
 interface DashboardContentCardProps {
-  content: DashboardContent | null | undefined;
+  content: DashboardContent[] | undefined;
   isLoading?: boolean;
   error?: string | null;
 }
@@ -28,11 +28,7 @@ function dDay(value: string | null): string | null {
   return difference > 0 ? `D-${difference}` : `D+${Math.abs(difference)}`;
 }
 
-export function DashboardContentCard({ content, isLoading, error }: DashboardContentCardProps) {
-  if (isLoading) return <section className={styles.state}>대시보드 안내를 불러오는 중입니다.</section>;
-  if (error) return <section className={styles.state} data-error="true">{error}</section>;
-  if (!content) return <section className={styles.state}>현재 등록된 대시보드 안내가 없습니다.</section>;
-
+function ContentCard({ content }: { content: DashboardContent }) {
   const exam = content.type === "EXAM";
   const countdown = exam ? dDay(content.examDate) : null;
   return (
@@ -60,4 +56,14 @@ export function DashboardContentCard({ content, isLoading, error }: DashboardCon
       ) : null}
     </section>
   );
+}
+
+export function DashboardContentCard({ content, isLoading, error }: DashboardContentCardProps) {
+  if (isLoading) return <section className={styles.state}>대시보드 안내를 불러오는 중입니다.</section>;
+  if (error) return <section className={styles.state} data-error="true">{error}</section>;
+  if (!content?.length) return <section className={styles.state}>현재 등록된 대시보드 안내가 없습니다.</section>;
+
+  const ordered = [...content].sort((left, right) =>
+    (left.type === "EXAM" ? 0 : 1) - (right.type === "EXAM" ? 0 : 1));
+  return <div className={styles.stack}>{ordered.map((item) => <ContentCard key={item.id} content={item} />)}</div>;
 }

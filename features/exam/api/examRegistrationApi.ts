@@ -55,6 +55,7 @@ export const examRegistrationApi = baseApi.injectEndpoints({
 
 export const {
   useGetRegistrationsQuery,
+  useGetOpenExamSlotsQuery,
   useLazyGetOpenExamSlotsQuery,
   useRegisterExamMutation,
   useCancelRegistrationMutation,

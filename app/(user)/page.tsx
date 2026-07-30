@@ -8,7 +8,7 @@ import { RecentResultPanel } from "@/features/dashboard/components/RecentResultP
 import { useGetDashboardContentQuery } from "@/features/dashboard/api/dashboardContentApi";
 import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
 import { WrongNoteModal } from "@/features/exam/components/WrongNoteModal/WrongNoteModal";
-import { useGetRegistrationsQuery } from "@/features/exam/api/examRegistrationApi";
+import { useGetOpenExamSlotsQuery, useGetRegistrationsQuery } from "@/features/exam/api/examRegistrationApi";
 import type { ExamRegistration } from "@/features/exam/services/examRegistrationService";
 import styles from "./page.module.css";
 
@@ -21,13 +21,10 @@ export default function Home() {
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
-  const closestRegistration = useMemo(
-    () => registrationsQuery.data?.registrations
-      .filter((item) => item.status === "applied")
-      .sort((left, right) =>
-        left.startsAt.localeCompare(right.startsAt))[0] ?? null,
-    [registrationsQuery.data],
-  );
+  const openSlotsQuery = useGetOpenExamSlotsQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
   const completedRegistrations = useMemo(
     () => (registrationsQuery.data?.registrations ?? [])
       .filter((item) => item.status === "completed" && item.gradingStatus === "graded")
@@ -42,7 +39,10 @@ export default function Home() {
       <div className={styles.layout}>
         <div className={styles.mainColumn}>
           <ActiveStudyCard
-            closestRegistration={closestRegistration}
+            registrations={registrationsQuery.data?.registrations ?? []}
+            openSlots={openSlotsQuery.data ?? []}
+            serverNow={registrationsQuery.data?.serverNow}
+            isLoading={registrationsQuery.isLoading || openSlotsQuery.isLoading}
             onStart={setSolving}
             onApplyExamClick={() => router.push("/exam-registration?openForm=true")}
           />

@@ -13,7 +13,7 @@ interface UpdateCommand {
 
 const dashboardContentApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    getDashboardContent: build.query<DashboardContent | null, void>({
+    getDashboardContent: build.query<DashboardContent[], void>({
       queryFn: (_argument, api) => queryResult(dashboardContentService.current(api.signal)),
       providesTags: [{ type: "DashboardContent", id: "CURRENT" }],
     }),

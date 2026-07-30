@@ -125,14 +125,14 @@ async function mutate<T>(
 }
 
 export const dashboardContentService = {
-  async current(signal?: AbortSignal): Promise<DashboardContent | null> {
+  async current(signal?: AbortSignal): Promise<DashboardContent[]> {
     const response = await fetch(`${API_BASE_URL}/api/v1/dashboard`, {
       credentials: "include", cache: "no-store", signal,
     });
     const payload = await parse(response) as ApiResponse<unknown> | null;
     if (!response.ok) throw new Error(message(payload, response.status));
     if (!isRecord(payload) || payload.success !== true ||
-        (payload.data !== null && !isContent(payload.data))) {
+        !Array.isArray(payload.data) || !payload.data.every(isContent)) {
       throw new Error("대시보드 API 응답 형식이 올바르지 않습니다.");
     }
     return payload.data;

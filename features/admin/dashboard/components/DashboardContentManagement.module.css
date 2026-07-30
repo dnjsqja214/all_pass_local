@@ -6,16 +6,20 @@
 .heading > button, .actions button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 7px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--color-primary); color: #fff; font-weight: 850; cursor: pointer; }
 .heading svg, .cardActions svg { width: 17px; height: 17px; }
 .error { padding: 13px 15px; border: 1px solid color-mix(in srgb, var(--color-danger) 35%, transparent); border-radius: 12px; background: color-mix(in srgb, var(--color-danger) 8%, var(--color-card-background)); color: var(--color-danger); font-weight: 700; }
+.modalBackdrop { position: fixed; z-index: 1000; inset: 0; display: grid; padding: 24px; background: rgb(0 0 0 / .58); place-items: center; }
+.modal { width: min(860px, 100%); max-height: calc(100vh - 48px); overflow: auto; border-radius: 20px; box-shadow: 0 24px 70px rgb(0 0 0 / .28); }
 .form { display: flex; flex-direction: column; gap: 17px; padding: 23px; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-card-background); }
 .formHeading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
 .formHeading h2 { margin: 0; font-size: 19px; }
+.formTools { display: flex; align-items: center; gap: 8px; }
 .typeTabs { display: flex; gap: 5px; padding: 4px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-page-background); }
 .typeTabs button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: var(--color-text-secondary); font-weight: 800; cursor: pointer; }
 .typeTabs button[data-active="true"] { background: var(--color-card-background); color: var(--color-primary); box-shadow: 0 2px 8px rgb(0 0 0 / .08); }
+.modalClose { display: grid; width: 42px; height: 42px; flex: 0 0 auto; padding: 0; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-page-background); color: var(--color-text-primary); cursor: pointer; place-items: center; }
+.modalClose svg { width: 18px; height: 18px; }
 .form label, .form fieldset { display: flex; min-width: 0; flex-direction: column; gap: 7px; color: var(--color-text-primary); font-size: 12px; font-weight: 800; }
 .form fieldset { margin: 0; padding: 16px; border: 1px solid var(--color-border); border-radius: 14px; }
 .form legend { padding: 0 7px; color: var(--color-primary); font-weight: 900; }
-.form small { color: var(--color-text-secondary); font-weight: 600; }
 .form input, .form textarea { width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-page-background); color: var(--color-text-primary); font: inherit; font-weight: 650; }
 .form textarea { min-height: 86px; resize: vertical; line-height: 1.55; }
 .grid, .examGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
@@ -38,4 +42,4 @@
 .cardActions button { display: inline-flex; align-items: center; gap: 5px; padding: 9px 11px; border: 1px solid var(--color-border); border-radius: 10px; background: transparent; color: var(--color-text-primary); font-weight: 800; cursor: pointer; }
 .cardActions button[data-power="true"] { color: var(--color-primary); }
 .empty { padding: 44px; border: 1px dashed var(--color-border); border-radius: 16px; color: var(--color-text-secondary); text-align: center; }
-@media (max-width: 800px) { .heading, .formHeading { align-items: stretch; flex-direction: column; } .heading > button { width: 100%; } .grid, .examGrid { grid-template-columns: 1fr; } .card { align-items: flex-start; flex-wrap: wrap; } .cardActions { width: 100%; margin-left: 59px; } }
+@media (max-width: 800px) { .modalBackdrop { padding: 12px; } .modal { max-height: calc(100vh - 24px); } .heading, .formHeading { align-items: stretch; flex-direction: column; } .formTools { justify-content: space-between; } .heading > button { width: 100%; } .grid, .examGrid { grid-template-columns: 1fr; } .card { align-items: flex-start; flex-wrap: wrap; } .cardActions { width: 100%; margin-left: 59px; } }
