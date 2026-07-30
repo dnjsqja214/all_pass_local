@@ -214,3 +214,11 @@ lockfile on Windows silently drops Linux-only packages and breaks CI.**
 * `@emnapi/core` / `@emnapi/runtime` (transitive optional deps of `@img/sharp-wasm32`)
   pruned by a Windows `npm install` → CI failed with
   `npm ci ... Missing: @emnapi/runtime from lock file`. Windows `npm ci` passed the whole time.
+
+## 8. GitHub 작업 규칙
+
+* GitHub 저장소, Pull Request, 이슈, 리뷰, Actions 상태 및 로그 확인은 항상 설치된 GitHub 플러그인/커넥터를 우선 사용한다.
+* `gh` CLI는 사용하지 않으며, 설치 여부나 인증 상태도 확인하지 않는다.
+* GitHub 플러그인이 지원하지 않는 원격 작업을 임의로 `gh` CLI로 대체하지 말고 사용자에게 알린다.
+* 로컬 작업 트리의 상태 확인, diff, 스테이징, 커밋 및 직접 푸시는 `git` CLI 사용을 허용한다.
+* 사용자가 `main` 또는 `master` 직접 푸시를 명시하면 별도 브랜치나 Pull Request를 만들지 않는다.
