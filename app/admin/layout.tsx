@@ -35,6 +35,7 @@ export default function AdminLayout({
   // 현재 활성화된 메뉴 식별
   const activeMenu = pathname.startsWith("/admin/members")
     ? "members"
+    : pathname.startsWith("/admin/dashboard") ? "dashboard"
     : pathname.startsWith("/admin/exam-schedules") ? "exam-schedules" : "today";
 
   // 데스크톱일 경우 기본적으로 사이드바를 열어두고, 로컬 스토리지에서 접힘 상태를 불러옵니다.

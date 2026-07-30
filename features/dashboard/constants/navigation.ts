@@ -7,7 +7,7 @@ export interface NavigationItem {
 export const USER_MENU_ITEMS: NavigationItem[] = [
   {
     id: "today",
-    label: "오늘 학습",
+    label: "대시보드",
     path: "/",
   },
   {

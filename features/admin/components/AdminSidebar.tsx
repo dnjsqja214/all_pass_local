@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Users,
   CalendarClock,
+  PanelsTopLeft,
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
@@ -30,6 +31,7 @@ export function AdminSidebar({
   const menuItems = [
     { id: "today", label: "오늘 현황" },
     { id: "members", label: "회원 관리" },
+    { id: "dashboard", label: "대시보드 관리" },
     { id: "exam-schedules", label: "시험 관리" },
   ];
 
@@ -43,6 +45,8 @@ export function AdminSidebar({
         return <Users className={iconClass} />;
       case "exam-schedules":
         return <CalendarClock className={iconClass} />;
+      case "dashboard":
+        return <PanelsTopLeft className={iconClass} />;
       default:
         return null;
     }
@@ -94,6 +98,7 @@ export function AdminSidebar({
             {menuItems.map((item) => {
               const path = item.id === "members"
                 ? "/admin/members"
+                : item.id === "dashboard" ? "/admin/dashboard"
                 : item.id === "exam-schedules" ? "/admin/exam-schedules" : "/admin";
               return (
                 <Link

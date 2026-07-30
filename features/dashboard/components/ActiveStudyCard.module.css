@@ -65,6 +65,17 @@
     }
   }
 
+  .closed {
+    padding: 15px 20px;
+    border: 1px solid rgb(255 255 255 / 0.18);
+    border-radius: 16px;
+    background: rgb(27 27 27 / 0.32);
+    color: #ffe8e7;
+    font-size: 13px;
+    font-weight: 750;
+    text-align: center;
+  }
+
   /* 예정된 시험 요약 */
   .exam {
     display: flex;

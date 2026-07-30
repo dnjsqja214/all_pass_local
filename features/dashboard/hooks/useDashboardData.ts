@@ -198,30 +198,11 @@ export function useDashboardData(initialTab: TabType = "today") {
     }
   ];
 
-  // 시험 D-Day 일정 Mock 데이터 (DB에서 조회해온 원시 날짜 포맷)
-  const examDDayInfo = {
-    examRound: 37,
-    examDate: "2026-10-31",
-    registrationStart: "2026-08-03",
-    registrationEnd: "2026-08-07",
-    announcementDate: "2026-12-02",
-  };
-
-  // 실시간 D-Day 계산 헬퍼 (timezone-safe)
-  const [year, month, day] = examDDayInfo.examDate.split("-").map(Number);
-  const targetDate = new Date(year, month - 1, day, 0, 0, 0, 0);
-  const today = new Date();
-  const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
-  const diffMs = targetDate.getTime() - todayMidnight.getTime();
-  const examDDay = Math.round(diffMs / (1000 * 60 * 60 * 24));
-
   return {
     activeTab,
     setActiveTab,
     scoreTrend,
     examAttempts,
     wrongNotes,
-    examDDay,
-    examDDayInfo,
   };
 }

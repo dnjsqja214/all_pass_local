@@ -13,7 +13,19 @@ import { useExamPhase } from "@/features/exam/hooks/useExamPhase";
 import { ExamCountdown } from "@/features/exam/components/ExamCountdown";
 import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
 import { useVoiceReminders } from "@/features/exam/hooks/useVoiceReminder";
+import { useGetDashboardContentQuery } from "@/features/dashboard/api/dashboardContentApi";
 import styles from "./layout.module.css";
+
+function getExamDDay(examDate: string | null | undefined): string | null {
+  if (!examDate) return null;
+  const [year, month, day] = examDate.split("-").map(Number);
+  const target = new Date(year, month - 1, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const difference = Math.round((target.getTime() - today.getTime()) / 86_400_000);
+  if (difference === 0) return "시험 D-Day";
+  return difference > 0 ? `시험까지 D-${difference}` : null;
+}
 
 export default function UserLayout({
   children,
@@ -23,6 +35,7 @@ export default function UserLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { status: authStatus, user, error: authError } = useAuth();
+  const dashboardQuery = useGetDashboardContentQuery();
   // 시험 시간이 되면 사이드바·본문 대신 대기 화면을 그린다. 덮는 게 아니라 바꿔치기라
   // 뒤에 아무것도 남지 않는다(주소로 빠져나갈 수도 없다).
   const {
@@ -86,8 +99,8 @@ export default function UserLayout({
     if (path === "/") {
       return {
         desktopTitle: "대시보드",
-        desktopSub: "실시간 학습 현황",
-        mobileTitle: "오늘의 학습",
+        desktopSub: "학습 및 시험 현황",
+        mobileTitle: "대시보드",
       };
     }
     if (path.startsWith("/learning-management")) {
@@ -120,13 +133,15 @@ export default function UserLayout({
     }
     return {
       desktopTitle: "대시보드",
-      desktopSub: "실시간 학습 현황",
-      mobileTitle: "오늘의 학습",
+      desktopSub: "학습 및 시험 현황",
+      mobileTitle: "대시보드",
     };
   };
 
   const headerInfo = getHeaderInfo(pathname);
-  const examDDay = 117; // 상수 D-Day
+  const examDDay = dashboardQuery.data?.type === "EXAM"
+    ? getExamDDay(dashboardQuery.data.examDate)
+    : null;
   const displayName = user?.name?.trim() || user?.email?.trim() || null;
 
   return (
@@ -175,7 +190,7 @@ export default function UserLayout({
               </div>
               <div className={styles.actions}>
                 <ModeSwitcher activeMode="user" roles={user?.roles ?? []} />
-                <span className={styles.dDayBadge}>시험까지 D-{examDDay}</span>
+                {examDDay ? <span className={styles.dDayBadge}>{examDDay}</span> : null}
 
                 {/* 상단 헤더로 옮겨진 사용자 프로필 카드 + 로그아웃 버튼 */}
                 <div className={styles.profileGroup}>
@@ -206,7 +221,7 @@ export default function UserLayout({
                   <h1 className={styles.mobileTitle}>{headerInfo.mobileTitle}</h1>
                   <div className={styles.mobileActions}>
                     <ModeSwitcher activeMode="user" roles={user?.roles ?? []} compact />
-                    <span className={styles.mobileDDay}>시험까지 D-{examDDay}</span>
+                    {examDDay ? <span className={styles.mobileDDay}>{examDDay}</span> : null}
                     <button onClick={handleLogout} className={styles.mobileLogout}>
                       로그아웃
                     </button>

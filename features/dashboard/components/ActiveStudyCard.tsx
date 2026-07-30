@@ -46,9 +46,13 @@ export function ActiveStudyCard({ closestRegistration, onStart, onApplyExamClick
     <section className={styles.card}>
       <div className={styles.textGroup}><span className={styles.title}>다음 시험</span><h2 className={styles.time}>{dateTime.format(new Date(closestRegistration.startsAt))}</h2></div>
       <div className={styles.exam}><span>{closestRegistration.round}회 · {closestRegistration.durationMinutes}분</span><strong>{closestRegistration.examTitle}</strong><small><Clock3 /> 입장 마감 {dateTime.format(new Date(closestRegistration.entryClosesAt))}</small></div>
-      <button className={styles.button} disabled={!canOpen} onClick={() => onStart(closestRegistration)}>
-        {closed ? "이어풀기" : canOpen ? "시험 시작" : countdown(startsAt - now)}
-      </button>
+      {closed ? (
+        <div className={styles.closed}>입장 시간이 종료된 시험입니다.</div>
+      ) : (
+        <button className={styles.button} disabled={!canOpen} onClick={() => onStart(closestRegistration)}>
+          {canOpen ? "시험 시작" : countdown(startsAt - now)}
+        </button>
+      )}
     </section>
   );
 }
