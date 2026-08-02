@@ -10,19 +10,32 @@ import { ExamSolvingModal } from "@/features/exam/components/ExamSolvingModal";
 import { WrongNoteModal } from "@/features/exam/components/WrongNoteModal/WrongNoteModal";
 import { useGetOpenExamSlotsQuery, useGetRegistrationsQuery } from "@/features/exam/api/examRegistrationApi";
 import type { ExamRegistration } from "@/features/exam/services/examRegistrationService";
+import { PermissionRequiredModal } from "@/features/auth/components/PermissionRequiredModal/PermissionRequiredModal";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
+  const { user } = useAuth();
+  const isMember = (user?.roles ?? []).includes("MEMBER");
   const [solving, setSolving] = useState<ExamRegistration | null>(null);
+  const [permissionOpen, setPermissionOpen] = useState(false);
   const [wrongNoteRegistrationId, setWrongNoteRegistrationId] = useState<string | null>(null);
+
+  // 멤버 권한이 없으면 신청·응시로 넘어가지 않고 안내 모달만 띄운다.
+  const handleApplyExam = () => {
+    if (!isMember) { setPermissionOpen(true); return; }
+    router.push("/exam-registration?openForm=true");
+  };
+  const handleStart = (registration: ExamRegistration) => {
+    if (!isMember) { setPermissionOpen(true); return; }
+    setSolving(registration);
+  };
   const dashboardQuery = useGetDashboardContentQuery();
   const registrationsQuery = useGetRegistrationsQuery(undefined, {
-    refetchOnFocus: true,
     refetchOnReconnect: true,
   });
   const openSlotsQuery = useGetOpenExamSlotsQuery(undefined, {
-    refetchOnFocus: true,
     refetchOnReconnect: true,
   });
   const completedRegistrations = useMemo(
@@ -43,8 +56,8 @@ export default function Home() {
             openSlots={openSlotsQuery.data ?? []}
             serverNow={registrationsQuery.data?.serverNow}
             isLoading={registrationsQuery.isLoading || openSlotsQuery.isLoading}
-            onStart={setSolving}
-            onApplyExamClick={() => router.push("/exam-registration?openForm=true")}
+            onStart={handleStart}
+            onApplyExamClick={handleApplyExam}
           />
           <RecentResultPanel registrations={completedRegistrations} onOpenWrongNote={setWrongNoteRegistrationId} />
         </div>
@@ -68,6 +81,7 @@ export default function Home() {
       {wrongNoteRegistrationId ? (
         <WrongNoteModal registrationId={wrongNoteRegistrationId} onClose={() => setWrongNoteRegistrationId(null)} />
       ) : null}
+      <PermissionRequiredModal isOpen={permissionOpen} onClose={() => setPermissionOpen(false)} />
     </div>
   );
 }

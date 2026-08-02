@@ -7,6 +7,7 @@ import { MobileBottomNav } from "@/features/dashboard/components/MobileBottomNav
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { authService } from "@/features/auth/services/authService";
 import { ModeSwitcher } from "@/features/auth/components/ModeSwitcher";
+import { AccessGateModal } from "@/features/auth/components/AccessGateModal";
 import { ThemeToggle } from "@/features/theme/components/ThemeToggle/ThemeToggle";
 import { MessengerWidget } from "@/features/chat/components/MessengerWidget/MessengerWidget";
 import { useExamPhase } from "@/features/exam/hooks/useExamPhase";
@@ -193,7 +194,7 @@ export default function UserLayout({
                 <span className={styles.subtitle}>{headerInfo.desktopSub}</span>
               </div>
               <div className={styles.actions}>
-                <ModeSwitcher activeMode="user" roles={user?.roles ?? []} />
+                <ModeSwitcher roles={user?.roles ?? []} />
                 {examDDay ? <span className={styles.dDayBadge}>{examDDay}</span> : null}
 
                 {/* 상단 헤더로 옮겨진 사용자 프로필 카드 + 로그아웃 버튼 */}
@@ -224,7 +225,7 @@ export default function UserLayout({
                 <div className={styles.mobileHeader}>
                   <h1 className={styles.mobileTitle}>{headerInfo.mobileTitle}</h1>
                   <div className={styles.mobileActions}>
-                    <ModeSwitcher activeMode="user" roles={user?.roles ?? []} compact />
+                    <ModeSwitcher roles={user?.roles ?? []} compact />
                     {examDDay ? <span className={styles.mobileDDay}>{examDDay}</span> : null}
                     <button onClick={handleLogout} className={styles.mobileLogout}>
                       로그아웃
@@ -248,6 +249,9 @@ export default function UserLayout({
             roles={user?.roles ?? []}
             mode="user"
           />
+
+          {/* 서버가 권한 없음(MEMBERSHIP_REQUIRED)을 돌려주면 전역으로 안내 모달을 띄운다. */}
+          <AccessGateModal />
         </>
       )}
     </div>

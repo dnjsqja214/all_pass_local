@@ -1,9 +1,4 @@
-import {
-  getCsrfToken,
-  invalidateCsrfToken,
-  withCsrfMutationLock,
-  type CsrfToken,
-} from "../../shared/api/csrf";
+import { getCsrfToken } from "../../shared/api/csrf";
 import type {
   ChatDirectoryUser,
   ChatMessage,
@@ -140,28 +135,19 @@ async function get<T>(
 }
 
 async function post(path: string, payload?: unknown): Promise<unknown> {
-  return withCsrfMutationLock(async () => {
-    const execute = (csrf: CsrfToken) => fetch(`${API_BASE_URL}${path}`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        [csrf.headerName]: csrf.token,
-      },
-      body: payload === undefined ? undefined : JSON.stringify(payload),
-    });
-
-    let csrf = await getCsrfToken();
-    let response = await execute(csrf);
-    if (response.status === 403) {
-      invalidateCsrfToken(csrf);
-      csrf = await getCsrfToken();
-      response = await execute(csrf);
-    }
-    const body = (await parseBody(response)) as ApiResponse<unknown> | null;
-    if (!response.ok) throw new Error(errorMessage(body, response.status));
-    return isRecord(body) ? body.data : null;
+  const csrf = await getCsrfToken();
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      [csrf.headerName]: csrf.token,
+    },
+    body: payload === undefined ? undefined : JSON.stringify(payload),
   });
+  const body = (await parseBody(response)) as ApiResponse<unknown> | null;
+  if (!response.ok) throw new Error(errorMessage(body, response.status));
+  return isRecord(body) ? body.data : null;
 }
 
 const pendingRoomJoins = new Map<string, Promise<void>>();

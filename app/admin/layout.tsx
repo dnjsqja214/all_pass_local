@@ -35,6 +35,7 @@ export default function AdminLayout({
   // 현재 활성화된 메뉴 식별
   const activeMenu = pathname.startsWith("/admin/members")
     ? "members"
+    : pathname.startsWith("/admin/access") ? "access"
     : pathname.startsWith("/admin/dashboard") ? "dashboard"
     : pathname.startsWith("/admin/exam-schedules") ? "exam-schedules" : "today";
 

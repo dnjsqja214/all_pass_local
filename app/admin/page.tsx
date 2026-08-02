@@ -60,7 +60,6 @@ export default function AdminDashboard() {
   const today = useMemo(() => toDateValue(new Date()), []);
   const [date, setDate] = useState(today);
   const query = useGetDailyOperationsQuery(date, {
-    pollingInterval: date === today ? 30_000 : 0,
     refetchOnFocus: true,
   });
   const data = query.data;
@@ -89,12 +88,15 @@ export default function AdminDashboard() {
             <ChevronRight size={18} />
           </button>
           <button type="button" className={styles.todayButton} onClick={() => setDate(today)}>오늘</button>
+          <button type="button" className={styles.todayButton} aria-label="새로고침"
+            disabled={query.isFetching} onClick={() => void query.refetch()}>
+            <RefreshCw size={16} className={query.isFetching ? styles.spin : undefined} /> 새로고침
+          </button>
         </div>
       </header>
 
       <div className={styles.dateSummary}>
         <span>{formatDate(date)}</span>
-        {date === today ? <span className={styles.live}><i />30초마다 갱신</span> : null}
       </div>
 
       {query.isLoading ? (

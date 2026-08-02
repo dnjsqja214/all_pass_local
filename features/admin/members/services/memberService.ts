@@ -1,11 +1,5 @@
+import { getCsrfToken } from "../../../shared/api/csrf";
 import {
-  getCsrfToken,
-  invalidateCsrfToken,
-  withCsrfMutationLock,
-  type CsrfToken,
-} from "../../../shared/api/csrf";
-import {
-  MEMBER_ROLES,
   type Member,
   type MemberRole,
   type MemberStatus,
@@ -33,7 +27,8 @@ function isMemberStatus(value: unknown): value is MemberStatus {
 }
 
 function isMemberRole(value: unknown): value is MemberRole {
-  return typeof value === "string" && MEMBER_ROLES.some((role) => role === value);
+  // 역할 코드는 고정 목록이 아니다(서버가 롤을 추가·삭제할 수 있음). 문자열이면 받는다.
+  return typeof value === "string";
 }
 
 function isMember(value: unknown): value is Member {
@@ -71,33 +66,25 @@ export const memberService = {
   },
 
   async updateRoles(id: string, roles: MemberRole[]): Promise<Member> {
-    return withCsrfMutationLock(async () => {
-      const execute = (csrf: CsrfToken) => fetch(
-        `${API_BASE_URL}/api/v1/admin/users/${encodeURIComponent(id)}/roles`,
-        {
-          method: "PUT",
-          credentials: "include",
-          cache: "no-store",
-          headers: {
-            "Content-Type": "application/json",
-            [csrf.headerName]: csrf.token,
-          },
-          body: JSON.stringify({ roles }),
+    const csrf = await getCsrfToken();
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/admin/users/${encodeURIComponent(id)}/roles`,
+      {
+        method: "PUT",
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          [csrf.headerName]: csrf.token,
         },
-      );
-      let csrf = await getCsrfToken();
-      let response = await execute(csrf);
-      if (response.status === 403) {
-        invalidateCsrfToken(csrf);
-        csrf = await getCsrfToken();
-        response = await execute(csrf);
-      }
-      const body = (await response.json().catch(() => null)) as ApiResponse<unknown> | null;
-      if (!response.ok) throw new Error(errorMessage(body, response.status));
-      if (!isRecord(body) || !isMember(body.data)) {
-        throw new Error("권한 변경 API 응답 형식이 올바르지 않습니다.");
-      }
-      return body.data;
-    });
+        body: JSON.stringify({ roles }),
+      },
+    );
+    const body = (await response.json().catch(() => null)) as ApiResponse<unknown> | null;
+    if (!response.ok) throw new Error(errorMessage(body, response.status));
+    if (!isRecord(body) || !isMember(body.data)) {
+      throw new Error("권한 변경 API 응답 형식이 올바르지 않습니다.");
+    }
+    return body.data;
   },
 };

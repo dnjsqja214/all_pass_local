@@ -10,7 +10,6 @@ import { useChatRoom } from "../../hooks/useChatRoom";
 import { ParticipantList } from "../ParticipantList/ParticipantList";
 import styles from "./Conversation.module.css";
 
-const PARTICIPANT_REFRESH_FALLBACK_MILLIS = 5 * 60_000;
 const PRESENCE_CHANGED_DESTINATION = "/topic/presence.changed";
 
 function isMembershipMessageType(messageType: ChatMessageType): boolean {
@@ -59,7 +58,6 @@ export function Conversation({
   } = useChatRoom(room?.id ?? null);
   const participantsQuery = useGetChatParticipantsQuery(room?.id ?? "", {
     skip: room === null,
-    pollingInterval: PARTICIPANT_REFRESH_FALLBACK_MILLIS,
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });

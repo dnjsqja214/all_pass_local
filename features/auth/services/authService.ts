@@ -1,10 +1,5 @@
 import { CurrentUser, MeResponse } from "../types/auth";
-import {
-  getCsrfToken,
-  invalidateCsrfToken,
-  withCsrfMutationLock,
-  type CsrfToken,
-} from "../../shared/api/csrf";
+import { getCsrfToken } from "../../shared/api/csrf";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -60,23 +55,15 @@ export const authService = {
   },
 
   async recordLogout(): Promise<void> {
-    await withCsrfMutationLock(async () => {
-      const execute = (csrf: CsrfToken) => fetch(buildApiUrl("/api/v1/access/logout"), {
-        method: "POST",
-        credentials: "include",
-        cache: "no-store",
-        headers: { [csrf.headerName]: csrf.token },
-      });
-      let csrf = await getCsrfToken();
-      let response = await execute(csrf);
-      if (response.status === 403) {
-        invalidateCsrfToken(csrf);
-        csrf = await getCsrfToken();
-        response = await execute(csrf);
-      }
-      if (!response.ok) {
-        throw new Error(`로그아웃 이력 기록에 실패했습니다. (${response.status})`);
-      }
+    const csrf = await getCsrfToken();
+    const response = await fetch(buildApiUrl("/api/v1/access/logout"), {
+      method: "POST",
+      credentials: "include",
+      cache: "no-store",
+      headers: { [csrf.headerName]: csrf.token },
     });
+    if (!response.ok) {
+      throw new Error(`로그아웃 이력 기록에 실패했습니다. (${response.status})`);
+    }
   },
 };

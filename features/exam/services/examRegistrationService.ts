@@ -1,4 +1,5 @@
 import { getCsrfToken } from "../../shared/api/csrf";
+import { ApiError, errorCodeOf } from "../../shared/api/apiError";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -75,7 +76,7 @@ export const examRegistrationService = {
   async getOpenSlots(signal?: AbortSignal): Promise<ExamSlot[]> {
     const response = await fetch(buildApiUrl("/api/v1/exam-slots"), { credentials: "include", cache: "no-store", signal });
     const body = await parseBody(response);
-    if (!response.ok) throw new Error(errorMessage(body, response.status));
+    if (!response.ok) throw new ApiError(errorMessage(body, response.status), { errorCode: errorCodeOf(body), status: response.status });
     if (!isRecord(body) || body.success !== true || !Array.isArray(body.data) || !body.data.every(isSlot)) {
       throw new Error("시험 일정 API 응답 형식이 올바르지 않습니다.");
     }
@@ -85,7 +86,7 @@ export const examRegistrationService = {
   async getRegistrations(signal?: AbortSignal): Promise<ExamRegistration[]> {
     const response = await fetch(buildApiUrl("/api/v1/exam-registrations"), { credentials: "include", cache: "no-store", signal });
     const body = await parseBody(response);
-    if (!response.ok) throw new Error(errorMessage(body, response.status));
+    if (!response.ok) throw new ApiError(errorMessage(body, response.status), { errorCode: errorCodeOf(body), status: response.status });
     if (!isRecord(body) || body.success !== true || !Array.isArray(body.data) || !body.data.every(isRegistration)) {
       throw new Error("시험 신청 API 응답 형식이 올바르지 않습니다.");
     }
@@ -107,7 +108,7 @@ export const examRegistrationService = {
     const roundTripMillis = Date.now() - sentAt;
     const dateHeader = response.headers.get("Date");
     const body = await parseBody(response);
-    if (!response.ok) throw new Error(errorMessage(body, response.status));
+    if (!response.ok) throw new ApiError(errorMessage(body, response.status), { errorCode: errorCodeOf(body), status: response.status });
     if (!isRecord(body) || body.success !== true || !Array.isArray(body.data) || !body.data.every(isRegistration)) {
       throw new Error("시험 신청 API 응답 형식이 올바르지 않습니다.");
     }
@@ -125,7 +126,7 @@ export const examRegistrationService = {
       body: JSON.stringify({ examId: slot.examId, startsAt: slot.startsAt }), signal,
     });
     const body = await parseBody(response);
-    if (!response.ok) throw new Error(errorMessage(body, response.status));
+    if (!response.ok) throw new ApiError(errorMessage(body, response.status), { errorCode: errorCodeOf(body), status: response.status });
     if (!isRecord(body) || body.success !== true || !isRegistration(body.data)) throw new Error("시험 신청 응답 형식이 올바르지 않습니다.");
     return body.data;
   },
@@ -136,7 +137,7 @@ export const examRegistrationService = {
       method: "DELETE", credentials: "include", cache: "no-store", headers: { [csrf.headerName]: csrf.token }, signal,
     });
     const body = await parseBody(response);
-    if (!response.ok) throw new Error(errorMessage(body, response.status));
+    if (!response.ok) throw new ApiError(errorMessage(body, response.status), { errorCode: errorCodeOf(body), status: response.status });
     if (!isRecord(body) || body.success !== true) throw new Error("시험 신청 취소 응답 형식이 올바르지 않습니다.");
   },
 };

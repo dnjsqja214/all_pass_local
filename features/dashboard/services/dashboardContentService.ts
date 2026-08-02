@@ -1,9 +1,4 @@
-import {
-  getCsrfToken,
-  invalidateCsrfToken,
-  withCsrfMutationLock,
-  type CsrfToken,
-} from "../../shared/api/csrf";
+import { getCsrfToken } from "../../shared/api/csrf";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -97,31 +92,23 @@ async function mutate<T>(
   body: DashboardContentCommand | undefined,
   validate: (value: unknown) => value is T,
 ): Promise<T> {
-  return withCsrfMutationLock(async () => {
-    const execute = (csrf: CsrfToken) => fetch(`${API_BASE_URL}${path}`, {
-      method,
-      credentials: "include",
-      cache: "no-store",
-      headers: {
-        ...(body ? { "Content-Type": "application/json" } : {}),
-        [csrf.headerName]: csrf.token,
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    let csrf = await getCsrfToken();
-    let response = await execute(csrf);
-    if (response.status === 403) {
-      invalidateCsrfToken(csrf);
-      csrf = await getCsrfToken();
-      response = await execute(csrf);
-    }
-    const payload = await parse(response);
-    if (!response.ok) throw new Error(message(payload, response.status));
-    if (!isRecord(payload) || payload.success !== true || !validate(payload.data)) {
-      throw new Error("대시보드 API 응답 형식이 올바르지 않습니다.");
-    }
-    return payload.data;
+  const csrf = await getCsrfToken();
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    credentials: "include",
+    cache: "no-store",
+    headers: {
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      [csrf.headerName]: csrf.token,
+    },
+    body: body ? JSON.stringify(body) : undefined,
   });
+  const payload = await parse(response);
+  if (!response.ok) throw new Error(message(payload, response.status));
+  if (!isRecord(payload) || payload.success !== true || !validate(payload.data)) {
+    throw new Error("대시보드 API 응답 형식이 올바르지 않습니다.");
+  }
+  return payload.data;
 }
 
 export const dashboardContentService = {

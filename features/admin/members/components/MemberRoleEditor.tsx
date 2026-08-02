@@ -2,54 +2,68 @@
 
 import { useState } from "react";
 import { memberService } from "../services/memberService";
-import { MEMBER_ROLES, type Member, type MemberRole } from "../types/member";
+import { BASE_ROLE, type Member, type MemberRole } from "../types/member";
 import styles from "./MemberRoleEditor.module.css";
 
 interface MemberRoleEditorProps {
   member: Member;
   currentUserId: string;
+  /** 로그인한 관리자가 가진 역할. 이 목록으로 스위치를 그린다(가진 것만 부여 가능). */
+  grantableRoles: MemberRole[];
   onUpdated: (member: Member) => void;
 }
 
-function normalizeRoles(roles: MemberRole[]): MemberRole[] {
-  const selected = new Set<MemberRole>(roles);
-  selected.add("USER");
-  return MEMBER_ROLES.filter((role) => selected.has(role));
+/** 항상 기본 역할(USER)을 포함하고 중복을 제거한다. */
+function withBase(roles: MemberRole[]): MemberRole[] {
+  return Array.from(new Set<MemberRole>([BASE_ROLE, ...roles]));
 }
 
 function sameRoles(left: MemberRole[], right: MemberRole[]): boolean {
-  const normalizedLeft = normalizeRoles(left);
-  const normalizedRight = normalizeRoles(right);
-  return normalizedLeft.length === normalizedRight.length &&
-    normalizedLeft.every((role) => normalizedRight.includes(role));
+  const a = new Set(withBase(left));
+  const b = new Set(withBase(right));
+  return a.size === b.size && [...a].every((role) => b.has(role));
 }
 
-export function MemberRoleEditor({ member, currentUserId, onUpdated }: MemberRoleEditorProps) {
-  const [roles, setRoles] = useState<MemberRole[]>(() => normalizeRoles(member.roles));
+/** 스위치 표시 순서: 기본 역할을 맨 앞, 나머지는 이름순. */
+function orderRoles(roles: MemberRole[]): MemberRole[] {
+  return [...new Set(roles)].sort((left, right) => {
+    if (left === BASE_ROLE) return -1;
+    if (right === BASE_ROLE) return 1;
+    return left.localeCompare(right);
+  });
+}
+
+export function MemberRoleEditor({
+  member,
+  currentUserId,
+  grantableRoles,
+  onUpdated,
+}: MemberRoleEditorProps) {
+  // 편집 대상의 전체 역할을 들고 있는다. 스위치가 없는 역할(내가 못 다루는 것)도 그대로 보존된다.
+  const [roles, setRoles] = useState<MemberRole[]>(() => withBase(member.roles));
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isSelf = member.id === currentUserId;
   const isDirty = !sameRoles(roles, member.roles);
+  const switches = orderRoles(grantableRoles);
 
   const isLocked = (role: MemberRole): boolean =>
-    role === "USER" || (role === "ADMIN" && isSelf);
+    role === BASE_ROLE || (role === "ADMIN" && isSelf);
 
   const toggle = (role: MemberRole) => {
     if (isLocked(role) || isSaving) return;
     setError(null);
-    setRoles((current) => normalizeRoles(
-      current.includes(role)
-        ? current.filter((selected) => selected !== role)
-        : [...current, role],
-    ));
+    setRoles((current) => current.includes(role)
+      ? withBase(current.filter((selected) => selected !== role))
+      : withBase([...current, role]));
   };
 
   const save = async () => {
     setIsSaving(true);
     setError(null);
     try {
-      onUpdated(await memberService.updateRoles(member.id, normalizeRoles(roles)));
+      onUpdated(await memberService.updateRoles(member.id, withBase(roles)));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "권한 변경에 실패했습니다.");
     } finally {
@@ -58,7 +72,7 @@ export function MemberRoleEditor({ member, currentUserId, onUpdated }: MemberRol
   };
 
   const reset = () => {
-    setRoles(normalizeRoles(member.roles));
+    setRoles(withBase(member.roles));
     setError(null);
   };
 
@@ -66,7 +80,7 @@ export function MemberRoleEditor({ member, currentUserId, onUpdated }: MemberRol
     <div className={styles.editor}>
       <div className={styles.controls}>
         <div className={styles.roles}>
-          {MEMBER_ROLES.map((role) => {
+          {switches.map((role) => {
             const locked = isLocked(role);
             return (
               <label key={role} className={styles.role} data-locked={locked}>

@@ -26,6 +26,17 @@
       color: #ffffff;
       box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
     }
+
+    /* 아직 연결된 화면이 없는 롤: 보이되 눌리지 않는다. */
+    &[data-disabled="true"] {
+      opacity: 0.45;
+      cursor: not-allowed;
+
+      &:hover {
+        background: transparent;
+        color: var(--color-text-secondary);
+      }
+    }
   }
 
   /* 관리자 헤더처럼 좁은 자리에서 쓰는 축소형 */

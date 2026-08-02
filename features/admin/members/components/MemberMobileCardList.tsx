@@ -1,5 +1,5 @@
 import React from "react";
-import { Member } from "../types/member";
+import { Member, MemberRole } from "../types/member";
 import { MemberStatusBadge } from "./MemberStatusBadge";
 import { MemberRoleEditor } from "./MemberRoleEditor";
 import styles from "./MemberMobileCardList.module.css";
@@ -7,6 +7,7 @@ import styles from "./MemberMobileCardList.module.css";
 interface MemberMobileCardListProps {
   members: Member[];
   currentUserId: string;
+  grantableRoles: MemberRole[];
   onMemberUpdated: (member: Member) => void;
 }
 
@@ -19,7 +20,7 @@ function formatDate(value: string): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("ko-KR");
 }
 
-export function MemberMobileCardList({ members, currentUserId, onMemberUpdated }: MemberMobileCardListProps) {
+export function MemberMobileCardList({ members, currentUserId, grantableRoles, onMemberUpdated }: MemberMobileCardListProps) {
   return (
     <div className={styles.list}>
       {members.map((member) => (
@@ -44,6 +45,7 @@ export function MemberMobileCardList({ members, currentUserId, onMemberUpdated }
             key={`${member.id}:${member.roles.join(",")}`}
             member={member}
             currentUserId={currentUserId}
+            grantableRoles={grantableRoles}
             onUpdated={onMemberUpdated}
           />
         </div>

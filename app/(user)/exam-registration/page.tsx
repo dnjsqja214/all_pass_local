@@ -70,7 +70,6 @@ function findScheduleConflict(slot: ExamSlot, registrations: ExamRegistration[])
 
 export default function ExamRegistrationPage() {
   const registrationsQuery = useGetRegistrationsQuery(undefined, {
-    refetchOnFocus: true,
     refetchOnReconnect: true,
   });
   const registrations = useMemo(

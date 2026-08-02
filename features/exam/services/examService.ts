@@ -8,6 +8,7 @@ import {
   SubmittedExamSession,
 } from "../types/exam";
 import { getCsrfToken } from "../../shared/api/csrf";
+import { ApiError, errorCodeOf } from "../../shared/api/apiError";
 
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
@@ -121,7 +122,7 @@ async function request<T>(
     ...init,
   });
   const body = await parseBody(response);
-  if (!response.ok) throw new Error(errorMessage(body, response.status));
+  if (!response.ok) throw new ApiError(errorMessage(body, response.status), { errorCode: errorCodeOf(body), status: response.status });
   if (!isRecord(body) || body.success !== true || !validator(body.data)) {
     throw new Error("시험 API 응답 형식이 올바르지 않습니다.");
   }

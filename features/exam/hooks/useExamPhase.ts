@@ -19,7 +19,6 @@ import type { ExamRegistration } from "../services/examRegistrationService";
 export type ExamPhase = "waiting" | "running" | "closed" | null;
 
 const WAITING_WINDOW_MILLIS = 10 * 60_000;
-const POLL_NEAR_MILLIS = 60_000;
 
 interface ExamPhaseValue {
   phase: ExamPhase;
@@ -81,8 +80,6 @@ export function useExamPhase(): ExamPhaseValue {
   const [browserNow, setBrowserNow] = useState(0);
 
   const query = useGetRegistrationsQuery(undefined, {
-    pollingInterval: POLL_NEAR_MILLIS,
-    refetchOnFocus: true,
     refetchOnReconnect: true,
   });
   const currentSnapshot = query.data;
@@ -112,6 +109,13 @@ export function useExamPhase(): ExamPhaseValue {
     const timer = window.setInterval(readClock, 1000);
     return () => window.clearInterval(timer);
   }, []);
+
+  // 폴링 대신: 대기 화면에 진입할 때 한 번만 서버시각을 재보정한다(+막판 일정변경 반영).
+  // 시작 판정은 서버(requireStartable)가 최종적으로 하므로 그 이상의 재보정은 불필요하다.
+  const { refetch } = query;
+  useEffect(() => {
+    if (phase === "waiting") void refetch();
+  }, [phase, refetch]);
 
   const markRegistrationSubmitted = useCallback((registrationId: string) => {
     dispatch(examRegistrationApi.util.updateQueryData(

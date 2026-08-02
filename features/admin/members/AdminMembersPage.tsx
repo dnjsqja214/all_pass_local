@@ -72,11 +72,13 @@ export function AdminMembersPage() {
           <MemberTable
             members={filteredMembers}
             currentUserId={user?.id ?? ""}
+            grantableRoles={user?.roles ?? []}
             onMemberUpdated={handleMemberUpdated}
           />
           <MemberMobileCardList
             members={filteredMembers}
             currentUserId={user?.id ?? ""}
+            grantableRoles={user?.roles ?? []}
             onMemberUpdated={handleMemberUpdated}
           />
         </>

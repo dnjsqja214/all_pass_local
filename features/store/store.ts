@@ -2,6 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { socketReducer } from "@/features/socket/store/socketSlice";
 import { themeReducer } from "@/features/theme/store/themeSlice";
+import { accessGateReducer } from "@/features/auth/store/accessGateSlice";
+import { accessGateMiddleware } from "@/features/auth/store/accessGateMiddleware";
 import { baseApi } from "./api/baseApi";
 
 export function makeStore() {
@@ -10,9 +12,10 @@ export function makeStore() {
       [baseApi.reducerPath]: baseApi.reducer,
       socket: socketReducer,
       theme: themeReducer,
+      accessGate: accessGateReducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(baseApi.middleware),
+      getDefaultMiddleware().concat(baseApi.middleware, accessGateMiddleware),
   });
 
   setupListeners(store.dispatch);

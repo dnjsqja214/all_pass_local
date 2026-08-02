@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { USER_MENU_ITEMS } from "../constants/navigation";
+import { visibleMenuItems } from "../constants/navigation";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { BrandRefreshButton } from "@/features/shared/components/BrandRefreshButton/BrandRefreshButton";
 import styles from "./UserSidebar.module.css";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
@@ -16,11 +17,14 @@ interface UserSidebarProps {
 
 export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  // 가진 롤로 접근 가능한 메뉴만. 예: 시험 신청은 정회원(MEMBER)만.
+  const menuItems = visibleMenuItems(user?.roles ?? []);
 
   // 현재 URL 경로에 따라 활성 탭 식별
   const getActiveTab = () => {
     if (pathname === "/") return "today";
-    const matched = USER_MENU_ITEMS.find((item) => item.path !== "/" && pathname.startsWith(item.path));
+    const matched = menuItems.find((item) => item.path !== "/" && pathname.startsWith(item.path));
     return matched ? matched.id : "today";
   };
 
@@ -149,7 +153,7 @@ export function UserSidebar({ isCollapsed, onToggleCollapse, onLogout }: UserSid
 
         {/* 네비게이션 메뉴 */}
         <nav className={styles.nav}>
-          {USER_MENU_ITEMS.map((item) => (
+          {menuItems.map((item) => (
             <Link
               key={item.id}
               href={item.path}

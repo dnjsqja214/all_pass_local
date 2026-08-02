@@ -22,7 +22,6 @@ import { RoomActionDialog } from "../RoomActionDialog/RoomActionDialog";
 import { RoomList } from "../RoomList/RoomList";
 import styles from "./MessengerWidget.module.css";
 
-const STATE_REFRESH_FALLBACK_MILLIS = 5 * 60_000;
 const CHAT_DIRECTORY_CHANGED_DESTINATION = "/topic/chat-directory.changed";
 const USER_CHAT_CHANGED_DESTINATION = "/user/queue/chat.changed";
 const PRESENCE_CHANGED_DESTINATION = "/topic/presence.changed";
@@ -57,13 +56,11 @@ export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetP
   const [notice, setNotice] = useState<string | null>(null);
   const [dialogMode, setDialogMode] = useState<DialogMode>(null);
   const roomsQuery = useGetChatRoomsQuery(undefined, {
-    pollingInterval: STATE_REFRESH_FALLBACK_MILLIS,
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
   const onlineUsersQuery = useGetOnlineUsersQuery(undefined, {
     skip: !isAdmin,
-    pollingInterval: STATE_REFRESH_FALLBACK_MILLIS,
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
@@ -193,6 +190,7 @@ export function MessengerWidget({ currentUserId, roles, mode }: MessengerWidgetP
   const handleOpen = () => {
     setIsOpen(true);
     void refetchRooms();
+    if (isAdmin) void refetchOnlineUsers();
   };
 
   return (

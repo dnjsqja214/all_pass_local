@@ -1,5 +1,5 @@
 import React from "react";
-import { Member } from "../types/member";
+import { Member, MemberRole } from "../types/member";
 import { MemberStatusBadge } from "./MemberStatusBadge";
 import { MemberRoleEditor } from "./MemberRoleEditor";
 import styles from "./MemberTable.module.css";
@@ -7,6 +7,7 @@ import styles from "./MemberTable.module.css";
 interface MemberTableProps {
   members: Member[];
   currentUserId: string;
+  grantableRoles: MemberRole[];
   onMemberUpdated: (member: Member) => void;
 }
 
@@ -19,7 +20,7 @@ function formatDate(value: string): string {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString("ko-KR");
 }
 
-export function MemberTable({ members, currentUserId, onMemberUpdated }: MemberTableProps) {
+export function MemberTable({ members, currentUserId, grantableRoles, onMemberUpdated }: MemberTableProps) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.scroller}>
@@ -55,6 +56,7 @@ export function MemberTable({ members, currentUserId, onMemberUpdated }: MemberT
                     key={`${member.id}:${member.roles.join(",")}`}
                     member={member}
                     currentUserId={currentUserId}
+                    grantableRoles={grantableRoles}
                     onUpdated={onMemberUpdated}
                   />
                 </td>
